@@ -119,6 +119,14 @@ public interface IStackKey<T>
     String getModId();
 
     /**
+     * 获取资源自身的 id，如物品 id、流体 id；能量这类没有注册表的资源默认返回 {@link #getTypeId()}
+     */
+    default ResourceLocation getSourceId()
+    {
+        return getTypeId();
+    }
+
+    /**
      * 判断堆叠是否为空堆叠
      */
     boolean isEmpty();

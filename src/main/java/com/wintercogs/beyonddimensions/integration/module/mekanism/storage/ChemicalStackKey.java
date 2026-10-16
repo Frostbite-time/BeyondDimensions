@@ -227,6 +227,14 @@ public class ChemicalStackKey implements IStackKey<ChemicalStack>
     }
 
     @Override
+    public ResourceLocation getSourceId()
+    {
+        return chemical.unwrapKey()
+                .map(ResourceKey::location)
+                .orElseGet(this::getTypeId);
+    }
+
+    @Override
     public boolean isEmpty()
     {
         return this == ChemicalStackKey.EMPTY || chemical == MekanismAPI.EMPTY_CHEMICAL_HOLDER;

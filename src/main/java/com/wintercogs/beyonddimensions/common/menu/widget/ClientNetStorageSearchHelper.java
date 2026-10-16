@@ -13,7 +13,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -38,12 +37,13 @@ public class ClientNetStorageSearchHelper
         public static final Query EMPTY = new Query("", List.of());
 
         private final String text;
-        private final List<String> terms;
+        // 每项是 | 分隔的各个部分
+        private final List<List<Part>> terms;
         // 这条搜索式对各资源的匹配结果，派生缓存清空后随之作废
         private final Map<IStackKey<?>, Boolean> matchCache = new HashMap<>();
         private long generation = -1;
 
-        private Query(String text, List<String> terms)
+        private Query(String text, List<List<Part>> terms)
         {
             this.text = text;
             this.terms = terms;
@@ -67,8 +67,10 @@ public class ClientNetStorageSearchHelper
             Objects.requireNonNull(text, "searchText cannot be null");
             if (text.isBlank())
                 return text.isEmpty() ? EMPTY : new Query(text, List.of());
-            List<String> terms = new ArrayList<>();
+            List<List<Part>> terms = new ArrayList<>();
             StringBuilder current = new StringBuilder();
+            // current 中被反斜杠转义的位置：这些字符不再当作 |、- 或前缀
+            BitSet escaped = new BitSet();
             boolean inQuotes = false;
             boolean escaping = false;
 
@@ -79,6 +81,7 @@ public class ClientNetStorageSearchHelper
                 // 若前一个字符是反斜杠，则当前字符直接按字面加入
                 if (escaping)
                 {
+                    escaped.set(current.length());
                     current.append(c);
                     escaping = false;
                     continue;
@@ -101,11 +104,7 @@ public class ClientNetStorageSearchHelper
                 // 仅在引号外，空白字符才作为分隔符
                 if (Character.isWhitespace(c) && !inQuotes)
                 {
-                    if (!current.isEmpty())
-                    {
-                        terms.add(current.toString().toLowerCase(Locale.ENGLISH));
-                        current.setLength(0);
-                    }
+                    addTerm(terms, current, escaped);
                     continue;
                 }
 
@@ -114,10 +113,55 @@ public class ClientNetStorageSearchHelper
 
             // 若最后一个字符是孤立的反斜杠，则将其本身保留
             if (escaping)
+            {
+                escaped.set(current.length());
                 current.append('\\');
-            if (!current.isEmpty())
-                terms.add(current.toString().toLowerCase(Locale.ENGLISH));
+            }
+            addTerm(terms, current, escaped);
             return new Query(text, List.copyOf(terms));
+        }
+
+        // 把 current 按未转义的 | 拆成各个部分作为一项，然后清空
+        private static void addTerm(List<List<Part>> terms, StringBuilder current, BitSet escaped)
+        {
+            if (current.isEmpty())
+                return;
+            List<Part> parts = new ArrayList<>();
+            int start = 0;
+            for (int i = 0; i <= current.length(); i++)
+            {
+                if (i < current.length() && (current.charAt(i) != '|' || escaped.get(i)))
+                    continue;
+                if (i > start)
+                    parts.add(Part.of(current, escaped, start, i));
+                start = i + 1;
+            }
+            terms.add(List.copyOf(parts));
+            current.setLength(0);
+            escaped.clear();
+        }
+    }
+
+    /**
+     * | 分隔的一个部分：可带 - 前缀表示取反，再由 @ / $ / # / * / ~ / % / & 选择匹配范围，没有前缀时匹配名称
+     */
+    private record Part(boolean negated, char prefix, String needle)
+    {
+        private static final char NAME = 0;
+        private static final String PREFIXES = "@$#*~%&";
+
+        static Part of(CharSequence text, BitSet escaped, int start, int end)
+        {
+            boolean negated = text.charAt(start) == '-' && !escaped.get(start);
+            if (negated)
+                start++;
+            // 例如只有一个 "-"，这里按空搜索处理：不产生实际过滤效果
+            if (start == end)
+                return new Part(false, NAME, "");
+            char prefix = NAME;
+            if (PREFIXES.indexOf(text.charAt(start)) >= 0 && !escaped.get(start))
+                prefix = text.charAt(start++);
+            return new Part(negated, prefix, text.subSequence(start, end).toString().toLowerCase(Locale.ENGLISH));
         }
     }
 
@@ -135,7 +179,8 @@ public class ClientNetStorageSearchHelper
     // TODO 等到有空的时候，我应该给IStackKeyRender加个接口，允许其产出无数量tooltip
     private final Map<IStackKey<?>, List<String>> tooltipCache = new HashMap<>();
     private final Map<IStackKey<?>, List<String>> tagCache = new HashMap<>();
-    private final Map<IStackKey<?>, String> itemIdCache = new HashMap<>();
+    private final Map<IStackKey<?>, String> sourceIdCache = new HashMap<>();
+    private final Map<IStackKey<?>, String> typeIdCache = new HashMap<>();
     private final Map<IStackKey<?>, Integer> durabilityCache = new HashMap<>();
     private final Map<IStackKey<?>, List<String>> componentCache = new HashMap<>();
 
@@ -175,10 +220,10 @@ public class ClientNetStorageSearchHelper
             return cached;
 
         boolean result = true;
-        // 多个 searchText 按与合并
-        for (String searchText : query.terms)
+        // 多个项按与合并
+        for (List<Part> term : query.terms)
         {
-            if (!matchesSingleSearchText(new KeyAmount(key, 1), searchText))
+            if (!matchesTerm(new KeyAmount(key, 1), term))
             {
                 result = false;
                 break;
@@ -189,23 +234,13 @@ public class ClientNetStorageSearchHelper
     }
 
     /**
-     * 单个 searchText：
-     * 1. 先按 | 拆分，多个部分按或合并
-     * 2. 每个部分可带 - 前缀表示取反
-     * 3. 再根据 @ / $ / # / * / % / & / 默认 选择匹配范围
+     * 单个项：| 分隔的各个部分按或合并
      */
-    private boolean matchesSingleSearchText(@NotNull KeyAmount keyAmount, @NotNull String searchText)
+    private boolean matchesTerm(@NotNull KeyAmount keyAmount, @NotNull List<Part> term)
     {
-        String[] orParts = searchText.split("\\|", -1);
-
-        for (String part : orParts)
+        for (Part part : term)
         {
-            if (part.isEmpty())
-            {
-                continue;
-            }
-
-            if (matchesSingleOrPart(keyAmount, part))
+            if (matchesPart(keyAmount, part))
             {
                 return true;
             }
@@ -215,42 +250,24 @@ public class ClientNetStorageSearchHelper
     }
 
     /**
-     * 单个 or 分支的匹配。
-     * 先处理 -，再处理 @ / $ / # / * / % / & / 默认。
+     * 单个 or 分支的匹配：按前缀选择匹配范围，再处理取反
      */
-    private boolean matchesSingleOrPart(@NotNull KeyAmount keyAmount, @NotNull String part)
+    private boolean matchesPart(@NotNull KeyAmount keyAmount, @NotNull Part part)
     {
-        boolean negated = false;
-        String actual = part;
-
-        if (!actual.isEmpty() && actual.charAt(0) == '-')
+        String needle = part.needle();
+        boolean matched = switch (part.prefix())
         {
-            negated = true;
-            actual = actual.substring(1);
-        }
+            case '@' -> needle.isEmpty() || matchesModId(keyAmount, needle);
+            case '$' -> needle.isEmpty() || matchesTooltip(keyAmount, needle);
+            case '#' -> needle.isEmpty() || matchesTag(keyAmount, needle);
+            case '*' -> needle.isEmpty() || matchesSourceId(keyAmount, needle);
+            case '~' -> needle.isEmpty() || matchesTypeId(keyAmount, needle);
+            case '%' -> matchesDurability(keyAmount.key(), needle);
+            case '&' -> matchesComponents(keyAmount.key(), needle);
+            default -> needle.isEmpty() || matchesName(keyAmount, needle);
+        };
 
-        // 例如只有一个 "-"，这里按空搜索处理：不产生实际过滤效果
-        if (actual.isEmpty())
-        {
-            return true;
-        }
-
-        boolean matched;
-
-        char prefix = actual.charAt(0);
-        String needle = actual.substring(1);
-        switch (prefix)
-        {
-            case '@' -> matched = needle.isEmpty() || matchesModId(keyAmount, needle);
-            case '$' -> matched = needle.isEmpty() || matchesTooltip(keyAmount, needle);
-            case '#' -> matched = needle.isEmpty() || matchesTag(keyAmount, needle);
-            case '*' -> matched = needle.isEmpty() || matchesItemId(keyAmount, needle);
-            case '%' -> matched = matchesDurability(keyAmount.key(), needle);
-            case '&' -> matched = matchesComponents(keyAmount.key(), needle);
-            default -> matched = matchesName(keyAmount, actual);
-        }
-
-        return negated ? !matched : matched;
+        return part.negated() ? !matched : matched;
     }
 
     private boolean matchesModId(@NotNull KeyAmount keyAmount, @NotNull String needle)
@@ -282,9 +299,14 @@ public class ClientNetStorageSearchHelper
         return false;
     }
 
-    private boolean matchesItemId(@NotNull KeyAmount keyAmount, @NotNull String needle)
+    private boolean matchesSourceId(@NotNull KeyAmount keyAmount, @NotNull String needle)
     {
-        return checkTextMatches(getItemId(keyAmount.key()), needle);
+        return checkTextMatches(getSourceId(keyAmount.key()), needle);
+    }
+
+    private boolean matchesTypeId(@NotNull KeyAmount keyAmount, @NotNull String needle)
+    {
+        return checkTextMatches(getTypeId(keyAmount.key()), needle);
     }
 
     private boolean matchesName(@NotNull KeyAmount keyAmount, @NotNull String needle)
@@ -388,17 +410,16 @@ public class ClientNetStorageSearchHelper
                 k -> k.getModId().toLowerCase(Locale.ENGLISH));
     }
 
-    private @NotNull String getItemId(@NotNull IStackKey<?> key)
+    private @NotNull String getSourceId(@NotNull IStackKey<?> key)
     {
-        return this.itemIdCache.computeIfAbsent(key,
-                k -> {
-                    if (key instanceof ItemStackKey itemKey)
-                    {
-                        ResourceLocation registryName = BuiltInRegistries.ITEM.getKey(itemKey.getSource());
-                        return registryName.getPath().toLowerCase(Locale.ENGLISH);
-                    }
-                    return "";
-                });
+        return this.sourceIdCache.computeIfAbsent(key,
+                k -> k.getSourceId().toString().toLowerCase(Locale.ENGLISH));
+    }
+
+    private @NotNull String getTypeId(@NotNull IStackKey<?> key)
+    {
+        return this.typeIdCache.computeIfAbsent(key,
+                k -> k.getTypeId().toString().toLowerCase(Locale.ENGLISH));
     }
 
     private @NotNull List<String> getTags(@NotNull IStackKey<?> key)
@@ -467,7 +488,8 @@ public class ClientNetStorageSearchHelper
         this.generation++;
         this.nameCache.clear();
         this.modidCache.clear();
-        this.itemIdCache.clear();
+        this.sourceIdCache.clear();
+        this.typeIdCache.clear();
         this.tooltipCache.clear();
         this.tagCache.clear();
         this.durabilityCache.clear();
@@ -480,7 +502,8 @@ public class ClientNetStorageSearchHelper
         this.query.matchCache.remove(key);
         this.nameCache.remove(key);
         this.modidCache.remove(key);
-        this.itemIdCache.remove(key);
+        this.sourceIdCache.remove(key);
+        this.typeIdCache.remove(key);
         this.tooltipCache.remove(key);
         this.tagCache.remove(key);
         this.durabilityCache.remove(key);

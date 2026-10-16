@@ -33,8 +33,8 @@ any chunks loaded. Share it with friends and connect it to pipes, machines and o
 ### A terminal for large collections
 
 - Press <kbd>O</kbd> anywhere to open your network.
-- Search by name or pinyin, or by mod `@`, tag `#`, tooltip `$`, item ID `*`, durability `%<50` and extra data `&`.
-  Leave things out with `-` and allow alternatives with `|`.
+- Search by name or pinyin, or by mod `@`, tag `#`, tooltip `$`, resource ID `*`, resource type `~`, durability `%<50`
+  and extra data `&`. Leave things out with `-` and allow alternatives with `|`.
 - Make your own category tabs with icons, search rules and hand-picked resources.
 - Sort by name, amount, mod, creative tab, stack size, first stored or last changed.
 - Craft in the built-in grid, with recipe transfer from JEI and EMI.

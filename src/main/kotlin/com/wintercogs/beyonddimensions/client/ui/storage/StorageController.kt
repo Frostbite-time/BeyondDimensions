@@ -26,7 +26,6 @@ import dev.compixel.forge.item.ItemIcon
 import net.minecraft.Util
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.resources.language.I18n
-import net.minecraft.core.registries.BuiltInRegistries
 import net.neoforged.neoforge.network.PacketDistributor
 
 /** 一个分类标签在界面上的样子：名称与图标 */
@@ -453,11 +452,13 @@ class StorageController(private val menu: DimensionsNetMenu) {
         )
     }
 
-    /** 一种资源能写进搜索式的条件：模组、ID、各个标签，以及耐久度和额外组件 */
+    /** 一种资源能写进搜索式的条件：模组、资源类型、ID、各个标签，以及耐久度和额外组件 */
     private fun chipsOf(key: IStackKey<*>): List<String> {
         val chips = ArrayList<String>()
         chips += "@" + key.modId.lowercase()
-        if (key is ItemStackKey) chips += "*" + BuiltInRegistries.ITEM.getKey(key.source).path
+        chips += "~" + key.typeId.path.substringAfterLast('/')
+        // 能量这类资源的 ID 就是类型 ID，不再重复列出
+        if (key.sourceId != key.typeId) chips += "*" + key.sourceId.path
         key.tags.map { "#" + it.location() }.sorted().forEach { chips += it }
         val stack = (key as? ItemStackKey)?.readOnlyStack
         if (stack != null && stack.isDamageableItem) chips += "%"

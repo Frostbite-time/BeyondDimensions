@@ -13,7 +13,7 @@
 ### Storage
 
 - Create your own category tabs with an icon, a name, a search rule and hand-picked resources. Right-click a tab, or its row in the tab list, to edit, move or delete it, or drag it to reorder. Categories are saved per player and work in every network.
-- New search syntax: `%` matches durability (for example `%<50`) and `&` matches extra components (for example `&enchant`).
+- New search syntax: `~` matches resource types (for example `~fluid`), `%` matches durability (for example `%<50`) and `&` matches extra components (for example `&enchant`). `*` matches the ID of every resource, not only items, and `\` makes any following character literal, including `@`, `#`, `-` and `|`.
 - Right-click a stored resource with an empty hand to take one, take a chosen amount or add it to a category.
 - Space + left-click moves everything at once: on your inventory or hotbar, every item in that part; on a stored resource, as much of it as possible; on a machine's slots, its whole storage. Shift + double-click moves every identical item from your inventory or the machine's slots.
 - While holding a container (bucket, tank, battery, backpack and others), left-click a stored resource to fill the container and right-click to empty it into the network. Hold Shift to transfer as much as possible.
@@ -57,7 +57,7 @@
 
 - New guides in English and Chinese, for modpacks and servers (KubeJS, storage rules, color schemes, commands and configuration) and for add-on developers (networks and storage, resource types, machine settings, screens). See the [README](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/README.md#guides).
 - Published to the [wintercogs Maven repository](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/README.md#for-developers) together with its sources.
-- New APIs: storage rules (`UnifiedStorageRules`, `InsertPlan`, `ExtractPlan`); data attached to networks (`NetDataType`, `BDRegistries.NET_DATA_TYPE_KEY`); machine settings (`MachineSetting`, `MachineType`, `Machine`, `MachineItem`, `SettingEditor`, `BDMachineSettings`); pages and server actions on Beyond Dimensions' screens (`BdPages`, `BdPage`, `BdMenuActions`); slot interactions (`SlotInteractions`, `SlotClick`); `UnifiedStorage.extractInto`; `IStackHandler.getFuzzyMatches`.
+- New APIs: storage rules (`UnifiedStorageRules`, `InsertPlan`, `ExtractPlan`); data attached to networks (`NetDataType`, `BDRegistries.NET_DATA_TYPE_KEY`); machine settings (`MachineSetting`, `MachineType`, `Machine`, `MachineItem`, `SettingEditor`, `BDMachineSettings`); pages and server actions on Beyond Dimensions' screens (`BdPages`, `BdPage`, `BdMenuActions`); slot interactions (`SlotInteractions`, `SlotClick`); `UnifiedStorage.extractInto`; `IStackHandler.getFuzzyMatches`; `IStackKey.getSourceId`.
 
 ### Breaking changes
 
@@ -104,7 +104,7 @@ For developers:
 ### 存储界面
 
 - 支持自定义分类标签，可设置图标、名称、搜索式和手动挑选的资源。右键标签或标签列表中对应的一行可以编辑、移动或删除，也可以拖动排序。分类按玩家保存，在所有网络中通用。
-- 新增搜索写法：`%` 匹配耐久（如 `%<50`），`&` 匹配额外组件（如 `&enchant`）。
+- 新增搜索写法：`~` 匹配资源类型（如 `~fluid`），`%` 匹配耐久（如 `%<50`），`&` 匹配额外组件（如 `&enchant`）。`*` 可以匹配所有资源的 ID，不再只限于物品；`\` 后的任意字符都按原样搜索，包括 `@`、`#`、`-` 和 `|`。
 - 空手右键存储中的资源，可以取出一个、取出指定数量或加入分类。
 - 空格 + 左键整批转移：点背包或快捷栏时转移该部分的全部物品，点存储中的资源时转移尽可能多的数量，点机器槽位时转移该机器存储的全部资源。Shift + 双击转移背包或机器槽位中所有完全相同的物品。
 - 手持容器（桶、储罐、电池、背包等）时，左键存储中的资源装入容器，右键将容器中的内容排入网络；按住 Shift 尽可能多地转移。
@@ -148,7 +148,7 @@ For developers:
 
 - 新增中英文指南，面向整合包和服务器（KubeJS、存储规则、配色、命令与配置）和附属开发（网络与存储、资源类型、机器设置、界面），见 [README](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/README.zh-CN.md#%E6%8C%87%E5%8D%97)。
 - 发布到 [wintercogs Maven 仓库](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/README.zh-CN.md#%E5%BC%80%E5%8F%91%E8%80%85)，附带源码包。
-- 新增 API：存储规则（`UnifiedStorageRules`、`InsertPlan`、`ExtractPlan`）；网络挂接数据（`NetDataType`、`BDRegistries.NET_DATA_TYPE_KEY`）；机器设置（`MachineSetting`、`MachineType`、`Machine`、`MachineItem`、`SettingEditor`、`BDMachineSettings`）；超越维度界面的附属页面与服务器动作（`BdPages`、`BdPage`、`BdMenuActions`）；槽位交互（`SlotInteractions`、`SlotClick`）；`UnifiedStorage.extractInto`；`IStackHandler.getFuzzyMatches`。
+- 新增 API：存储规则（`UnifiedStorageRules`、`InsertPlan`、`ExtractPlan`）；网络挂接数据（`NetDataType`、`BDRegistries.NET_DATA_TYPE_KEY`）；机器设置（`MachineSetting`、`MachineType`、`Machine`、`MachineItem`、`SettingEditor`、`BDMachineSettings`）；超越维度界面的附属页面与服务器动作（`BdPages`、`BdPage`、`BdMenuActions`）；槽位交互（`SlotInteractions`、`SlotClick`）；`UnifiedStorage.extractInto`；`IStackHandler.getFuzzyMatches`；`IStackKey.getSourceId`。
 
 ### 破坏性改动
 
