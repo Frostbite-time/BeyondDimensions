@@ -58,7 +58,7 @@
 
 - New guides in English and Chinese, for modpacks and servers (KubeJS, storage rules, color schemes, commands and configuration) and for add-on developers (networks and storage, resource types, machine settings, screens). See the [README](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/README.md#guides).
 - Published to the [wintercogs Maven repository](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/README.md#for-developers) together with its sources.
-- New APIs: storage rules (`UnifiedStorageRules`, `InsertPlan`, `ExtractPlan`); data attached to networks (`NetDataType`, `BDRegistries.NET_DATA_TYPE_KEY`); machine settings (`MachineSetting`, `MachineType`, `Machine`, `MachineItem`, `SettingEditor`, `BDMachineSettings`); pages and server actions on Beyond Dimensions' screens (`BdPages`, `BdPage`, `BdMenuActions`); slot interactions (`SlotInteractions`, `SlotClick`); `UnifiedStorage.extractInto`; `IStackHandler.getFuzzyMatches`; `IStackKey.getSourceId`.
+- New APIs: storage rules (`UnifiedStorageRules`, `InsertPlan`, `ExtractPlan`); data attached to networks, saved with them or kept in memory (`NetDataType`, `BDRegistries.NET_DATA_TYPE_KEY`); tasks run in every network's tick (`NetTickTasks`); machine settings (`MachineSetting`, `MachineType`, `Machine`, `MachineItem`, `SettingEditor`, `BDMachineSettings`); pages and server actions on Beyond Dimensions' screens (`BdPages`, `BdPage`, `BdMenuActions`); slot interactions (`SlotInteractions`, `SlotClick`); `UnifiedStorage.extractInto`; `IStackHandler.getFuzzyMatches`; `IStackKey.getSourceId`.
 
 ### Breaking changes
 
@@ -150,7 +150,7 @@ For developers:
 
 - 新增中英文指南，面向整合包和服务器（KubeJS、存储规则、配色、命令与配置）和附属开发（网络与存储、资源类型、机器设置、界面），见 [README](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/README.zh-CN.md#%E6%8C%87%E5%8D%97)。
 - 发布到 [wintercogs Maven 仓库](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/README.zh-CN.md#%E5%BC%80%E5%8F%91%E8%80%85)，附带源码包。
-- 新增 API：存储规则（`UnifiedStorageRules`、`InsertPlan`、`ExtractPlan`）；网络挂接数据（`NetDataType`、`BDRegistries.NET_DATA_TYPE_KEY`）；机器设置（`MachineSetting`、`MachineType`、`Machine`、`MachineItem`、`SettingEditor`、`BDMachineSettings`）；超越维度界面的附属页面与服务器动作（`BdPages`、`BdPage`、`BdMenuActions`）；槽位交互（`SlotInteractions`、`SlotClick`）；`UnifiedStorage.extractInto`；`IStackHandler.getFuzzyMatches`；`IStackKey.getSourceId`。
+- 新增 API：存储规则（`UnifiedStorageRules`、`InsertPlan`、`ExtractPlan`）；网络挂接数据，可随网络保存或只在内存中（`NetDataType`、`BDRegistries.NET_DATA_TYPE_KEY`）；在每个网络每刻运行的任务（`NetTickTasks`）；机器设置（`MachineSetting`、`MachineType`、`Machine`、`MachineItem`、`SettingEditor`、`BDMachineSettings`）；超越维度界面的附属页面与服务器动作（`BdPages`、`BdPage`、`BdMenuActions`）；槽位交互（`SlotInteractions`、`SlotClick`）；`UnifiedStorage.extractInto`；`IStackHandler.getFuzzyMatches`；`IStackKey.getSourceId`。
 
 ### 破坏性改动
 

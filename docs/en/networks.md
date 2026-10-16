@@ -84,3 +84,19 @@ net.updateData(UPGRADES.get(), count -> count + 1);
 `getExistingData`, `setData` and `removeData` work the same way. Keep values immutable and change them through
 `setData` or `updateData`, which mark the network for saving. Data stays on the server; send what the client needs
 yourself. When your mod is removed, its data stays in the save untouched and comes back with the mod.
+
+Leave out `codec` to keep the data in memory only: it is not saved, and changing it does not mark the network for
+saving. This suits caches and recent records.
+
+## Run code every tick
+
+`NetTickTasks.register` runs a task for every loaded network at the start of each server tick, in registration order,
+so you need neither your own tick event nor a list of networks. Deleted and temporary networks are skipped. Register
+during mod construction; this one makes upgraded networks use 10 FE per tick:
+
+```java
+NetTickTasks.register(ResourceLocation.fromNamespaceAndPath("examplemod", "upkeep"), net -> {
+    if (net.getOrCreateData(UPGRADES.get()) > 0)
+        net.getUnifiedStorage().extract(EnergyStackKey.INSTANCE, 10, false, false);
+});
+```

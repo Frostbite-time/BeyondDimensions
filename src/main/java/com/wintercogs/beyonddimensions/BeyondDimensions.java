@@ -65,6 +65,8 @@ public class BeyondDimensions
         BDAttachments.register(modEventBus);
         BDMachineSettings.register(modEventBus);
         BDMachineTypes.register(modEventBus);
+        BDNetDataTypes.register(modEventBus);
+        BDNetTasks.register();
         BDStorageRules.register();
 
         // 分发集成模块

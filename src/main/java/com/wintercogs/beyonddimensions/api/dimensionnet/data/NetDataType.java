@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.api.dimensionnet.data;
 import com.mojang.serialization.Codec;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.BinaryOperator;
@@ -24,6 +25,8 @@ import java.util.function.Supplier;
  * }</pre>
  * 值宜为不可变对象，通过 {@link DimensionsNet#setData} 或 {@link DimensionsNet#updateData} 修改；可变对象改动后需调用
  * {@link DimensionsNet#setDirty()}。数据只在服务端，需要在客户端显示时由附属自行同步。
+ * <p>
+ * 不提供编解码器时数据只在内存中，不写入存档，改动也不标记网络需要保存，适合缓存与近期记录。
  * <p>
  * 存档里类型未注册（附属未安装）的数据原样保留，附属装回后恢复；类型已注册但解析失败的数据隔离保存，不会被覆盖。
  */
@@ -53,9 +56,20 @@ public final class NetDataType<T>
         return Objects.requireNonNull(defaultValue.get(), "NetDataType default value");
     }
 
-    public Codec<T> codec()
+    /**
+     * 保存与读取的编解码器；只在内存中的数据为 null
+     */
+    public @Nullable Codec<T> codec()
     {
         return codec;
+    }
+
+    /**
+     * 是否随网络写入存档
+     */
+    public boolean isPersistent()
+    {
+        return codec != null;
     }
 
     /**
@@ -82,7 +96,7 @@ public final class NetDataType<T>
         }
 
         /**
-         * 保存与读取的编解码器，必须提供
+         * 保存与读取的编解码器；不提供时数据只在内存中
          */
         public Builder<T> codec(Codec<T> codec)
         {
@@ -100,12 +114,10 @@ public final class NetDataType<T>
         }
 
         /**
-         * @throws IllegalStateException 没有提供编解码器或合并方式
+         * @throws IllegalStateException 没有提供合并方式
          */
         public NetDataType<T> build()
         {
-            if (codec == null)
-                throw new IllegalStateException("NetDataType needs a codec");
             if (merge == null)
                 throw new IllegalStateException("NetDataType needs a merge function");
             return new NetDataType<>(defaultValue, codec, merge);

@@ -10,9 +10,6 @@ import com.wintercogs.beyonddimensions.api.storage.key.ErrorData;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.init.BDItems;
-import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
 import com.wintercogs.beyonddimensions.util.PlayerNameHelper;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;
@@ -21,7 +18,6 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
@@ -91,20 +87,6 @@ public class DimensionsNet extends SavedData
     private final @NotNull UnifiedStorage unifiedStorage;
 
     /**
-     * 标记网络是否为一个临时网络，临时网络通常用于客户端菜单的同步中，作为资源容器使用
-     * <p>
-     * 临时网络不会执行生成破碎的时空结晶之类的操作
-     */
-    private final boolean temporary;
-
-    /**
-     * currentTime是流动的倒计时，用于生成破碎时空结晶，该数据持久化保存
-     * <p>
-     * holdTime是固定的时间间隔，用于确定多久生成一次时间间隔，每当currentTime归零，holdTime会为它赋值
-     */
-    private int currentTime = 0;
-
-    /**
      * 挂接的数据，见 {@link NetDataType}
      */
     private final Map<NetDataType<?>, Object> attachments = new LinkedHashMap<>();
@@ -125,25 +107,24 @@ public class DimensionsNet extends SavedData
     private final Map<NetDataType<?>, Tag> lastWrittenAttachments = new HashMap<>();
 
     /**
-     * 当前服务器载入的网络，由 {@link #tickLoaded} 统一推进计时，服务器停止时清空
+     * 当前服务器载入的网络，由 {@link #tickLoaded} 每刻运行任务，服务器停止时清空
      */
     private static final Set<DimensionsNet> LOADED = Collections.newSetFromMap(new IdentityHashMap<>());
 
     /**
      * 构造函数
      *
-     * @param temporary 为真则说明是临时网络
+     * @param temporary 为真则说明是临时网络，通常用于客户端菜单的同步，作为资源容器使用；临时网络不运行每刻任务
      */
     public DimensionsNet(boolean temporary)
     {
         unifiedStorage = new UnifiedStorage(this, AbstractUnorderedStackHandler.UiTimestampPolicy.AUTO);
-        this.temporary = temporary;
         if (!temporary)
             LOADED.add(this);
     }
 
     /**
-     * 每刻推进所有已载入网络的计时，由 BD 注册到事件总线
+     * 每刻为所有已载入的网络运行 {@link NetTickTasks} 注册的任务，由 BD 注册到事件总线
      */
     public static void tickLoaded(ServerTickEvent.Pre event)
     {
@@ -430,9 +411,6 @@ public class DimensionsNet extends SavedData
         readMembers(tag, "Players", net.players, net.id);
         net.readAttachments(tag, registryAccess);
 
-        // 读取倒计时
-        net.currentTime = tag.getInt("currentTime");
-
         if (tag.contains("Deleted"))
             net.deleted = tag.getBoolean("Deleted");
 
@@ -478,9 +456,6 @@ public class DimensionsNet extends SavedData
         // 保存存储
         tag.put("UnifiedStorage", unifiedStorage.serializeNBT(registryAccess));
 
-        // 保存倒计时
-        tag.putInt("currentTime", this.currentTime);
-
         // 保存删除状态
         tag.putBoolean("Deleted", this.deleted);
 
@@ -518,9 +493,16 @@ public class DimensionsNet extends SavedData
         {
             value = type.createDefault();
             attachments.put(type, value);
-            setDirty();
+            markChanged(type);
         }
         return (T) value;
+    }
+
+    // 只在内存中的数据改动后不必保存网络
+    private void markChanged(NetDataType<?> type)
+    {
+        if (type.isPersistent())
+            setDirty();
     }
 
     /**
@@ -546,7 +528,7 @@ public class DimensionsNet extends SavedData
     public <T> @Nullable T setData(NetDataType<T> type, T value)
     {
         Object previous = attachments.put(type, Objects.requireNonNull(value));
-        setDirty();
+        markChanged(type);
         return (T) previous;
     }
 
@@ -559,7 +541,7 @@ public class DimensionsNet extends SavedData
     {
         T next = Objects.requireNonNull(update.apply(getOrCreateData(type)));
         attachments.put(type, next);
-        setDirty();
+        markChanged(type);
         return next;
     }
 
@@ -575,7 +557,7 @@ public class DimensionsNet extends SavedData
         if (previous != null)
         {
             lastWrittenAttachments.remove(type);
-            setDirty();
+            markChanged(type);
         }
         return Optional.ofNullable((T) previous);
     }
@@ -588,6 +570,8 @@ public class DimensionsNet extends SavedData
         for (Map.Entry<NetDataType<?>, Object> entry : attachments.entrySet())
         {
             NetDataType<?> type = entry.getKey();
+            if (!type.isPersistent())
+                continue;
             ResourceLocation typeId = BDRegistries.NET_DATA_TYPES.getKey(type);
             if (typeId == null)
             {
@@ -651,6 +635,9 @@ public class DimensionsNet extends SavedData
                 unknownAttachments.put(key, raw);
                 continue;
             }
+            // 这种数据现在只在内存中，存档里留下的旧内容不再读取
+            if (!type.isPersistent())
+                continue;
             String failure = decodeAttachment(type, raw, ops);
             if (failure != null)
             {
@@ -1110,24 +1097,11 @@ public class DimensionsNet extends SavedData
     }
 
     /**
-     * 用于执行定期操作，目前仅用于生成破碎的时空结晶。由 {@link #tickLoaded} 统一调用
-     * <p>
-     * 计时本身不标记脏：只有产出结晶时网络才需要保存，未保存的计时进度在重启后从上次保存的值继续
+     * 运行 {@link NetTickTasks} 注册的任务。由 {@link #tickLoaded} 统一调用
      */
     public void onServerTick(ServerTickEvent.Pre event)
     {
-        // 不对临时网络执行倒计时
-        if (temporary || ServerConfigRuntime.crystalGenerateTime <= 0)
-            return;
-
-        currentTime++;
-        if (currentTime >= ServerConfigRuntime.crystalGenerateTime * 20)
-        {
-            ItemStack stack = new ItemStack(BDItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(), 1);
-            this.unifiedStorage.insert(new ItemStackKey(stack), stack.getCount(), false);
-            currentTime = 0;
-        }
-
+        NetTickTasks.run(this);
     }
 
     private void syncPlayerMembership(UUID playerId, boolean switchPrimary)

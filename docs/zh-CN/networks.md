@@ -77,3 +77,16 @@ net.updateData(UPGRADES.get(), count -> count + 1);
 ```
 
 `getExistingData`、`setData` 和 `removeData` 的用法相同。数据应使用不可变值，并通过 `setData` 或 `updateData` 修改，这两个方法会将网络标记为待保存。数据只存在于服务端，客户端如需显示，需自行同步。模组卸载后，其数据原样保留在存档中，重新安装后恢复。
+
+不调用 `codec` 时数据只在内存中：不写入存档，修改时也不会将网络标记为待保存，适合缓存和近期记录。
+
+## 每刻运行任务
+
+`NetTickTasks.register` 注册的任务会在每个服务端刻开始时，按注册顺序对每个已载入的网络各调用一次，无需自行订阅刻事件或遍历网络；已删除和临时的网络不会调用。在模组构造期间注册，下面的示例让有升级的网络每刻消耗 10 FE：
+
+```java
+NetTickTasks.register(ResourceLocation.fromNamespaceAndPath("examplemod", "upkeep"), net -> {
+    if (net.getOrCreateData(UPGRADES.get()) > 0)
+        net.getUnifiedStorage().extract(EnergyStackKey.INSTANCE, 10, false, false);
+});
+```
