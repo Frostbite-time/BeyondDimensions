@@ -9,7 +9,7 @@ its settings and pastes them onto every connected machine of the same type.
 | Type | Role |
 | --- | --- |
 | `MachineSetting<T>` | One setting: its codec, default, label and editor. Registered in `BDRegistries.MACHINE_SETTING_KEY` |
-| `SettingEditor<T>` | How the setting is edited and which values are valid: `choice(options, label)`, as buttons or with `.cycling()` as one button that steps through them, or `toggle(on, off)`. The server refuses other values |
+| `SettingEditor<T>` | The control a setting is edited with, which also decides its valid values: `buttons`, `cycle` or `dropdown` to pick one of the options, `toggle` or `chip` (a short button; adjacent ones share a row) to switch it on and off, `number` for a whole number in a range. The server refuses other values |
 | `MachineType` | A kind of machine and its settings, in display order. Registered in `BDRegistries.MACHINE_TYPE_KEY` |
 | `MachineSettings` | A machine's values, immutable. Settings it doesn't recognize are kept and saved back |
 | `Machine` | Implemented by a machine's block entity |
@@ -17,7 +17,8 @@ its settings and pastes them onto every connected machine of the same type.
 
 `BDMachineSettings` holds Beyond Dimensions' own settings, which other machines can use too: `REDSTONE`, `WORKING`,
 `POP`, `FUZZY`, `FILTER_FUZZY`, `FILTER`, `RECEIVE`, `SORT`, `COLLECT_ITEMS`, `COLLECT_EXPERIENCE`, `COLLECT_FLUIDS`,
-`COLLECT_COMPONENTS`, `RANGE` and others.
+`COLLECT_COMPONENTS`, `RANGE` and others. `BDMachineSettings.side(face)` are the six faces of a side configuration; a
+machine type that lists all six shows them as one net on the settings page.
 
 ## Declare settings and a machine type
 
@@ -32,7 +33,7 @@ public enum Speed { SLOW, NORMAL, FAST }
 public static final DeferredHolder<MachineSetting<?>, MachineSetting<Speed>> SPEED = SETTINGS.register("speed",
         () -> MachineSetting.enumeration(Speed.class, Speed.NORMAL)
                 .label("ui.examplemod.speed")
-                .editor(SettingEditor.choice(List.of(Speed.values()),
+                .editor(SettingEditor.buttons(List.of(Speed.values()),
                         speed -> "ui.examplemod.speed." + MachineSetting.lowercase(speed)))
                 .build());
 
@@ -44,8 +45,8 @@ public static final DeferredHolder<MachineType, MachineType> PRESS = TYPES.regis
 ```
 
 A machine type can change a setting's label, hint, editor or default for its own machines through the `entry` builder,
-for example to offer only some of the options. `section(label)` puts the settings declared after it in a titled group
-on the settings page; `entry.chip(label)` shows a toggle as a short button that shares a row with adjacent ones.
+for example to offer only some of the options with `withOptions` or to show a toggle as a chip. `section(label)` puts
+the settings declared after it in a titled group on the settings page.
 
 ## Implement Machine
 

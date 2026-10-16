@@ -29,7 +29,7 @@ class HopperScreen(menu: NetHopperMenu, inventory: Inventory, title: Component) 
 
     override fun handle(action: HopperAction) {
         when (action) {
-            is HopperAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
+            is HopperAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
         }
     }
 

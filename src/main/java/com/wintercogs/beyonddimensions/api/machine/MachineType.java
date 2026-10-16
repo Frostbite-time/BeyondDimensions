@@ -80,7 +80,7 @@ public final class MachineType
     }
 
     /**
-     * 机器类型里的一项设置；可以替换设置自带的文字、编辑声明与默认值
+     * 机器类型里的一项设置；可以替换设置自带的文字、编辑方式与默认值
      */
     public static final class Entry<T>
     {
@@ -88,7 +88,6 @@ public final class MachineType
         private final @Nullable String labelKey;
         private final @Nullable String hintKey;
         private final @Nullable String lockedHintKey;
-        private final @Nullable String chipKey;
         private final @Nullable String sectionKey;
         private final @Nullable UnaryOperator<SettingEditor<T>> editorOverride;
         private final @Nullable T defaultValue;
@@ -102,7 +101,6 @@ public final class MachineType
             this.lockedHintKey = builder.lockedHintKey;
             this.editorOverride = builder.editorOverride;
             this.defaultValue = builder.defaultValue;
-            this.chipKey = builder.chipKey;
             this.sectionKey = sectionKey;
         }
 
@@ -127,14 +125,6 @@ public final class MachineType
         public @Nullable String lockedHintKey()
         {
             return lockedHintKey;
-        }
-
-        /**
-         * 设置页上显示为短按钮时按钮上的名称，见 {@link EntryBuilder#chip}；为空时是普通的一行
-         */
-        public @Nullable String chipKey()
-        {
-            return chipKey;
         }
 
         /**
@@ -184,7 +174,6 @@ public final class MachineType
         private @Nullable String labelKey;
         private @Nullable String hintKey;
         private @Nullable String lockedHintKey;
-        private @Nullable String chipKey;
         private @Nullable UnaryOperator<SettingEditor<T>> editorOverride;
         private @Nullable T defaultValue;
 
@@ -212,17 +201,7 @@ public final class MachineType
         }
 
         /**
-         * 开关在设置页上显示为一个短按钮，同一组里相邻的这类开关并排成一行；labelKey 是按钮上的名称，应当很短。
-         * 其他编辑方式的设置忽略这一项
-         */
-        public EntryBuilder<T> chip(String labelKey)
-        {
-            this.chipKey = Objects.requireNonNull(labelKey);
-            return this;
-        }
-
-        /**
-         * 替换编辑声明，例如只开放部分选项
+         * 替换编辑方式，例如把开关换成短按钮
          */
         public EntryBuilder<T> editor(SettingEditor<T> editor)
         {
@@ -231,7 +210,7 @@ public final class MachineType
         }
 
         /**
-         * 在设置自带的编辑声明上修改；首次用到时才调用
+         * 在设置自带的编辑方式上修改，例如只开放部分选项；首次用到时才调用
          */
         public EntryBuilder<T> editor(UnaryOperator<SettingEditor<T>> override)
         {

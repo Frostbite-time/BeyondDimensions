@@ -5,8 +5,7 @@ import com.wintercogs.beyonddimensions.api.machine.MachineType;
 import com.wintercogs.beyonddimensions.api.machine.SettingEditor;
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
 import com.wintercogs.beyonddimensions.common.machine.RelativeSide;
-import com.wintercogs.beyonddimensions.common.machine.setting.HopperRangeMode;
-import com.wintercogs.beyonddimensions.common.machine.setting.SideMode;
+import com.wintercogs.beyonddimensions.common.machine.setting.*;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -72,9 +71,12 @@ public final class BDMachineTypes
             () -> MachineType.builder(BDItems.NET_MAGNET_ITEM)
                     .section("ui.beyonddimensions.magnet.section.collect")
                     .setting(BDMachineSettings.WORKING)
-                    .setting(BDMachineSettings.COLLECT_ITEMS, entry -> entry.chip("ui.beyonddimensions.magnet.collect.items"))
-                    .setting(BDMachineSettings.COLLECT_EXPERIENCE, entry -> entry.chip("ui.beyonddimensions.magnet.collect.experience"))
-                    .setting(BDMachineSettings.COLLECT_FLUIDS, entry -> entry.chip("ui.beyonddimensions.magnet.collect.fluids"))
+                    .setting(BDMachineSettings.COLLECT_ITEMS, entry -> entry
+                            .editor(SettingEditor.chip(HopperItemMode.ALLOW, HopperItemMode.DENY, "ui.beyonddimensions.magnet.collect.items")))
+                    .setting(BDMachineSettings.COLLECT_EXPERIENCE, entry -> entry
+                            .editor(SettingEditor.chip(HopperXpMode.ALLOW, HopperXpMode.DENY, "ui.beyonddimensions.magnet.collect.experience")))
+                    .setting(BDMachineSettings.COLLECT_FLUIDS, entry -> entry
+                            .editor(SettingEditor.chip(HopperFluidMode.ALLOW, HopperFluidMode.DENY, "ui.beyonddimensions.magnet.collect.fluids")))
                     .setting(BDMachineSettings.RANGE, entry -> entry.editor(rangeHints("magnet")))
                     .section("ui.beyonddimensions.magnet.section.filter")
                     .setting(BDMachineSettings.FILTER)
@@ -129,10 +131,7 @@ public final class BDMachineTypes
     // 网络泵只从输入的面抽取，每一面只能输入或禁用，默认六面都抽取
     private static MachineType.EntryBuilder<SideMode> pumpFace(MachineType.EntryBuilder<SideMode> entry)
     {
-        return entry.defaultValue(SideMode.INPUT).editor(base -> {
-            var choice = (SettingEditor.Choice<SideMode>) base;
-            return new SettingEditor.Choice<>(List.of(SideMode.INPUT, SideMode.NONE), choice.optionLabel(), choice.optionHint(), choice.cycle());
-        });
+        return entry.defaultValue(SideMode.INPUT).editor(base -> ((SettingEditor.Choice<SideMode>) base).withOptions(List.of(SideMode.INPUT, SideMode.NONE)));
     }
 
     // 各机器的实际收集范围不同，选项说明按机器给出

@@ -19,7 +19,7 @@ import java.util.Set;
 
 /**
  * 机器设置在菜单里的同步与修改：一个同步字段带上机器类型、设置值与此刻不可修改的设置，
- * 一个动作提交单项修改，服务端按编辑声明校验
+ * 一个动作提交单项修改，服务端按编辑方式校验
  */
 public final class MachineSettingsSync
 {
@@ -167,10 +167,10 @@ public final class MachineSettingsSync
     }
 
     /**
-     * 客户端：把设置改成编辑声明里的第 index 个值（开关的 0 为打开、1 为关闭）
+     * 客户端：按控件给出的值修改设置，见 {@link #valueAt}
      */
     public static <M extends BDBaseMenu & MachineMenu> boolean request(M menu, MenuSync<M> sync, MenuAction<M, Change> action,
-                                                                       ResourceLocation settingId, int index)
+                                                                       ResourceLocation settingId, long pick)
     {
         Snapshot snapshot = menu.machineSettings().snapshot();
         MachineType type = snapshot.machineType();
@@ -178,26 +178,27 @@ public final class MachineSettingsSync
         MachineType.Entry<?> entry = type == null || setting == null ? null : type.entry(setting);
         if (entry == null || snapshot.isLocked(setting))
             return false;
-        Tag value = encodeChoice(entry, index);
+        Tag value = encodePick(entry, pick);
         return value != null && sync.request(action, new Change(settingId, value)).queued();
     }
 
-    private static <T> @Nullable Tag encodeChoice(MachineType.Entry<T> entry, int index)
+    private static <T> @Nullable Tag encodePick(MachineType.Entry<T> entry, long pick)
     {
-        T value = valueAt(entry.editor(), index);
+        T value = valueAt(entry.editor(), pick);
         return value == null ? null : entry.setting().codec().encodeStart(NbtOps.INSTANCE, value).result().orElse(null);
     }
 
     /**
-     * 编辑声明里的第 index 个值：选择的第 index 项，开关的 0 为打开、1 为关闭
+     * 控件给出的值对应的设置值：选择类控件给出第几项，开关与短按钮的 0 为打开、1 为关闭，数值框给出框里的数；
+     * 不在范围内时为 null
      */
-    public static <T> @Nullable T valueAt(SettingEditor<T> editor, int index)
+    public static <T> @Nullable T valueAt(SettingEditor<T> editor, long pick)
     {
         return switch (editor)
         {
-            case SettingEditor.Choice<T> choice ->
-                    index >= 0 && index < choice.options().size() ? choice.options().get(index) : null;
-            case SettingEditor.Toggle<T> toggle -> index == 0 ? toggle.on() : index == 1 ? toggle.off() : null;
+            case SettingEditor.Choice<T> choice -> pick >= 0 && pick < choice.options().size() ? choice.options().get((int) pick) : null;
+            case SettingEditor.OnOff<T> onOff -> pick == 0 ? onOff.on() : pick == 1 ? onOff.off() : null;
+            case SettingEditor.NumberField<T> number -> pick >= number.min() && pick <= number.max() ? number.fromLong().apply(pick) : null;
         };
     }
 

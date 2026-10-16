@@ -44,7 +44,7 @@ class MagnetScreen(menu: NetMagnetMenu, inventory: Inventory, title: Component) 
 
     override fun handle(action: MagnetAction) {
         when (action) {
-            is MagnetAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
+            is MagnetAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
         }
     }
 

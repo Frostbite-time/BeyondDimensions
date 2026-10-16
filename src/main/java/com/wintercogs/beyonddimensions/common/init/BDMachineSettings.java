@@ -36,7 +36,7 @@ public final class BDMachineSettings
     public static final DeferredHolder<MachineSetting<?>, MachineSetting<RedStoneControlMode>> REDSTONE = SETTINGS.register("redstone",
             () -> MachineSetting.enumeration(RedStoneControlMode.class, RedStoneControlMode.IGNORE)
                     .label(MACHINE + "redstone")
-                    .editor(SettingEditor.choice(List.of(RedStoneControlMode.values()), mode -> MACHINE + "redstone." + lowercase(mode)))
+                    .editor(SettingEditor.buttons(List.of(RedStoneControlMode.values()), mode -> MACHINE + "redstone." + lowercase(mode)))
                     .legacyKey("control_mode")
                     .build());
 
@@ -93,7 +93,7 @@ public final class BDMachineSettings
     public static final DeferredHolder<MachineSetting<?>, MachineSetting<FilterMode>> FILTER = SETTINGS.register("filter",
             () -> MachineSetting.enumeration(FilterMode.class, FilterMode.BLACK)
                     .label(MACHINE + "filter")
-                    .editor(SettingEditor.choice(List.of(FilterMode.values()), mode -> MACHINE + "filter." + lowercase(mode)))
+                    .editor(SettingEditor.buttons(List.of(FilterMode.values()), mode -> MACHINE + "filter." + lowercase(mode)))
                     .legacyKey("filter_type")
                     .legacyComponent(BDDataComponents.FILTER_MODE)
                     .build());
@@ -159,7 +159,7 @@ public final class BDMachineSettings
     public static final DeferredHolder<MachineSetting<?>, MachineSetting<HopperRangeMode>> RANGE = SETTINGS.register("range",
             () -> MachineSetting.enumeration(HopperRangeMode.class, HopperRangeMode.RADIUS_MID)
                     .label(MACHINE + "range")
-                    .editor(SettingEditor.choice(List.of(HopperRangeMode.values()), mode -> MACHINE + "range." + rangeName(mode)).cycling())
+                    .editor(SettingEditor.cycle(List.of(HopperRangeMode.values()), mode -> MACHINE + "range." + rangeName(mode)))
                     .legacyKey("hopper_range_mode")
                     .legacyComponent(BDDataComponents.HOPPER_RANGE_MODE)
                     .build());
@@ -170,9 +170,8 @@ public final class BDMachineSettings
     public static final DeferredHolder<MachineSetting<?>, MachineSetting<FeederMode>> FEEDING = SETTINGS.register("feeding",
             () -> MachineSetting.enumeration(FeederMode.class, FeederMode.NORMAL)
                     .label("ui.beyonddimensions.feeder.mode")
-                    .editor(new SettingEditor.Choice<>(List.of(FeederMode.values()),
-                            mode -> "ui.beyonddimensions.feeder.mode." + lowercase(mode),
-                            mode -> "ui.beyonddimensions.feeder.mode." + lowercase(mode) + ".hint", true))
+                    .editor(SettingEditor.cycle(List.of(FeederMode.values()), mode -> "ui.beyonddimensions.feeder.mode." + lowercase(mode))
+                            .withHints(mode -> "ui.beyonddimensions.feeder.mode." + lowercase(mode) + ".hint"))
                     .legacyComponent(BDDataComponents.FEEDER_MODE)
                     .build());
 
@@ -182,9 +181,8 @@ public final class BDMachineSettings
     public static final DeferredHolder<MachineSetting<?>, MachineSetting<PickupTarget>> PICKUP_TARGET = SETTINGS.register("pickup_target",
             () -> MachineSetting.enumeration(PickupTarget.class, PickupTarget.NETWORK_ONLY)
                     .label(MACHINE + "pickup_target")
-                    .editor(new SettingEditor.Choice<>(List.of(PickupTarget.values()),
-                            target -> MACHINE + "pickup_target." + lowercase(target),
-                            target -> MACHINE + "pickup_target." + lowercase(target) + ".hint", true))
+                    .editor(SettingEditor.cycle(List.of(PickupTarget.values()), target -> MACHINE + "pickup_target." + lowercase(target))
+                            .withHints(target -> MACHINE + "pickup_target." + lowercase(target) + ".hint"))
                     .build());
 
     /**
@@ -193,7 +191,7 @@ public final class BDMachineSettings
     public static final DeferredHolder<MachineSetting<?>, MachineSetting<EmitMode>> EMIT = SETTINGS.register("emit",
             () -> MachineSetting.enumeration(EmitMode.class, EmitMode.AT_LEAST)
                     .label("ui.beyonddimensions.emitter.mode")
-                    .editor(SettingEditor.choice(List.of(EmitMode.values()), mode -> "ui.beyonddimensions.emitter.mode." + lowercase(mode)))
+                    .editor(SettingEditor.buttons(List.of(EmitMode.values()), mode -> "ui.beyonddimensions.emitter.mode." + lowercase(mode)))
                     .build());
 
     /**
@@ -212,7 +210,7 @@ public final class BDMachineSettings
     }
 
     /**
-     * 相对正面的 side 那一面的输入输出
+     * 相对正面的 side 那一面的输入输出。机器类型列出全部六个面时，设置页把它们合成一张面配置图，每一面是一个循环切换的格子
      */
     public static DeferredHolder<MachineSetting<?>, MachineSetting<SideMode>> side(RelativeSide side)
     {
@@ -223,7 +221,7 @@ public final class BDMachineSettings
     {
         return MachineSetting.enumeration(SideMode.class, SideMode.BOTH)
                 .label(SIDE + lowercase(side))
-                .editor(SettingEditor.choice(List.of(SideMode.values()), mode -> SIDE + "mode." + lowercase(mode)))
+                .editor(SettingEditor.cycle(List.of(SideMode.values()), mode -> SIDE + "mode." + lowercase(mode)))
                 .build();
     }
 

@@ -30,7 +30,7 @@ class PumpScreen(menu: NetPumpMenu, inventory: Inventory, title: Component) :
 
     override fun handle(action: PumpAction) {
         when (action) {
-            is PumpAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
+            is PumpAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
         }
     }
 

@@ -181,9 +181,10 @@ public class MachineConfigCardItem extends Item
         Component shown = switch (entry.editor())
         {
             case SettingEditor.Choice<T> choice -> Component.translatable(choice.optionLabel().apply(value));
-            case SettingEditor.Toggle<T> toggle -> Component.translatable(value.equals(toggle.on())
+            case SettingEditor.OnOff<T> onOff -> Component.translatable(value.equals(onOff.on())
                     ? "tooltip.beyonddimensions.machine_config_card.on"
                     : "tooltip.beyonddimensions.machine_config_card.off");
+            case SettingEditor.NumberField<T> number -> Component.literal(Long.toString(number.toLong().applyAsLong(value)));
         };
         return Component.translatable("tooltip.beyonddimensions.machine_config_card.setting", Component.translatable(entry.labelKey()), shown)
                 .withStyle(ChatFormatting.GRAY);

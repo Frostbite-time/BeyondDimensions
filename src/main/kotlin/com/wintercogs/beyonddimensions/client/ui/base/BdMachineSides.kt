@@ -203,7 +203,7 @@ private fun FaceCell(
                             it.buttons.isSecondaryPressed -> -1
                             else -> return@onPointerEvent
                         }
-                    onPick(MachineSettingPick(face.setting, (face.selected + step).mod(face.options.size)))
+                    onPick(MachineSettingPick(face.setting, (face.selected + step).mod(face.options.size).toLong()))
                     feedback.activate()
                 },
             contentAlignment = Alignment.Center,

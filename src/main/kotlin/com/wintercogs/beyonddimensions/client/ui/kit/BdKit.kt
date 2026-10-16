@@ -32,6 +32,7 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -546,26 +547,14 @@ fun BdSettingRow(title: String, description: String? = null, control: @Composabl
     }
 }
 
-/**
- * 一组互斥模式：标题在上，下面是分段按钮；[cycle] 为真时改为左右切换。
- * [description] 是当前选项的说明
- */
+/** 一项选择类设置：标题在上，[control] 在下，再下面是选中项的说明 [description] */
 @Composable
-fun BdModeSetting(
-    title: String,
-    options: List<String>,
-    selected: Int,
-    enabled: Boolean,
-    description: String? = null,
-    cycle: Boolean = false,
-    onSelect: (Int) -> Unit,
-) {
+fun BdChoiceSetting(title: String, description: String? = null, control: @Composable () -> Unit) {
     val colors = Bd.colors
     Column(Modifier.fillMaxWidth()) {
         OreText(title, color = colors[BdColors.text], maxLines = 1)
         Spacer(Modifier.height(2.dp))
-        if (cycle) BdCycler(options, selected, enabled, onSelect)
-        else BdSegmented(options, selected, onSelect, Modifier.fillMaxWidth(), enabled = enabled, fill = true)
+        control()
         if (description != null) {
             Spacer(Modifier.height(2.dp))
             OreText(description, color = colors[BdColors.faint], style = Bd.caption, maxLines = 2)
@@ -573,9 +562,9 @@ fun BdModeSetting(
     }
 }
 
-/** 左右箭头依次切换的选择器 */
+/** 循环按钮：一次显示一项，左右箭头切换到上一项或下一项 */
 @Composable
-private fun BdCycler(options: List<String>, selected: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
+fun BdCycler(options: List<String>, selected: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
     val colors = Bd.colors
     Row(
         Modifier.fillMaxWidth()
@@ -605,6 +594,51 @@ private fun BdCycler(options: List<String>, selected: Int, enabled: Boolean, onS
             enabled = enabled,
             size = 13.dp,
         )
+    }
+}
+
+/** 下拉菜单：显示选中项的按钮，点开后在下方列出全部选项，选中的一项用强调色 */
+@Composable
+fun BdDropdown(options: List<String>, selected: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
+    val colors = Bd.colors
+    val density = LocalDensity.current
+    var open by remember { mutableStateOf(false) }
+    var width by remember { mutableStateOf(0.dp) }
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    Box(Modifier.fillMaxWidth()) {
+        Row(
+            Modifier.fillMaxWidth()
+                .height(15.dp)
+                .onSizeChanged { width = with(density) { it.width.toDp() } }
+                .hoverable(interaction, enabled)
+                .bdClickable(interaction, enabled = enabled) { open = !open }
+                .bdInset(colors, edge = if (enabled && (open || hovered)) colors[BdColors.accent] else null)
+                .padding(start = 5.dp, end = 2.dp)
+                .alpha(if (enabled) 1f else 0.55f),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            OreText(
+                options.getOrElse(selected) { "" },
+                Modifier.weight(1f),
+                color = if (enabled) colors[BdColors.accentDeep] else colors[BdColors.faint],
+                maxLines = 1,
+            )
+            BdIcon(BdIcons.ChevronDown, color = colors[BdColors.faint])
+        }
+        if (open && enabled) {
+            BdPopover({ open = false }) {
+                // 与按钮同宽：浮层两侧各有 6 的内边距
+                Column(Modifier.widthIn(min = (width - 12.dp).coerceAtLeast(0.dp))) {
+                    options.forEachIndexed { index, label ->
+                        BdMenuRow(label, selected = index == selected) {
+                            open = false
+                            if (index != selected) onSelect(index)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

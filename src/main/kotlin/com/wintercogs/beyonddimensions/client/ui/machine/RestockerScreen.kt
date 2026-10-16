@@ -32,7 +32,7 @@ class RestockerScreen(menu: NetRestockerMenu, inventory: Inventory, title: Compo
 
     override fun handle(action: RestockerAction) {
         when (action) {
-            is RestockerAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
+            is RestockerAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
         }
     }
 

@@ -88,11 +88,11 @@ public class NetFeederMenu extends BDBaseMenu implements MachineMenu
     }
 
     /**
-     * 客户端：把设置改成编辑声明里的第 index 个值
+     * 客户端：按控件给出的值修改设置，见 {@link MachineSettingsSync#valueAt}
      */
-    public boolean requestSetting(ResourceLocation setting, int index)
+    public boolean requestSetting(ResourceLocation setting, long pick)
     {
-        return MachineSettingsSync.request(this, synchronization, SET_SETTING, setting, index);
+        return MachineSettingsSync.request(this, synchronization, SET_SETTING, setting, pick);
     }
 
     public NetFeederMenu(int id, Inventory playerInventory, FriendlyByteBuf data)

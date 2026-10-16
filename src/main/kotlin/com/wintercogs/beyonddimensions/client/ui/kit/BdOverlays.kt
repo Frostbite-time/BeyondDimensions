@@ -215,9 +215,9 @@ private class AtPoint(private val point: IntOffset) : PopupPositionProvider {
     }
 }
 
-/** 菜单中的一行：一行小字，悬停时浅色底 */
+/** 菜单中的一行：一行小字，悬停时浅色底；[selected] 为真时文字用强调色，例如下拉菜单里选中的一项 */
 @Composable
-fun BdMenuRow(label: String, onClick: () -> Unit) {
+fun BdMenuRow(label: String, selected: Boolean = false, onClick: () -> Unit) {
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
@@ -232,7 +232,7 @@ fun BdMenuRow(label: String, onClick: () -> Unit) {
     ) {
         OreText(
             label,
-            color = if (hovered) colors[BdColors.accentDeep] else colors[BdColors.text],
+            color = if (hovered || selected) colors[BdColors.accentDeep] else colors[BdColors.text],
             style = Bd.caption,
             maxLines = 1
         )

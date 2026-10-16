@@ -29,7 +29,7 @@ class FeederScreen(menu: NetFeederMenu, inventory: Inventory, title: Component) 
 
     override fun handle(action: FeederAction) {
         when (action) {
-            is FeederAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
+            is FeederAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
         }
     }
 

@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * 机器的一项设置，注册到 {@link BDRegistries#MACHINE_SETTING_KEY}：值的类型与编解码器、默认值、显示文字与编辑声明。
+ * 机器的一项设置，注册到 {@link BDRegistries#MACHINE_SETTING_KEY}：值的类型与编解码器、默认值、显示文字与编辑方式。
  * 值应为不可变对象，编解码器不应依赖注册表上下文
  */
 public final class MachineSetting<T>
@@ -212,7 +212,7 @@ public final class MachineSetting<T>
         }
 
         /**
-         * @throws IllegalStateException 没有设置名或编辑声明
+         * @throws IllegalStateException 没有设置名或编辑方式
          */
         public MachineSetting<T> build()
         {

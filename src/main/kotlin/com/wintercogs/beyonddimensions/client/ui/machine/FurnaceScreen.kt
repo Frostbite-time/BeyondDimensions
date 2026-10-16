@@ -49,7 +49,7 @@ class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component
 
     override fun handle(action: FurnaceAction) {
         when (action) {
-            is FurnaceAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
+            is FurnaceAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
         }
     }
 

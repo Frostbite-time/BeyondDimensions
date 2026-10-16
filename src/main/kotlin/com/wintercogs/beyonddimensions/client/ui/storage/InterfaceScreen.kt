@@ -33,7 +33,7 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
 
     override fun handle(action: InterfaceAction) {
         when (action) {
-            is InterfaceAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
+            is InterfaceAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
         }
     }
 

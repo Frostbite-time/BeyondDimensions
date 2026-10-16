@@ -77,7 +77,7 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
 
     override fun handle(action: EnergyAction) {
         when (action) {
-            is EnergyAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
+            is EnergyAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
         }
     }
 

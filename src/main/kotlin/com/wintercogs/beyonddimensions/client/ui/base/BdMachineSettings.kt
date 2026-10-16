@@ -22,27 +22,39 @@ data class MachineSettingRow(
     val setting: ResourceLocation,
     val title: String,
     val description: String?,
-    val editor: MachineSettingControl,
+    val control: MachineSettingControl,
     val enabled: Boolean,
     val section: String? = null,
 )
 
-/** 一行设置用的控件 */
+/** 一行设置用的控件，与 [SettingEditor] 的编辑方式一一对应，另有六个面合成的面配置 */
 sealed interface MachineSettingControl {
-    /** 从几个选项中选一个；[cycle] 为真时是点一下换下一项的单个按钮 */
-    data class Choice(val options: List<String>, val selected: Int, val cycle: Boolean) : MachineSettingControl
+    /** 分段按钮 */
+    data class Buttons(val options: List<String>, val selected: Int) : MachineSettingControl
 
+    /** 循环按钮 */
+    data class Cycle(val options: List<String>, val selected: Int) : MachineSettingControl
+
+    /** 下拉菜单 */
+    data class Dropdown(val options: List<String>, val selected: Int) : MachineSettingControl
+
+    /** 开关 */
     data class Toggle(val on: Boolean) : MachineSettingControl
 
-    /** 开关的短按钮形式，同一组里相邻的几个并排成一行；[label] 是按钮上的名称 */
+    /** 短按钮，同一组里相邻的几个并排成一行；[label] 是按钮上的文字 */
     data class Chip(val label: String, val on: Boolean) : MachineSettingControl
+
+    /** 数值框 */
+    data class NumberField(val value: Long, val range: LongRange) : MachineSettingControl
 
     /** 面配置：六个面合成一个展开图，行的 [MachineSettingRow.setting] 是其中第一个面 */
     data class Sides(val state: SidesState) : MachineSettingControl
 }
 
-/** 设置页上的一次修改：编辑声明里的第 [index] 个值，开关的 0 为打开、1 为关闭 */
-data class MachineSettingPick(val setting: ResourceLocation, val index: Int)
+/**
+ * 设置页上的一次修改：[value] 是控件给出的值，选择类控件是第几项，开关与短按钮的 0 为打开、1 为关闭，数值框是框里的数
+ */
+data class MachineSettingPick(val setting: ResourceLocation, val value: Long)
 
 /**
  * 按菜单同步来的设置生成设置页的各行，顺序与分组与机器类型的声明相同；在游戏线程调用。
@@ -73,33 +85,33 @@ private fun <T> settingRow(entry: MachineType.Entry<T>, snapshot: MachineSetting
     val id = BDRegistries.MACHINE_SETTINGS.getKey(setting) ?: return null
     val value = entry.valueIn(snapshot.settings())
     val locked = snapshot.isLocked(setting)
-    val hint = if (locked) entry.lockedHintKey() ?: entry.hintKey() else entry.hintKey()
+    val hint = (if (locked) entry.lockedHintKey() ?: entry.hintKey() else entry.hintKey())?.let(::tr)
     val title = tr(entry.labelKey())
     return when (val editor = entry.editor()) {
         is SettingEditor.Choice<T> -> {
             val selected = editor.options().indexOf(value).coerceAtLeast(0)
+            val options = editor.options().map { tr(editor.optionLabel().apply(it)) }
+            val control =
+                when (editor) {
+                    is SettingEditor.Buttons<T> -> MachineSettingControl.Buttons(options, selected)
+                    is SettingEditor.Cycle<T> -> MachineSettingControl.Cycle(options, selected)
+                    is SettingEditor.Dropdown<T> -> MachineSettingControl.Dropdown(options, selected)
+                }
             // 选项各自有说明时显示选中项的说明
-            val description = editor.optionHint()?.apply(editor.options()[selected]) ?: hint
-            MachineSettingRow(
-                id,
-                title,
-                description?.let(::tr),
-                MachineSettingControl.Choice(
-                    editor.options().map { tr(editor.optionLabel().apply(it)) },
-                    selected,
-                    editor.cycle()
-                ),
-                !locked,
-            )
+            val description = editor.optionHint()?.apply(editor.options()[selected])?.let(::tr) ?: hint
+            MachineSettingRow(id, title, description, control, !locked)
         }
 
-        is SettingEditor.Toggle<T> -> {
-            val on = value == editor.on()
-            val control = entry.chipKey()?.let { MachineSettingControl.Chip(tr(it), on) } ?: MachineSettingControl.Toggle(on)
-            MachineSettingRow(id, title, hint?.let(::tr), control, !locked)
-        }
+        is SettingEditor.Toggle<T> ->
+            MachineSettingRow(id, title, hint, MachineSettingControl.Toggle(value == editor.on()), !locked)
 
-        else -> null
+        is SettingEditor.Chip<T> ->
+            MachineSettingRow(id, title, hint, MachineSettingControl.Chip(tr(editor.labelKey()), value == editor.on()), !locked)
+
+        is SettingEditor.NumberField<T> -> {
+            val number = MachineSettingControl.NumberField(editor.toLong().applyAsLong(value), editor.min()..editor.max())
+            MachineSettingRow(id, title, hint, number, !locked)
+        }
     }
 }
 
@@ -113,8 +125,8 @@ fun BdMachineSettings(rows: List<MachineSettingRow>, shown: Boolean, onPick: (Ma
     while (start < rows.size) {
         val row = rows[start]
         var end = start + 1
-        if (row.editor is MachineSettingControl.Chip)
-            while (end < rows.size && rows[end].editor is MachineSettingControl.Chip && rows[end].section == row.section) end++
+        if (row.control is MachineSettingControl.Chip)
+            while (end < rows.size && rows[end].control is MachineSettingControl.Chip && rows[end].section == row.section) end++
         val opensSection = row.section != null && (start == 0 || rows[start - 1].section != row.section)
         val first = start == 0
         val group = rows.subList(start, end)
@@ -123,7 +135,7 @@ fun BdMachineSettings(rows: List<MachineSettingRow>, shown: Boolean, onPick: (Ma
                 if (!first) SectionDivider()
                 BdSectionLabel(row.section)
             }
-            if (row.editor is MachineSettingControl.Chip) SettingChips(group, shown, onPick) else SettingRow(row, shown, onPick)
+            if (row.control is MachineSettingControl.Chip) SettingChips(group, shown, onPick) else SettingRow(row, shown, onPick)
         }
         start = end
     }
@@ -131,47 +143,56 @@ fun BdMachineSettings(rows: List<MachineSettingRow>, shown: Boolean, onPick: (Ma
 
 @Composable
 private fun SettingRow(row: MachineSettingRow, shown: Boolean, onPick: (MachineSettingPick) -> Unit) {
-    when (val control = row.editor) {
-        is MachineSettingControl.Choice ->
-            BdModeSetting(
-                row.title,
-                control.options,
-                control.selected,
-                shown && row.enabled,
-                description = row.description,
-                cycle = control.cycle,
-            ) { onPick(MachineSettingPick(row.setting, it)) }
-
-        is MachineSettingControl.Toggle ->
-            BdSettingRow(row.title, row.description) {
-                BdToggle(
-                    control.on,
-                    { onPick(MachineSettingPick(row.setting, if (it) 0 else 1)) },
-                    shown && row.enabled
-                )
+    val enabled = shown && row.enabled
+    val pick = { value: Long -> onPick(MachineSettingPick(row.setting, value)) }
+    val pickOption = { index: Int -> pick(index.toLong()) }
+    when (val control = row.control) {
+        is MachineSettingControl.Buttons ->
+            BdChoiceSetting(row.title, row.description) {
+                BdSegmented(control.options, control.selected, pickOption, Modifier.fillMaxWidth(), enabled = enabled, fill = true)
             }
 
+        is MachineSettingControl.Cycle ->
+            BdChoiceSetting(row.title, row.description) { BdCycler(control.options, control.selected, enabled, pickOption) }
+
+        is MachineSettingControl.Dropdown ->
+            BdChoiceSetting(row.title, row.description) { BdDropdown(control.options, control.selected, enabled, pickOption) }
+
+        is MachineSettingControl.Toggle ->
+            BdSettingRow(row.title, row.description) { BdToggle(control.on, { pick(if (it) 0 else 1) }, enabled) }
+
         is MachineSettingControl.Chip -> SettingChips(listOf(row), shown, onPick)
+        is MachineSettingControl.NumberField ->
+            BdSettingRow(row.title, row.description) { BdNumberEditor(control.value, pick, control.range, enabled) }
+
         is MachineSettingControl.Sides -> BdMachineSides(row.title, control.state, shown, onPick)
     }
 }
 
-/** 并排的短按钮开关，平分一行，打开的带强调色的边框 */
+/** 并排的短按钮，平分一行，打开的带强调色的边框；悬停时显示设置名与说明 */
 @Composable
 private fun SettingChips(rows: List<MachineSettingRow>, shown: Boolean, onPick: (MachineSettingPick) -> Unit) {
     val colors = Bd.colors
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
         for (row in rows) key(row.setting) {
-            val chip = row.editor as MachineSettingControl.Chip
-            BdChip(
-                { onPick(MachineSettingPick(row.setting, if (chip.on) 1 else 0)) },
+            val chip = row.control as MachineSettingControl.Chip
+            BdTooltip(
+                {
+                    OreText(row.title, color = colors[BdColors.text], style = Bd.caption)
+                    row.description?.let { OreText(it, color = colors[BdColors.faint], style = Bd.caption) }
+                },
                 Modifier.weight(1f),
-                enabled = shown && row.enabled,
-                active = chip.on,
             ) {
-                Spacer(Modifier.weight(1f))
-                OreText(chip.label, color = colors[if (chip.on) BdColors.accentDeep else BdColors.faint], maxLines = 1)
-                Spacer(Modifier.weight(1f))
+                BdChip(
+                    { onPick(MachineSettingPick(row.setting, if (chip.on) 1 else 0)) },
+                    Modifier.fillMaxWidth(),
+                    enabled = shown && row.enabled,
+                    active = chip.on,
+                ) {
+                    Spacer(Modifier.weight(1f))
+                    OreText(chip.label, color = colors[if (chip.on) BdColors.accentDeep else BdColors.faint], maxLines = 1)
+                    Spacer(Modifier.weight(1f))
+                }
             }
         }
     }

@@ -7,13 +7,13 @@
 | 类型 | 作用 |
 | --- | --- |
 | `MachineSetting<T>` | 一项设置：编解码器、默认值、名称和编辑方式。注册到 `BDRegistries.MACHINE_SETTING_KEY` |
-| `SettingEditor<T>` | 编辑方式及合法取值：`choice(options, label)` 显示为一组按钮，加上 `.cycling()` 后显示为单个按钮，每次点击切换到下一项；`toggle(on, off)` 显示为开关。服务端拒绝不合法的值 |
+| `SettingEditor<T>` | 编辑设置用的控件，同时决定合法取值：`buttons`（分段按钮）、`cycle`（循环按钮）、`dropdown`（下拉菜单）从选项中选一个；`toggle`（开关）、`chip`（短按钮，同组相邻的排成一行）切换开启与关闭；`number`（数值框）输入范围内的整数。服务端拒绝不合法的值 |
 | `MachineType` | 一类机器及其设置，按显示顺序排列。注册到 `BDRegistries.MACHINE_TYPE_KEY` |
 | `MachineSettings` | 一台机器的设置值，不可变。无法识别的设置原样保留，保存时写回 |
 | `Machine` | 由机器的方块实体实现 |
 | `MachineItem` | 由本身作为机器的物品实现，如网络磁铁；设置保存在物品堆叠上 |
 
-`BDMachineSettings` 包含超越维度自身的设置，其他机器也可以直接使用：`REDSTONE`、`WORKING`、`POP`、`FUZZY`、`FILTER_FUZZY`、`FILTER`、`RECEIVE`、`SORT`、`COLLECT_ITEMS`、`COLLECT_EXPERIENCE`、`COLLECT_FLUIDS`、`COLLECT_COMPONENTS`、`RANGE` 等。
+`BDMachineSettings` 包含超越维度自身的设置，其他机器也可以直接使用：`REDSTONE`、`WORKING`、`POP`、`FUZZY`、`FILTER_FUZZY`、`FILTER`、`RECEIVE`、`SORT`、`COLLECT_ITEMS`、`COLLECT_EXPERIENCE`、`COLLECT_FLUIDS`、`COLLECT_COMPONENTS`、`RANGE` 等。`BDMachineSettings.side(face)` 是面配置的六个面；机器类型列出全部六个面时，设置页将它们显示为一张展开图。
 
 ## 声明设置和机器类型
 
@@ -28,7 +28,7 @@ public enum Speed { SLOW, NORMAL, FAST }
 public static final DeferredHolder<MachineSetting<?>, MachineSetting<Speed>> SPEED = SETTINGS.register("speed",
         () -> MachineSetting.enumeration(Speed.class, Speed.NORMAL)
                 .label("ui.examplemod.speed")
-                .editor(SettingEditor.choice(List.of(Speed.values()),
+                .editor(SettingEditor.buttons(List.of(Speed.values()),
                         speed -> "ui.examplemod.speed." + MachineSetting.lowercase(speed)))
                 .build());
 
@@ -39,7 +39,7 @@ public static final DeferredHolder<MachineType, MachineType> PRESS = TYPES.regis
                 .build());
 ```
 
-机器类型可以通过 `entry` 覆盖某项设置在该类机器上的名称、说明、编辑方式或默认值，例如只开放部分选项。`section(label)` 将其后声明的设置归入一组，设置页在组前显示标题；`entry.chip(label)` 将开关显示为短按钮，同组中相邻的短按钮排成一行。
+机器类型可以通过 `entry` 覆盖某项设置在该类机器上的名称、说明、编辑方式或默认值，例如用 `withOptions` 只开放部分选项，或把开关换成短按钮。`section(label)` 将其后声明的设置归入一组，设置页在组前显示标题。
 
 ## 实现 Machine
 

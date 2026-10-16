@@ -59,7 +59,7 @@ class StockEmitterScreen(menu: NetStockEmitterMenu, inventory: Inventory, title:
 
     override fun handle(action: StockEmitterAction) {
         when (action) {
-            is StockEmitterAction.Setting -> container.requestSetting(action.pick.setting, action.pick.index)
+            is StockEmitterAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
             is StockEmitterAction.Threshold -> container.requestThreshold(action.value)
         }
     }
