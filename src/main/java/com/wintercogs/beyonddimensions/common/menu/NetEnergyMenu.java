@@ -6,10 +6,13 @@ import com.wintercogs.beyonddimensions.api.machine.Machine;
 import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.common.block.entity.NetEnergyPathwayBlockEntity;
+import com.wintercogs.beyonddimensions.common.init.BDNetDataTypes;
 import com.wintercogs.beyonddimensions.common.menu.machine.MachineMenu;
 import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync;
+import com.wintercogs.beyonddimensions.common.menu.state.EnergyHistory;
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
+import dev.compixel.sync.state.SyncCodec;
 import dev.compixel.sync.state.SyncCodecs;
 import dev.compixel.sync.state.SyncSchema;
 import net.minecraft.network.FriendlyByteBuf;
@@ -20,10 +23,14 @@ import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
 import static com.wintercogs.beyonddimensions.common.init.BDMenus.Net_Energy_Menu;
 
 /**
- * 维度网络能量通道：同步三个能量读数
+ * 维度网络能量通道：同步存量、容量、最近一秒的速率，以及网络在服务端记下的近期各格
  */
 public class NetEnergyMenu extends BDBaseMenu implements MachineMenu
 {
@@ -31,20 +38,46 @@ public class NetEnergyMenu extends BDBaseMenu implements MachineMenu
 
     private long energyStored = 0;
     private long energyCapacity = 0;
-    private long energyRate = 0;
-    private boolean sampledEnergy;
+    private double energyRate = 0;
+    private EnergyHistory.Bars energyBars = EnergyHistory.Bars.EMPTY;
 
+    private static final SyncCodec<Double> RATE_CODEC = SyncCodec.of("beyonddimensions:energy_rate/1",
+            DataOutput::writeDouble, DataInput::readDouble);
 
-    private static final SyncSchema<NetEnergyMenu> SCHEMA = MachineSettingsSync.field(SyncSchema.<NetEnergyMenu>builder("beyonddimensions:energy", 2))
+    private static final SyncCodec<EnergyHistory.Bars> BARS_CODEC = SyncCodec.of("beyonddimensions:energy_bars/1",
+            (out, bars) -> {
+                out.writeShort(bars.flows().length);
+                for (long flow : bars.flows())
+                    out.writeLong(flow);
+                for (long stored : bars.stored())
+                    out.writeLong(stored);
+            },
+            in -> {
+                int count = in.readUnsignedShort();
+                if (count > EnergyHistory.BARS)
+                    throw new IOException("Too many energy bars: " + count);
+                long[] flows = new long[count];
+                long[] stored = new long[count];
+                for (int i = 0; i < count; i++)
+                    flows[i] = in.readLong();
+                for (int i = 0; i < count; i++)
+                    stored[i] = in.readLong();
+                return new EnergyHistory.Bars(flows, stored);
+            });
+
+    private static final SyncSchema<NetEnergyMenu> SCHEMA = MachineSettingsSync.field(SyncSchema.<NetEnergyMenu>builder("beyonddimensions:energy", 3))
             .field("number_stored", SyncCodecs.LONG,
                     m -> m.energyStored,
                     (m, value) -> m.energyStored = value)
             .field("number_capacity", SyncCodecs.LONG,
                     m -> m.energyCapacity,
                     (m, value) -> m.energyCapacity = value)
-            .field("number_rate", SyncCodecs.LONG,
+            .field("rate", RATE_CODEC,
                     m -> m.energyRate,
                     (m, value) -> m.energyRate = value)
+            .field("bars", BARS_CODEC,
+                    m -> m.energyBars,
+                    (m, value) -> m.energyBars = value)
             .build();
 
     private static final MenuAction<NetEnergyMenu, MachineSettingsSync.Change> SET_SETTING = MachineSettingsSync.action();
@@ -130,11 +163,11 @@ public class NetEnergyMenu extends BDBaseMenu implements MachineMenu
 
         DimensionsNet net = be.getNet();
 
-        long stored = net == null ? 0 : getEnergyStored(net.getUnifiedStorage());
-        this.energyRate = sampledEnergy ? stored - this.energyStored : 0;
-        this.energyStored = stored;
-        sampledEnergy = true;
+        this.energyStored = net == null ? 0 : getEnergyStored(net.getUnifiedStorage());
         this.energyCapacity = net == null ? 0 : net.getUnifiedStorage().getSlotCapacity(0);
+        EnergyHistory history = net == null ? null : net.getOrCreateData(BDNetDataTypes.ENERGY_HISTORY.get());
+        this.energyRate = history == null ? 0 : history.recentRate();
+        this.energyBars = history == null ? EnergyHistory.Bars.EMPTY : history.bars();
     }
 
     public long energyStored()
@@ -147,9 +180,20 @@ public class NetEnergyMenu extends BDBaseMenu implements MachineMenu
         return energyCapacity;
     }
 
-    public long energyRate()
+    /**
+     * 最近一秒平均每刻的变化，正数为流入
+     */
+    public double energyRate()
     {
         return energyRate;
+    }
+
+    /**
+     * 网络近期的各格，从旧到新
+     */
+    public EnergyHistory.Bars energyBars()
+    {
+        return energyBars;
     }
 
     @Override

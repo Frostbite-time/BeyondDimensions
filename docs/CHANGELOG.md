@@ -8,7 +8,7 @@
 - Screens open and close with short animations, and the game behind them is blurred.
 - Four color schemes: Beyond Dimensions Casing (default), Glass (translucent), Vanilla and Brass. The palette button on each window opens an editor for every color, and resource packs can add schemes.
 - Text uses CompixelUI's pixel font. Fluid and chemical amounts under one bucket show as `<1` instead of a decimal.
-- The Energy Network screen shows an input and output graph, the average flow and the estimated time until the network is full or empty.
+- The Energy Network screen shows the average flow and bar charts of the stored energy and of input and output over the last half minute. The server records them for every network, so they are complete as soon as the screen opens.
 
 ### Storage
 
@@ -100,7 +100,7 @@ For developers:
 - 界面打开和关闭时有简短的动画，背后的游戏画面会模糊。
 - 提供超维机壳（默认）、玻璃（半透明）、原版、黄铜四种配色。点击窗口上的调色板按钮可以修改任意颜色，资源包可以添加配色。
 - 文字改用 CompixelUI 的像素字体。不足一桶的流体和化学品显示为 `<1`，不再显示小数。
-- 能量网络界面显示收支曲线、平均收支，以及预计充满或耗尽的时间。
+- 能量网络界面以柱状图显示近半分钟的存量与收支，并显示平均收支。柱状图的数据由服务端为每个网络记录，打开界面时就是完整的。
 
 ### 存储界面
 

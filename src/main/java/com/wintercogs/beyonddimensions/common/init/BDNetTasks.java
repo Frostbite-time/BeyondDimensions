@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetTickTasks;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
 import com.wintercogs.beyonddimensions.common.dimensionnet.CrystalTimer;
 
 /**
@@ -15,6 +16,9 @@ public final class BDNetTasks
 
     public static void register()
     {
+        // 记下网络的能量存量，供能量通道的界面显示
+        NetTickTasks.register(BeyondDimensions.makeId("energy_history"), net -> net.getOrCreateData(BDNetDataTypes.ENERGY_HISTORY.get())
+                .record(net.getUnifiedStorage().getStackByKey(EnergyStackKey.INSTANCE).amount()));
         NetTickTasks.register(BeyondDimensions.makeId("shattered_crystal"), CrystalTimer::generateCrystal);
     }
 }

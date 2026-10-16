@@ -16,6 +16,7 @@ import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.NetEnergyMenu
+import com.wintercogs.beyonddimensions.common.menu.state.EnergyHistory
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
 import dev.compixel.ui.ore.display.OreText
@@ -24,32 +25,34 @@ import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 import java.util.*
 import kotlin.math.abs
-import kotlin.math.ceil
+import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 /**
- * 维度网络能量通道：网络的存量与收支、近半分钟的收支曲线与玩家背包；设置页是各面的输入输出、主动弹出与红石控制。
- * 网络的容量极大，填充比例看不出变化，所以展示收支的走势与预计的耗尽或充满时间
+ * 维度网络能量通道：网络的存量与收支、近半分钟的存量与收支柱状图与玩家背包；设置页是各面的输入输出、主动弹出与红石控制。
+ * 网络的容量极大，填充比例看不出变化，所以展示存量的走势。柱状图的数据由服务端为每个网络记录，打开界面时就是完整的
  */
 class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) :
     BdInventoryScreen<NetEnergyMenu, EnergyState, EnergyAction>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(BDBlocks.NET_ENERGY_PATHWAY.get()))
     private val playerSlots = menu.playerSlotIds()
     private val text = EnergyText(title.string)
-    private val history = FlowHistory()
     private val sides = machineSidesView(menu.be)
 
-    override fun inventoryTick() {
-        super.inventoryTick()
-        history.record(container.energyRate())
-    }
+    // 图表只在同步来新的一格时重算，每刻的快照沿用
+    private var chartsSource = EnergyHistory.Bars.EMPTY
+    private var charts = Charts(chartsSource)
 
     override fun snapshot(): EnergyState {
         val stored = container.energyStored()
         val capacity = container.energyCapacity()
         val limited = capacity != Long.MAX_VALUE
-        val rate = history.recent()
-        val bars = history.bars()
+        val rate = container.energyRate()
+        val history = container.energyBars()
+        if (history !== chartsSource) {
+            chartsSource = history
+            charts = Charts(history)
+        }
         return EnergyState(
             settings = machineSettingRows(container.machineSettings().snapshot(), sides),
             stored = stored,
@@ -65,32 +68,11 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
                         String.format(Locale.ROOT, "%.0f%%", stored * 100.0 / capacity)
                     )
                 else null,
-            outlook = outlook(stored, capacity, rate),
-            flow = bars,
-            peak = tr("ui.beyonddimensions.energy.peak", formatRate(bars.maxOfOrNull { abs(it) }?.toDouble() ?: 0.0)),
+            flow = charts.flow,
+            peak = charts.peak,
+            trend = charts.trend,
+            range = charts.range,
         )
-    }
-
-    /** 按最近一秒的平均速率估计多久后耗尽或充满；要一千天以上时不再估计 */
-    private fun outlook(stored: Long, capacity: Long, rate: Double): Outlook? {
-        val (key, ticks) =
-            when {
-                rate < 0 && stored > 0 -> "ui.beyonddimensions.energy.empty_in" to stored / -rate
-                rate > 0 && capacity != Long.MAX_VALUE && capacity > stored ->
-                    "ui.beyonddimensions.energy.full_in" to (capacity - stored) / rate
-
-                else -> return null
-            }
-        val seconds = ceil(ticks / 20).toLong()
-        val duration =
-            when {
-                seconds < 60 -> tr("ui.beyonddimensions.time.seconds", seconds)
-                seconds < 3600 -> tr("ui.beyonddimensions.time.minutes", seconds / 60)
-                seconds < 86400 -> tr("ui.beyonddimensions.time.hours", seconds / 3600, seconds % 3600 / 60)
-                seconds < 1000L * 86400 -> tr("ui.beyonddimensions.time.days", seconds / 86400)
-                else -> return null
-            }
-        return Outlook(tr(key, duration), draining = rate < 0)
     }
 
     override fun handle(action: EnergyAction) {
@@ -130,9 +112,6 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
     }
 }
 
-/** 估计的耗尽或充满时间；[draining] 为 true 时是耗尽 */
-data class Outlook(val label: String, val draining: Boolean)
-
 data class EnergyState(
     val settings: List<MachineSettingRow>,
     val stored: Long,
@@ -141,10 +120,13 @@ data class EnergyState(
     val capacity: String,
     /** 已用的比例，容量有上限时才有 */
     val used: String?,
-    val outlook: Outlook?,
-    /** 收支曲线每一格平均每刻的变化，从旧到新 */
+    /** 收支柱状图每一格平均每刻的变化，从旧到新 */
     val flow: List<Float>,
     val peak: String,
+    /** 存量柱状图每一格结束时的存量，从旧到新 */
+    val trend: List<Long>,
+    /** 存量柱状图覆盖的最低与最高存量 */
+    val range: String,
 )
 
 sealed interface EnergyAction {
@@ -161,45 +143,42 @@ private class EnergyText(val title: String) {
 /** 每格的宽度：两列柱子加一列空隙 */
 private const val BAR_PITCH = 3
 
-/** 曲线内部的宽度：页面内容宽减去两侧各 2 的内边距 */
+/** 柱状图内部的宽度：页面内容宽减去两侧各 2 的内边距 */
 private const val CHART_COLUMNS = SLOT_WINDOW_WIDTH - SIDE_RAIL_WIDTH - 2 * PAGE_PADDING_X - 4
 
-/** 收支曲线的格数，最旧与最新的一格正好贴住两边；每格汇总的刻数 */
+/** 柱状图的格数，最旧与最新的一格正好贴住两边；服务端保留的格数不少于这些 */
 private const val FLOW_BARS = (CHART_COLUMNS + 1) / BAR_PITCH
-private const val BAR_TICKS = 10
 
-/** 每刻记下网络能量的变化，只保留曲线覆盖的那段时间 */
-private class FlowHistory {
-    private val samples = LongArray(FLOW_BARS * BAR_TICKS)
-    private var recorded = 0L
+/** 由同步来的各格算出的两张柱状图，只取最新的 [FLOW_BARS] 格；在游戏线程构造 */
+private class Charts(history: EnergyHistory.Bars) {
+    /** 每格平均每刻的收支 */
+    val flow: List<Float>
+    val peak: String
+    /** 每格结束时的存量 */
+    val trend: List<Long>
+    val range: String
 
-    fun record(rate: Long) {
-        samples[(recorded % samples.size).toInt()] = rate
-        recorded++
-    }
-
-    private fun sample(tick: Long) = samples[(tick % samples.size).toInt()]
-
-    /** 最近一秒平均每刻的变化 */
-    fun recent(): Double {
-        val count = minOf(recorded, 20L)
-        if (count == 0L) return 0.0
-        var sum = 0.0
-        for (tick in recorded - count until recorded) sum += sample(tick)
-        return sum / count
-    }
-
-    /** 每格平均每刻的变化，从旧到新；最新的一格可能还没有满 */
-    fun bars(): List<Float> {
-        if (recorded == 0L) return emptyList()
-        val newest = (recorded - 1) / BAR_TICKS
-        return (maxOf(0L, newest - FLOW_BARS + 1)..newest).map { bar ->
-            val start = bar * BAR_TICKS
-            val end = minOf(start + BAR_TICKS, recorded)
-            var sum = 0.0
-            for (tick in start until end) sum += sample(tick)
-            (sum / (end - start)).toFloat()
+    init {
+        val flows = history.flows()
+        val stored = history.stored()
+        val first = maxOf(0, flows.size - FLOW_BARS)
+        val flow = ArrayList<Float>(flows.size - first)
+        val trend = ArrayList<Long>(flows.size - first)
+        var peak = 0f
+        var low = Long.MAX_VALUE
+        var high = Long.MIN_VALUE
+        for (i in first until flows.size) {
+            val rate = flows[i].toFloat() / EnergyHistory.BAR_TICKS
+            flow.add(rate)
+            peak = maxOf(peak, abs(rate))
+            trend.add(stored[i])
+            low = minOf(low, stored[i])
+            high = maxOf(high, stored[i])
         }
+        this.flow = flow
+        this.trend = trend
+        this.peak = tr("ui.beyonddimensions.energy.peak", formatRate(peak.toDouble()))
+        this.range = if (trend.isEmpty()) "" else tr("ui.beyonddimensions.energy.range", formatReadout(low), formatReadout(high))
     }
 }
 
@@ -210,7 +189,7 @@ private fun formatRate(rate: Double): String {
     else formatReadout(magnitude.roundToLong())
 }
 
-/** 网络能量：存量与速率、容量与已用比例、收支曲线与预计时间 */
+/** 网络能量：存量与速率、容量与已用比例、存量与收支柱状图 */
 @Composable
 private fun EnergyReadout(state: EnergyState, text: EnergyText) {
     val colors = Bd.colors
@@ -255,23 +234,48 @@ private fun EnergyReadout(state: EnergyState, text: EnergyText) {
         if (state.used != null) OreText(state.used, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
     }
     Spacer(Modifier.height(4.dp))
-    BdTooltip(state.peak, Modifier.fillMaxWidth()) { FlowChart(state.flow, Modifier.fillMaxWidth().height(39.dp)) }
-    Spacer(Modifier.height(2.dp))
-    Row(Modifier.fillMaxWidth()) {
-        Spacer(Modifier.weight(1f))
-        // 没有估计时也占一行，下面的背包不随之移动
-        val outlook = state.outlook
-        OreText(
-            outlook?.label.orEmpty(),
-            color = if (outlook?.draining == true) colors[BdColors.warning] else colors[BdColors.online],
-            style = Bd.caption,
-            maxLines = 1
-        )
+    BdTooltip(state.range, Modifier.fillMaxWidth(), enabled = state.trend.isNotEmpty()) {
+        TrendChart(state.trend, Modifier.fillMaxWidth().height(21.dp))
+    }
+    Spacer(Modifier.height(3.dp))
+    BdTooltip(state.peak, Modifier.fillMaxWidth()) { FlowChart(state.flow, Modifier.fillMaxWidth().height(33.dp)) }
+}
+
+/**
+ * 存量柱状图：每格是那时的存量，最新的一格在最右侧，越旧越淡。按这段时间的最低与最高存量缩放，
+ * 最低的一格约占四分之一高（存量离零较近时从零算起），网络容量再大也看得出涨落
+ */
+@Composable
+private fun TrendChart(values: List<Long>, modifier: Modifier) {
+    val colors = Bd.colors
+    Canvas(modifier.bdInset(colors).padding(2.dp)) {
+        val cell = 1.dp.toPx()
+        val columns = (size.width / cell).toInt()
+        val rows = (size.height / cell).toInt()
+        val high = values.maxOrNull() ?: return@Canvas
+        if (high <= 0L) return@Canvas
+        val low = values.min()
+        // 先在整数里求差，存量极大时换成浮点也不丢掉涨落
+        val range = (high - low).toDouble()
+        val below = minOf(low.toDouble(), range / 3)
+        val span = range + below
+        values.asReversed().forEachIndexed { age, value ->
+            val left = columns - (age + 1) * BAR_PITCH + 1
+            if (left < 0) return@forEachIndexed
+            val height =
+                if (span <= 0.0) rows
+                else (((value - low).toDouble() + below) / span * rows).roundToInt().coerceIn(1, rows)
+            val color = colors[BdColors.accent].copy(alpha = 1f - 0.65f * age / FLOW_BARS)
+            val top = (rows - height) * cell
+            drawRect(color, Offset(left * cell, top), Size((BAR_PITCH - 1) * cell, height * cell))
+            // 柱顶亮一行
+            drawRect(lerp(color, colors[BdColors.text], 0.5f), Offset(left * cell, top), Size((BAR_PITCH - 1) * cell, cell))
+        }
     }
 }
 
 /**
- * 收支曲线：中线以上为流入、以下为流出，按最大值缩放，最新的一格在最右侧，越旧越淡。
+ * 收支柱状图：中线以上为流入、以下为流出，按最大值缩放，最新的一格在最右侧，越旧越淡。
  * 两条点线标出峰值的一半
  */
 @Composable
