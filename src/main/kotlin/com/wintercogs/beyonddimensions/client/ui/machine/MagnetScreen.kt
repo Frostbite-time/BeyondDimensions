@@ -97,6 +97,7 @@ private class MagnetText(val title: String) {
     val filters = tr("ui.beyonddimensions.machine.filter_slots")
     val toInventory = tr("ui.beyonddimensions.magnet.exceptions.inventory")
     val toNetwork = tr("ui.beyonddimensions.magnet.exceptions.network")
+
     /** 例外物品实际怎么送，按物品去向各一句 */
     val exceptionHints =
         PickupTarget.entries.associateWith { tr("ui.beyonddimensions.magnet.exceptions.hint.${it.name.lowercase()}") }

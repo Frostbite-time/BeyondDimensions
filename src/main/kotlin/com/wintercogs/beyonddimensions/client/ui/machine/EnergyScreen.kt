@@ -154,6 +154,7 @@ private class Charts(history: EnergyHistory.Bars) {
     /** 每格平均每刻的收支 */
     val flow: List<Float>
     val peak: String
+
     /** 每格结束时的存量 */
     val trend: List<Long>
     val range: String
@@ -178,7 +179,8 @@ private class Charts(history: EnergyHistory.Bars) {
         this.flow = flow
         this.trend = trend
         this.peak = tr("ui.beyonddimensions.energy.peak", formatRate(peak.toDouble()))
-        this.range = if (trend.isEmpty()) "" else tr("ui.beyonddimensions.energy.range", formatReadout(low), formatReadout(high))
+        this.range =
+            if (trend.isEmpty()) "" else tr("ui.beyonddimensions.energy.range", formatReadout(low), formatReadout(high))
     }
 }
 
@@ -206,7 +208,13 @@ private fun EnergyReadout(state: EnergyState, text: EnergyText) {
                     maxLines = 1
                 )
                 Spacer(Modifier.width(2.dp))
-                OreText("FE", Modifier.alignByBaseline(), color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
+                OreText(
+                    "FE",
+                    Modifier.alignByBaseline(),
+                    color = colors[BdColors.faint],
+                    style = Bd.caption,
+                    maxLines = 1
+                )
             }
         }
         Spacer(Modifier.weight(1f))
@@ -269,7 +277,11 @@ private fun TrendChart(values: List<Long>, modifier: Modifier) {
             val top = (rows - height) * cell
             drawRect(color, Offset(left * cell, top), Size((BAR_PITCH - 1) * cell, height * cell))
             // 柱顶亮一行
-            drawRect(lerp(color, colors[BdColors.text], 0.5f), Offset(left * cell, top), Size((BAR_PITCH - 1) * cell, cell))
+            drawRect(
+                lerp(color, colors[BdColors.text], 0.5f),
+                Offset(left * cell, top),
+                Size((BAR_PITCH - 1) * cell, cell)
+            )
         }
     }
 }

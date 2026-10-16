@@ -76,7 +76,19 @@ class StorageText {
 
     /** 搜索写法：每项一个示例与它的含义 */
     val searchSyntax =
-        listOf("name", "mod", "tag", "tooltip", "id", "type", "durability", "components", "exclude", "any", "escape").map {
+        listOf(
+            "name",
+            "mod",
+            "tag",
+            "tooltip",
+            "id",
+            "type",
+            "durability",
+            "components",
+            "exclude",
+            "any",
+            "escape"
+        ).map {
             tr("ui.beyonddimensions.storage.search.help.$it") to tr("ui.beyonddimensions.storage.search.help.$it.hint")
         }
     val searchRule = tr("ui.beyonddimensions.storage.search.help.rule")

@@ -196,9 +196,11 @@ public final class MachineSettingsSync
     {
         return switch (editor)
         {
-            case SettingEditor.Choice<T> choice -> pick >= 0 && pick < choice.options().size() ? choice.options().get((int) pick) : null;
+            case SettingEditor.Choice<T> choice ->
+                    pick >= 0 && pick < choice.options().size() ? choice.options().get((int) pick) : null;
             case SettingEditor.OnOff<T> onOff -> pick == 0 ? onOff.on() : pick == 1 ? onOff.off() : null;
-            case SettingEditor.NumberField<T> number -> pick >= number.min() && pick <= number.max() ? number.fromLong().apply(pick) : null;
+            case SettingEditor.NumberField<T> number ->
+                    pick >= number.min() && pick <= number.max() ? number.fromLong().apply(pick) : null;
         };
     }
 

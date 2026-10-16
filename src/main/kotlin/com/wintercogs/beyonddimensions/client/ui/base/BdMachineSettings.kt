@@ -106,10 +106,17 @@ private fun <T> settingRow(entry: MachineType.Entry<T>, snapshot: MachineSetting
             MachineSettingRow(id, title, hint, MachineSettingControl.Toggle(value == editor.on()), !locked)
 
         is SettingEditor.Chip<T> ->
-            MachineSettingRow(id, title, hint, MachineSettingControl.Chip(tr(editor.labelKey()), value == editor.on()), !locked)
+            MachineSettingRow(
+                id,
+                title,
+                hint,
+                MachineSettingControl.Chip(tr(editor.labelKey()), value == editor.on()),
+                !locked
+            )
 
         is SettingEditor.NumberField<T> -> {
-            val number = MachineSettingControl.NumberField(editor.toLong().applyAsLong(value), editor.min()..editor.max())
+            val number =
+                MachineSettingControl.NumberField(editor.toLong().applyAsLong(value), editor.min()..editor.max())
             MachineSettingRow(id, title, hint, number, !locked)
         }
     }
@@ -135,7 +142,11 @@ fun BdMachineSettings(rows: List<MachineSettingRow>, shown: Boolean, onPick: (Ma
                 if (!first) SectionDivider()
                 BdSectionLabel(row.section)
             }
-            if (row.control is MachineSettingControl.Chip) SettingChips(group, shown, onPick) else SettingRow(row, shown, onPick)
+            if (row.control is MachineSettingControl.Chip) SettingChips(group, shown, onPick) else SettingRow(
+                row,
+                shown,
+                onPick
+            )
         }
         start = end
     }
@@ -149,14 +160,35 @@ private fun SettingRow(row: MachineSettingRow, shown: Boolean, onPick: (MachineS
     when (val control = row.control) {
         is MachineSettingControl.Buttons ->
             BdChoiceSetting(row.title, row.description) {
-                BdSegmented(control.options, control.selected, pickOption, Modifier.fillMaxWidth(), enabled = enabled, fill = true)
+                BdSegmented(
+                    control.options,
+                    control.selected,
+                    pickOption,
+                    Modifier.fillMaxWidth(),
+                    enabled = enabled,
+                    fill = true
+                )
             }
 
         is MachineSettingControl.Cycle ->
-            BdChoiceSetting(row.title, row.description) { BdCycler(control.options, control.selected, enabled, pickOption) }
+            BdChoiceSetting(row.title, row.description) {
+                BdCycler(
+                    control.options,
+                    control.selected,
+                    enabled,
+                    pickOption
+                )
+            }
 
         is MachineSettingControl.Dropdown ->
-            BdChoiceSetting(row.title, row.description) { BdDropdown(control.options, control.selected, enabled, pickOption) }
+            BdChoiceSetting(row.title, row.description) {
+                BdDropdown(
+                    control.options,
+                    control.selected,
+                    enabled,
+                    pickOption
+                )
+            }
 
         is MachineSettingControl.Toggle ->
             BdSettingRow(row.title, row.description) { BdToggle(control.on, { pick(if (it) 0 else 1) }, enabled) }
@@ -190,7 +222,11 @@ private fun SettingChips(rows: List<MachineSettingRow>, shown: Boolean, onPick: 
                     active = chip.on,
                 ) {
                     Spacer(Modifier.weight(1f))
-                    OreText(chip.label, color = colors[if (chip.on) BdColors.accentDeep else BdColors.faint], maxLines = 1)
+                    OreText(
+                        chip.label,
+                        color = colors[if (chip.on) BdColors.accentDeep else BdColors.faint],
+                        maxLines = 1
+                    )
                     Spacer(Modifier.weight(1f))
                 }
             }

@@ -64,7 +64,8 @@ public sealed interface SettingEditor<T> permits SettingEditor.Choice, SettingEd
     /**
      * 分段按钮
      */
-    record Buttons<T>(List<T> options, Function<T, String> optionLabel, @Nullable Function<T, String> optionHint) implements Choice<T>
+    record Buttons<T>(List<T> options, Function<T, String> optionLabel,
+                      @Nullable Function<T, String> optionHint) implements Choice<T>
     {
         public Buttons
         {
@@ -88,7 +89,8 @@ public sealed interface SettingEditor<T> permits SettingEditor.Choice, SettingEd
     /**
      * 循环按钮
      */
-    record Cycle<T>(List<T> options, Function<T, String> optionLabel, @Nullable Function<T, String> optionHint) implements Choice<T>
+    record Cycle<T>(List<T> options, Function<T, String> optionLabel,
+                    @Nullable Function<T, String> optionHint) implements Choice<T>
     {
         public Cycle
         {
@@ -112,7 +114,8 @@ public sealed interface SettingEditor<T> permits SettingEditor.Choice, SettingEd
     /**
      * 下拉菜单
      */
-    record Dropdown<T>(List<T> options, Function<T, String> optionLabel, @Nullable Function<T, String> optionHint) implements Choice<T>
+    record Dropdown<T>(List<T> options, Function<T, String> optionLabel,
+                       @Nullable Function<T, String> optionHint) implements Choice<T>
     {
         public Dropdown
         {
@@ -182,7 +185,8 @@ public sealed interface SettingEditor<T> permits SettingEditor.Choice, SettingEd
      * @param toLong   设置值换成框里的数
      * @param fromLong 框里的数换成设置值
      */
-    record NumberField<T>(long min, long max, ToLongFunction<T> toLong, LongFunction<T> fromLong) implements SettingEditor<T>
+    record NumberField<T>(long min, long max, ToLongFunction<T> toLong,
+                          LongFunction<T> fromLong) implements SettingEditor<T>
     {
         public NumberField
         {
