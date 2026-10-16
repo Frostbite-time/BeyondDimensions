@@ -16,7 +16,7 @@
 
   "tooltip.beyonddimensions.network_open_key": "按【%s】開啟維度網路",
   "tooltip.item.unstable_space_time.long_data": "時空仍在穩定中，仍需%s個穩定週期，請保持隨身攜帶",
-  "tooltip.beyonddimensions.item.xp_exchange": "手持時：右鍵開啟設定介面\n在倉庫GUI中：右鍵存入經驗，中鍵取出經驗",
+  "tooltip.beyonddimensions.item.xp_exchange": "手持時：右鍵開啟設定介面\n在倉庫GUI中：右鍵存入經驗，左鍵點擊經驗流體取出經驗",
   "tooltip.jade.beyonddimensions.net.bound": "網路：%1$s（#%2$s）（%3$s）",
   "tooltip.jade.beyonddimensions.net.unbound": "網路：未綁定",
   "tooltip.jade.beyonddimensions.net.permission.none": "無",

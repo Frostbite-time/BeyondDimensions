@@ -16,7 +16,7 @@
 
   "tooltip.beyonddimensions.network_open_key": "按【%s】打开维度网络",
   "tooltip.item.unstable_space_time.long_data": "时空仍在稳定中，仍需%s个稳定周期，请保持随身携带",
-  "tooltip.beyonddimensions.item.xp_exchange": "手持时：右键打开设置界面\n在仓库GUI中：右键存入经验，中键取出经验",
+  "tooltip.beyonddimensions.item.xp_exchange": "手持时：右键打开设置界面\n在仓库GUI中：右键存入经验，左键点击经验流体取出经验",
   "tooltip.jade.beyonddimensions.net.bound": "网络：%1$s（#%2$s）（%3$s）",
   "tooltip.jade.beyonddimensions.net.unbound": "网络：未绑定",
   "tooltip.jade.beyonddimensions.net.permission.none": "无",

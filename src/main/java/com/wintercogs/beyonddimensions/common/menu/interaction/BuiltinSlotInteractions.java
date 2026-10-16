@@ -64,7 +64,9 @@ public final class BuiltinSlotInteractions
                         && (c.isLeft() || c.isRight())
                         && c.clicked().key().isSameTypeSameComponents(new ItemStackKey(c.carried())),
                 BuiltinSlotInteractions::insertCarried);
-        add("xp_rod", c -> click(c) && c.carried().getItem() instanceof XpExchangeItem && !c.isLeft(),
+        // 经验棒：右键存入经验，左键点到经验流体时取出；左键点其他资源照常放入
+        add("xp_rod", c -> click(c) && c.carried().getItem() instanceof XpExchangeItem
+                        && (c.isRight() || c.isLeft() && isXp(c.clicked().key())),
                 BuiltinSlotInteractions::xpRod);
         // 手上拿着容器（桶、储罐、电池、背包等）：左键把被点击的资源装进去，右键把里面的东西排进存储。
         // 普通点击转移一个原版堆叠，按住 Shift 一直转移到装满、排空或存储不再收为止
@@ -155,12 +157,12 @@ public final class BuiltinSlotInteractions
         return true;
     }
 
-    // —— 经验棒：右键存入、中键取出若干级 ——
+    // —— 经验棒：右键存入、左键从经验流体取出若干级 ——
 
     private static boolean xpRod(SlotClick c)
     {
         IStackKey<?> clicked = c.clicked().key();
-        boolean xp = clicked instanceof FluidStackKey fluid && fluid.hasTag(BDTags.C_EXPERIENCE);
+        boolean xp = isXp(clicked);
         int levels = XpExchangeItem.getXpLevelPerAction(c.carried());
         if (c.isRight())
         {
@@ -170,7 +172,7 @@ public final class BuiltinSlotInteractions
             else if (c.clicked().isEmpty() || c.kind() == Kind.STORAGE)
                 depositXp(c, xpFluid(), levels);
         }
-        else if (c.isMiddle() && xp)
+        else if (xp)
         {
             int maxXp = XpUtil.xpToGiveForLevels(c.player(), levels);
             int given = XpExchangeItem.extractExperience(c.storage(), (FluidStackKey) clicked, c.storageSlot(), maxXp);
@@ -178,6 +180,12 @@ public final class BuiltinSlotInteractions
                 c.player().giveExperiencePoints(given);
         }
         return true;
+    }
+
+    // 带 c:experience 标签的流体
+    private static boolean isXp(IStackKey<?> key)
+    {
+        return key instanceof FluidStackKey fluid && fluid.hasTag(BDTags.C_EXPERIENCE);
     }
 
     private static void depositXp(SlotClick c, IStackKey<?> fluid, int levels)

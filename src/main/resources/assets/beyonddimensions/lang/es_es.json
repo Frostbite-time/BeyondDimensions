@@ -16,7 +16,7 @@
 
   "tooltip.beyonddimensions.network_open_key": "Pulsa [%s] para abrir la red dimensional",
   "tooltip.item.unstable_space_time.long_data": "El espacio-tiempo aún se estabiliza, faltan %s ciclos. Por favor, llévalo siempre contigo.",
-  "tooltip.beyonddimensions.item.xp_exchange": "Al sostenerlo: clic derecho para abrir la configuración\nEn GUIs de almacenamiento: clic derecho para guardar XP, clic central para recuperar XP",
+  "tooltip.beyonddimensions.item.xp_exchange": "Al sostenerlo: clic derecho para abrir la configuración\nEn GUIs de almacenamiento: clic derecho para guardar XP, clic izquierdo sobre XP líquida para recuperar XP",
   "tooltip.jade.beyonddimensions.net.bound": "Red: %1$s (#%2$s) (%3$s)",
   "tooltip.jade.beyonddimensions.net.unbound": "Red: sin vincular",
   "tooltip.jade.beyonddimensions.net.permission.none": "Ninguno",

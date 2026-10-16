@@ -16,7 +16,7 @@
 
   "tooltip.beyonddimensions.network_open_key": "【%s】でディメンションネットワークを開く",
   "tooltip.item.unstable_space_time.long_data": "時空は安定化中、残り%s回の安定化サイクルが必要です。常に携帯してください。",
-  "tooltip.beyonddimensions.item.xp_exchange": "手に持った状態：右クリックで設定を開く\nストレージGUI内：右クリックで経験値を保存、中クリックで経験値を取り出す",
+  "tooltip.beyonddimensions.item.xp_exchange": "手に持った状態：右クリックで設定を開く\nストレージGUI内：右クリックで経験値を保存、液体経験値を左クリックで経験値を取り出す",
   "tooltip.jade.beyonddimensions.net.bound": "ネットワーク：%1$s（#%2$s）（%3$s）",
   "tooltip.jade.beyonddimensions.net.unbound": "ネットワーク：未バインド",
   "tooltip.jade.beyonddimensions.net.permission.none": "なし",

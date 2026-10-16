@@ -73,7 +73,7 @@ For players, modpacks and servers:
 - The Network Terminal no longer has one crafting grid shared by all players; each player has their own. Items left in an old Network Terminal or Portable Network Terminal go to the storage, then to the inventory of the player who opens it, and the rest drops at their feet. An old Network Terminal broken before being opened drops them.
 - By default the crafting grid empties when you close the screen; turn on "Keep grid on close" to keep it.
 - While holding a container, left-click now fills it and right-click empties it.
-- Middle-click no longer stores or takes resources in Beyond Dimensions' screens; the XP Rod still uses it to retrieve experience.
+- Middle-click no longer stores or takes resources in Beyond Dimensions' screens. The XP Rod retrieves experience with a left-click on liquid experience instead.
 - The Shift + Z key was removed; recipe viewer search sync is a setting on the storage screen.
 - Network Interfaces, Dimensional Network Energy Pathways and Network Pumps placed before this version face north.
 - Resource packs: full blocks now use one texture per face (`textures/block/<block>/<face>.png`, with `on` and `off` folders for lit or powered states), the Network Terminal uses a JSON model instead of OBJ, and the old screen textures are gone.
@@ -165,7 +165,7 @@ For developers:
 - 网络终端不再有所有玩家共用的合成格，改为每个玩家各一份。旧版网络终端和便携网络终端中留下的物品，在打开时依次送回存储和打开者的背包，放不下的掉落在其脚下；未打开就被拆除的旧网络终端会掉出这些物品。
 - 合成格默认在关闭界面时清空，开启“关闭后保留合成格”即可保留。
 - 手持容器时，改为左键装入、右键排出。
-- 在超越维度的界面中，中键不再存入或取出资源；经验棒仍用中键取出经验。
+- 在超越维度的界面中，中键不再存入或取出资源；经验棒改为左键点击经验流体取出经验。
 - 移除 Shift + Z 快捷键，配方查看器搜索同步改为存储界面中的设置。
 - 此前放置的网络接口、维度网络能量通道和网络泵正面朝北。
 - 资源包：完整方块的贴图改为每个面一个文件（`textures/block/<方块>/<面>.png`，点亮或通电的状态分 `on` 和 `off` 文件夹），网络终端改用 JSON 模型，旧的界面贴图已删除。

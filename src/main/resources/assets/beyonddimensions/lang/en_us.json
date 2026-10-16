@@ -16,7 +16,7 @@
 
   "tooltip.beyonddimensions.network_open_key": "Press [%s] to open the Dimensional Network",
   "tooltip.item.unstable_space_time.long_data": "Space-time is still stabilizing: %s more stabilization cycles needed. Keep it on you.",
-  "tooltip.beyonddimensions.item.xp_exchange": "When held: Right-click to open settings\nIn storage GUIs: Right-click to store XP, Middle-click to retrieve XP",
+  "tooltip.beyonddimensions.item.xp_exchange": "When held: Right-click to open settings\nIn storage GUIs: Right-click to store XP, Left-click liquid XP to retrieve XP",
   "tooltip.jade.beyonddimensions.net.bound": "Network: %1$s (#%2$s) (%3$s)",
   "tooltip.jade.beyonddimensions.net.unbound": "Network: Unbound",
   "tooltip.jade.beyonddimensions.net.permission.none": "None",

@@ -16,7 +16,7 @@
 
   "tooltip.beyonddimensions.network_open_key": "[%s] 키를 눌러 차원 네트워크 열기",
   "tooltip.item.unstable_space_time.long_data": "시공간 안정화 중, %s회의 안정화 주기 남음. 항상 휴대하십시오.",
-  "tooltip.beyonddimensions.item.xp_exchange": "손에 들었을 때: 우클릭으로 설정 열기\n저장 GUI에서: 우클릭으로 XP 저장, 휠 클릭으로 XP 회수",
+  "tooltip.beyonddimensions.item.xp_exchange": "손에 들었을 때: 우클릭으로 설정 열기\n저장 GUI에서: 우클릭으로 XP 저장, 액체 경험치를 좌클릭해 XP 회수",
   "tooltip.jade.beyonddimensions.net.bound": "네트워크: %1$s (#%2$s) (%3$s)",
   "tooltip.jade.beyonddimensions.net.unbound": "네트워크: 바인딩되지 않음",
   "tooltip.jade.beyonddimensions.net.permission.none": "없음",

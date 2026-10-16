@@ -16,7 +16,7 @@
 
   "tooltip.beyonddimensions.network_open_key": "Нажмите [%s], чтобы открыть сеть измерений",
   "tooltip.item.unstable_space_time.long_data": "Пространство-время стабилизируется, осталось %s циклов. Носите с собой постоянно.",
-  "tooltip.beyonddimensions.item.xp_exchange": "В руке: ПКМ открывает настройки\nВ интерфейсах хранилища: ПКМ - сохранить опыт, СКМ - извлечь опыт",
+  "tooltip.beyonddimensions.item.xp_exchange": "В руке: ПКМ открывает настройки\nВ интерфейсах хранилища: ПКМ - сохранить опыт, ЛКМ по жидкому опыту - извлечь опыт",
   "tooltip.jade.beyonddimensions.net.bound": "Сеть: %1$s (#%2$s) (%3$s)",
   "tooltip.jade.beyonddimensions.net.unbound": "Сеть: не привязана",
   "tooltip.jade.beyonddimensions.net.permission.none": "Нет",
