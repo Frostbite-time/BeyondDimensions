@@ -83,7 +83,6 @@ object BdColors : ColorSchema("beyonddimensions") {
     /** 熔炉导管渐变的终点；起点见 [cyan] */
     val violet = color("violet", "accent", Color(0xFF6D6AFF))
     val online = color("online", "status", Color(0xFF4FD69A))
-    val warning = color("warning", "status", Color(0xFFF2B544))
     val danger = color("danger", "status", Color(0xFFFF6B6B))
 
     /** 槽位凹槽的底色，以及左上的暗边与右下的亮边 */

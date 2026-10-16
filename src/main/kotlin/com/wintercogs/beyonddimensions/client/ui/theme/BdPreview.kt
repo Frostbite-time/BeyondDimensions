@@ -46,7 +46,6 @@ internal class BdPreviewContent {
     val muted = tr("ui.beyonddimensions.color_preview.muted")
     val faint = tr("ui.beyonddimensions.color_preview.faint")
     val online = tr("ui.beyonddimensions.color_preview.online")
-    val warning = tr("ui.beyonddimensions.color_preview.warning")
     val danger = tr("ui.beyonddimensions.color_preview.danger")
     val setting = tr("ui.beyonddimensions.color_preview.setting")
     val settingHint = tr("ui.beyonddimensions.color_preview.setting.hint")
@@ -131,8 +130,6 @@ internal fun BdPreview(content: BdPreviewContent) {
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Status(colors[BdColors.online], content.online)
-                        Spacer(Modifier.width(6.dp))
-                        Status(colors[BdColors.warning], content.warning)
                         Spacer(Modifier.width(6.dp))
                         Status(colors[BdColors.danger], content.danger)
                     }
