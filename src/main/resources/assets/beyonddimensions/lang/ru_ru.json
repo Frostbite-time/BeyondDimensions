@@ -354,7 +354,6 @@
   "ui.beyonddimensions.energy.used": "Занято %s",
   "ui.beyonddimensions.energy.empty_in": "Опустеет через ~%s",
   "ui.beyonddimensions.energy.full_in": "Заполнится через ~%s",
-  "ui.beyonddimensions.energy.window": "Последние %s с",
   "ui.beyonddimensions.energy.peak": "Пик %s FE/t",
   "ui.beyonddimensions.time.seconds": "%s с",
   "ui.beyonddimensions.time.minutes": "%s мин",

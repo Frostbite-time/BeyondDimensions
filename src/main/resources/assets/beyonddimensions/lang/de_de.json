@@ -354,7 +354,6 @@
   "ui.beyonddimensions.energy.used": "Belegt %s",
   "ui.beyonddimensions.energy.empty_in": "Leer in ca. %s",
   "ui.beyonddimensions.energy.full_in": "Voll in ca. %s",
-  "ui.beyonddimensions.energy.window": "Letzte %s s",
   "ui.beyonddimensions.energy.peak": "Spitze %s FE/t",
   "ui.beyonddimensions.time.seconds": "%s s",
   "ui.beyonddimensions.time.minutes": "%s min",

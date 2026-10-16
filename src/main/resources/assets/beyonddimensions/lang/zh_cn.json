@@ -354,7 +354,6 @@
   "ui.beyonddimensions.energy.used": "已用 %s",
   "ui.beyonddimensions.energy.empty_in": "约 %s后耗尽",
   "ui.beyonddimensions.energy.full_in": "约 %s后充满",
-  "ui.beyonddimensions.energy.window": "近 %s 秒",
   "ui.beyonddimensions.energy.peak": "峰值 %s FE/t",
   "ui.beyonddimensions.time.seconds": "%s 秒",
   "ui.beyonddimensions.time.minutes": "%s 分钟",

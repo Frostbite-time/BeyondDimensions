@@ -354,7 +354,6 @@
   "ui.beyonddimensions.energy.used": "使用中 %s",
   "ui.beyonddimensions.energy.empty_in": "約%sで空",
   "ui.beyonddimensions.energy.full_in": "約%sで満タン",
-  "ui.beyonddimensions.energy.window": "直近%s秒",
   "ui.beyonddimensions.energy.peak": "ピーク %s FE/t",
   "ui.beyonddimensions.time.seconds": "%s秒",
   "ui.beyonddimensions.time.minutes": "%s分",

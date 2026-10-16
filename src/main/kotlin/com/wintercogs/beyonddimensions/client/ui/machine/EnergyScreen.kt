@@ -156,11 +156,16 @@ private class EnergyText(val title: String) {
     val inventory = tr("ui.beyonddimensions.inventory")
     val network = tr("ui.beyonddimensions.energy.network")
     val unlimited = tr("ui.beyonddimensions.energy.unlimited")
-    val window = tr("ui.beyonddimensions.energy.window", FLOW_BARS * BAR_TICKS / 20)
 }
 
-/** 收支曲线的格数，每格汇总的刻数 */
-private const val FLOW_BARS = 52
+/** 每格的宽度：两列柱子加一列空隙 */
+private const val BAR_PITCH = 3
+
+/** 曲线内部的宽度：页面内容宽减去两侧各 2 的内边距 */
+private const val CHART_COLUMNS = SLOT_WINDOW_WIDTH - SIDE_RAIL_WIDTH - 2 * PAGE_PADDING_X - 4
+
+/** 收支曲线的格数，最旧与最新的一格正好贴住两边；每格汇总的刻数 */
+private const val FLOW_BARS = (CHART_COLUMNS + 1) / BAR_PITCH
 private const val BAR_TICKS = 10
 
 /** 每刻记下网络能量的变化，只保留曲线覆盖的那段时间 */
@@ -209,11 +214,21 @@ private fun formatRate(rate: Double): String {
 @Composable
 private fun EnergyReadout(state: EnergyState, text: EnergyText) {
     val colors = Bd.colors
-    BdSectionLabel(text.network) { OreText("FE", color = colors[BdColors.faint], style = Bd.caption) }
+    BdSectionLabel(text.network)
     Spacer(Modifier.height(5.dp))
     Row(verticalAlignment = Alignment.Bottom) {
         BdTooltip(formatExact(state.stored) + " FE") {
-            OreText(formatReadout(state.stored), color = colors[BdColors.text], style = Bd.title, maxLines = 1)
+            Row {
+                OreText(
+                    formatReadout(state.stored),
+                    Modifier.alignByBaseline(),
+                    color = colors[BdColors.text],
+                    style = Bd.title,
+                    maxLines = 1
+                )
+                Spacer(Modifier.width(2.dp))
+                OreText("FE", Modifier.alignByBaseline(), color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
+            }
         }
         Spacer(Modifier.weight(1f))
         val rateColor =
@@ -243,21 +258,17 @@ private fun EnergyReadout(state: EnergyState, text: EnergyText) {
     BdTooltip(state.peak, Modifier.fillMaxWidth()) { FlowChart(state.flow, Modifier.fillMaxWidth().height(39.dp)) }
     Spacer(Modifier.height(2.dp))
     Row(Modifier.fillMaxWidth()) {
-        OreText(text.window, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
         Spacer(Modifier.weight(1f))
-        state.outlook?.let {
-            OreText(
-                it.label,
-                color = if (it.draining) colors[BdColors.warning] else colors[BdColors.online],
-                style = Bd.caption,
-                maxLines = 1
-            )
-        }
+        // 没有估计时也占一行，下面的背包不随之移动
+        val outlook = state.outlook
+        OreText(
+            outlook?.label.orEmpty(),
+            color = if (outlook?.draining == true) colors[BdColors.warning] else colors[BdColors.online],
+            style = Bd.caption,
+            maxLines = 1
+        )
     }
 }
-
-/** 每格的宽度，含右侧一格空隙 */
-private const val BAR_PITCH = 3
 
 /**
  * 收支曲线：中线以上为流入、以下为流出，按最大值缩放，最新的一格在最右侧，越旧越淡。

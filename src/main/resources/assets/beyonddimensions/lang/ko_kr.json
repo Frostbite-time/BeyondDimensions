@@ -354,7 +354,6 @@
   "ui.beyonddimensions.energy.used": "사용 %s",
   "ui.beyonddimensions.energy.empty_in": "약 %s 후 바닥남",
   "ui.beyonddimensions.energy.full_in": "약 %s 후 가득 참",
-  "ui.beyonddimensions.energy.window": "최근 %s초",
   "ui.beyonddimensions.energy.peak": "최대 %s FE/t",
   "ui.beyonddimensions.time.seconds": "%s초",
   "ui.beyonddimensions.time.minutes": "%s분",
