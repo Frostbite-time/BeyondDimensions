@@ -18,7 +18,9 @@ import org.anti_ad.mc.ipn.api.IPNIgnore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 // 定义一些用于 超越维度 模组的ui界面的基本方法。
@@ -167,108 +169,25 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
         if (slot != null && slot.mayPickup(player) && !clickStack.isEmpty()
                 && clickStack.key().equals(new ItemStackKey(slot.getItem())))
         {
-            ItemStack cacheStack;
-            // 快速合成处理
-            if (slot instanceof ResultSlot resultSlot)
+            ItemStack cacheStack = slot.getItem().copy(); // 完成数据包校验
+            ItemStack remaining = cacheStack.copy();
+            for (int targetSlotIndex : targets)
             {
-                cacheStack = slot.getItem().copy(); // 完成数据包校验 并锁定本次合成使用的配方成品
-                for (int i = 0; !slot.getItem().isEmpty() && // 当合成槽为空时不执行操作
-                        slot.getItem().getItem() == cacheStack.getItem() && // 当合成槽物品已经从一个配方变成另一个配方时不执行操作
-                        i < slot.getItem().getMaxStackSize() / slot.getItem().getCount(); i++) // 限制单次合成次数
+                if (remaining.isEmpty()) break;
+                Slot targetSlot = slots.get(targetSlotIndex);
+                int newSize;
+                if (targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
                 {
-                    // 产物先放进背包与原版槽位，并记录回滚信息；BD 槽位只模拟，整份产物都放得下并合成成功后才真正放入
-                    ItemStack remaining = cacheStack.copy();
-                    Map<Integer, Integer> insertedToInv = new HashMap<>();
-                    Map<Integer, Integer> insertedToSlots = new HashMap<>();
-                    Map<Integer, Integer> plannedTypedSlots = new LinkedHashMap<>();
-                    Set<Object> simulatedStorages = Collections.newSetFromMap(new IdentityHashMap<>());
-                    for (int invSlot = inventoryStartIndex; invSlot < inventoryEndIndex && !remaining.isEmpty(); invSlot++)
-                    {
-                        Slot targetSlot = slots.get(invSlot);
-                        // safeInsert会破坏stack的数量，因此放入一个copy
-                        int newSize = targetSlot.safeInsert(remaining.copy()).getCount();
-                        if ((remaining.getCount() - newSize) != 0)
-                            insertedToInv.put(invSlot, remaining.getCount() - newSize);
-                        remaining.setCount(newSize);
-                    }
-
-                    // 处理剩余物品
-                    for (int targetSlotIndex : targets)
-                    {
-                        if (remaining.isEmpty()) break;
-                        Slot targetSlot = slots.get(targetSlotIndex);
-                        int newSize;
-                        if (targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
-                        {
-                            // 无序槽位共用一份存储，同一份存储只模拟一次
-                            if (!aTargetSlot.isOrdered() && !simulatedStorages.add(aTargetSlot.getStorage()))
-                                continue;
-                            // 此处是安全的转换，remaining不会超出int
-                            newSize = (int) aTargetSlot.safeInsert(new ItemStackKey(remaining), remaining.getCount(), true).amount();
-                            if ((remaining.getCount() - newSize) != 0)
-                                plannedTypedSlots.put(targetSlotIndex, remaining.getCount() - newSize);
-                        }
-                        else
-                        {
-                            newSize = targetSlot.safeInsert(remaining.copy()).getCount();
-                            if ((remaining.getCount() - newSize) != 0)
-                                insertedToSlots.put(targetSlotIndex, remaining.getCount() - newSize);
-                        }
-                        remaining.setCount(newSize);
-                    }
-
-                    // 如果产物能被完整放下，则通过safeTake执行一次完整取出流程
-                    if (remaining.isEmpty() && !resultSlot.safeTake(cacheStack.getCount(), Integer.MAX_VALUE, player).isEmpty())
-                    {
-                        for (Map.Entry<Integer, Integer> entry : plannedTypedSlots.entrySet())
-                        {
-                            AbstractStackTypedSlot aSlot = (AbstractStackTypedSlot) slots.get(entry.getKey());
-                            KeyAmount left = aSlot.safeInsert(new ItemStackKey(cacheStack), entry.getValue());
-                            // 模拟与实际不一致时才会放不下，交给玩家
-                            if (!left.isEmpty() && left.toStack() instanceof ItemStack leftStack)
-                                player.getInventory().placeItemBackInInventory(leftStack);
-                        }
-                    }
-                    else // 没能完整放下或没能合成，则将之前放进背包与原版槽位的物品取回
-                    {
-                        for (Map.Entry<Integer, Integer> entry : insertedToInv.entrySet())
-                        {
-                            Slot afterSlot = slots.get(entry.getKey());
-                            afterSlot.safeTake(entry.getValue(), Integer.MAX_VALUE, player);
-                        }
-                        for (Map.Entry<Integer, Integer> entry : insertedToSlots.entrySet())
-                        {
-                            Slot afterSlot = slots.get(entry.getKey());
-                            afterSlot.safeTake(entry.getValue(), Integer.MAX_VALUE, player);
-                        }
-                    }
-
+                    // 此处是安全的转换，remaining不会超出int
+                    newSize = (int) aTargetSlot.safeInsert(new ItemStackKey(remaining), remaining.getCount()).amount();
                 }
-
-            }
-            else // 普通快速移动处理
-            {
-                cacheStack = slot.getItem().copy(); // 完成数据包校验
-                ItemStack remaining = cacheStack.copy();
-                for (int targetSlotIndex : targets)
+                else
                 {
-                    if (remaining.isEmpty()) break;
-                    Slot targetSlot = slots.get(targetSlotIndex);
-                    int newSize;
-                    if (targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
-                    {
-                        // 此处是安全的转换，remaining不会超出int
-                        newSize = (int) aTargetSlot.safeInsert(new ItemStackKey(remaining), remaining.getCount()).amount();
-                    }
-                    else
-                    {
-                        newSize = targetSlot.safeInsert(remaining).getCount();
-                    }
-                    remaining.setCount(newSize);
+                    newSize = targetSlot.safeInsert(remaining).getCount();
                 }
-                slot.tryRemove(cacheStack.getCount() - remaining.getCount(), Integer.MAX_VALUE, player);
+                remaining.setCount(newSize);
             }
-
+            slot.tryRemove(cacheStack.getCount() - remaining.getCount(), Integer.MAX_VALUE, player);
             slot.setChanged();
         }
         return ItemStack.EMPTY;

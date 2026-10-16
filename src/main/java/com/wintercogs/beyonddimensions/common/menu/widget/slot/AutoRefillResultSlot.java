@@ -6,11 +6,9 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.common.CommonHooks;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,10 +44,15 @@ public class AutoRefillResultSlot extends ResultSlot
         int gridStartY = positionedInput.top();
 
         CommonHooks.setCraftingPlayer(player);
-        NonNullList<ItemStack> remainingItems = player.level().getRecipeManager()
-                .getRemainingItemsFor(RecipeType.CRAFTING, craftingGrid, player.level());
+        NonNullList<ItemStack> remainingItems = menu.remainingItems(craftingGrid);
         CommonHooks.setCraftingPlayer(null);
 
+        menu.consumeIngredients(() -> consumeIngredients(player, craftingGrid, gridStartX, gridStartY, remainingItems));
+    }
+
+    // 扣除一次合成的原料并放回剩余物
+    private void consumeIngredients(Player player, CraftingInput craftingGrid, int gridStartX, int gridStartY, NonNullList<ItemStack> remainingItems)
+    {
         // 一般而言，此函数每次调用最多完成一次合成
         int craftTimes = 1;
 
@@ -132,6 +135,5 @@ public class AutoRefillResultSlot extends ResultSlot
                 }
             }
         }
-        menu.slotChangedCraftingGrid(menu, player.level(), player, craftSlots, (ResultContainer) this.container, this.index);
     }
 }

@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
+import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot
 import dev.compixel.forge.item.ItemIcon
@@ -93,7 +94,7 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
         val slot = menu.slots.getOrNull(slotId)
         when {
             slot is AbstractStackTypedSlot -> clickResource(slotId, slot, button, type)
-            slot != null && (type == ClickType.QUICK_MOVE || isMoveAllClick(slotId, button, type)) ->
+            slot != null && (type == ClickType.QUICK_MOVE || isSpaceClick(slotId, button, type)) ->
                 clickVanilla(slotId, slot, button, type)
             // 其余原版手势（拖动、交换、丢弃、收集）仍由原生执行，但要排在已提交的菜单操作之后
             !menu.menuSync().isSendingAction() -> super.execute(slotId, button, type)
@@ -124,10 +125,16 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
         }
     }
 
-    /** 空格左键点背包或快捷栏的槽位是整批转移，交给服务端的 BD 命令，不执行原版的拿起 */
-    private fun isMoveAllClick(slotId: Int, button: Int, type: ClickType) =
+    /**
+     * 空格左键点背包或快捷栏是整批转移，点合成结果是连续合成，点合成格是清空合成格；
+     * 都交给服务端的 BD 命令，不执行原版的拿起
+     */
+    private fun isSpaceClick(slotId: Int, button: Int, type: ClickType) =
         type == ClickType.PICKUP && button == 0 && spaceHeld() &&
-                slotId >= menu.inventoryStartIndex && slotId < menu.inventoryEndIndex
+                (slotId >= menu.inventoryStartIndex && slotId < menu.inventoryEndIndex || isCraftSlot(slotId))
+
+    private fun isCraftSlot(slotId: Int) =
+        menu is DimensionsCraftMenu && (slotId == menu.resultSlotIndex || menu.isCraftGridSlot(slotId))
 
     /** 普通槽位的 Shift 点击与空格左键由服务端的 BD 命令处理，不额外发送原版的点击 */
     private fun clickVanilla(slotId: Int, slot: Slot, button: Int, type: ClickType) {

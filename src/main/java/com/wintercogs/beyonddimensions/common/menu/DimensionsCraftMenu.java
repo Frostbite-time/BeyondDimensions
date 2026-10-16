@@ -9,6 +9,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
+import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
@@ -16,6 +17,7 @@ import com.wintercogs.beyonddimensions.integration.module.polymorph.PolymorphHel
 import com.wintercogs.beyonddimensions.util.InventoryHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -35,10 +37,7 @@ import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static com.wintercogs.beyonddimensions.common.init.BDMenus.Dimensions_Craft_Menu;
 
@@ -51,6 +50,11 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     public int resultSlotIndex;
     public int craftSlotStartIndex;
     public int craftSlotEndIndex;
+
+    // 扣除一次合成的原料时合成格会逐格改动，扣完之后才重新匹配配方
+    private boolean consumingIngredients;
+    // 连续合成时沿用的配方：每次合成后先试它，产物等这一批结束后再同步给客户端
+    private @Nullable RecipeHolder<CraftingRecipe> batchRecipe;
 
 
     /**
@@ -101,16 +105,36 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
         craftSlotEndIndex = slots.size();
     }
 
+    /**
+     * 是否是合成格的槽位，不含产物槽
+     */
+    public boolean isCraftGridSlot(int index)
+    {
+        return index >= craftSlotStartIndex && index < craftSlotEndIndex;
+    }
+
 
     // 工艺槽实现
     public static void slotChangedCraftingGrid(AbstractContainerMenu menu, Level level, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, int resultSlotIndex)
+    {
+        slotChangedCraftingGrid(menu, level, player, craftSlots, resultSlots, resultSlotIndex, null, true);
+    }
+
+    /**
+     * @param hint 先试的配方，合成格仍然符合它时不再查找
+     * @param send 是否立即把产物发给客户端；不发时由之后的同步带上
+     */
+    private static void slotChangedCraftingGrid(AbstractContainerMenu menu, Level level, Player player, CraftingContainer craftSlots,
+                                                ResultContainer resultSlots, int resultSlotIndex,
+                                                @Nullable RecipeHolder<CraftingRecipe> hint, boolean send)
     {
         if (!level.isClientSide)
         {
             CraftingInput craftinginput = craftSlots.asCraftInput();
             ServerPlayer serverplayer = (ServerPlayer) player;
             ItemStack itemstack = ItemStack.EMPTY;
-            Optional<RecipeHolder<CraftingRecipe>> optional = getRecipe(player, craftinginput, level);
+            Optional<RecipeHolder<CraftingRecipe>> optional = hint != null && !craftinginput.isEmpty() && hint.value().matches(craftinginput, level)
+                    ? Optional.of(hint) : getRecipe(player, craftinginput, level);
             if (optional.isPresent())
             {
 
@@ -128,10 +152,192 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
             }
 
             resultSlots.setItem(0, itemstack);
-            menu.setRemoteSlot(resultSlotIndex, itemstack);
-            serverplayer.connection.send(new ClientboundContainerSetSlotPacket(menu.containerId, menu.incrementStateId(), resultSlotIndex, itemstack));
+            if (send)
+            {
+                menu.setRemoteSlot(resultSlotIndex, itemstack);
+                serverplayer.connection.send(new ClientboundContainerSetSlotPacket(menu.containerId, menu.incrementStateId(), resultSlotIndex, itemstack));
+            }
         }
 
+    }
+
+    // 按合成格重新匹配配方；连续合成时先试这一批的配方，产物等结束后再同步
+    private void updateCraftResult()
+    {
+        slotChangedCraftingGrid(this, player.level(), player, craftSlots, resultSlots, resultSlotIndex, batchRecipe, batchRecipe == null);
+    }
+
+    // 产出当前产物的配方，合成格已不再符合它时为 null
+    @SuppressWarnings("unchecked")
+    private @Nullable RecipeHolder<CraftingRecipe> recipeInUse(CraftingInput input)
+    {
+        RecipeHolder<?> used = resultSlots.getRecipeUsed();
+        return used != null && used.value() instanceof CraftingRecipe recipe && recipe.matches(input, player.level())
+                ? (RecipeHolder<CraftingRecipe>) used : null;
+    }
+
+    /**
+     * 合成一次后留在合成格各位置的剩余物，按产出当前产物的配方计算
+     */
+    public NonNullList<ItemStack> remainingItems(CraftingInput input)
+    {
+        RecipeHolder<CraftingRecipe> recipe = recipeInUse(input);
+        return recipe != null ? recipe.value().getRemainingItems(input)
+                : player.level().getRecipeManager().getRemainingItemsFor(RecipeType.CRAFTING, input, player.level());
+    }
+
+    /**
+     * 扣除一次合成的原料：其间合成格逐格改动，不随每一格重新匹配配方，扣完后匹配一次
+     */
+    public void consumeIngredients(Runnable consume)
+    {
+        consumingIngredients = true;
+        try
+        {
+            consume.run();
+        }
+        finally
+        {
+            consumingIngredients = false;
+        }
+        updateCraftResult();
+    }
+
+    /**
+     * Shift 点产物：合成一组，产物先放进背包，放不下的再按 targets 放进其他槽位
+     */
+    @Override
+    public ItemStack quickMoveHandle(Player player, int slotIndex, KeyAmount clickStack, List<Integer> targets)
+    {
+        if (slotIndex != resultSlotIndex)
+            return super.quickMoveHandle(player, slotIndex, clickStack, targets);
+        ItemStack product = slots.get(resultSlotIndex).getItem();
+        if (isCurrentProduct(clickStack))
+            craftRepeatedly(product.getMaxStackSize() / product.getCount(), targets);
+        return ItemStack.EMPTY;
+    }
+
+    /**
+     * 空格左键点产物：连续合成，产物只放进背包，直到背包放满、原料用完或合成格换了配方
+     */
+    public void craftIntoInventory(KeyAmount clicked)
+    {
+        ItemStack product = slots.get(resultSlotIndex).getItem();
+        if (isCurrentProduct(clicked))
+            craftRepeatedly(inventorySpaceFor(product) / product.getCount(), List.of());
+    }
+
+    // 客户端点到的正是此刻的产物；合成格已换成别的配方时不合成
+    private boolean isCurrentProduct(KeyAmount clicked)
+    {
+        Slot slot = slots.get(resultSlotIndex);
+        return slot.mayPickup(player) && !clicked.isEmpty() && clicked.key().equals(new ItemStackKey(slot.getItem()));
+    }
+
+    // 背包（含快捷栏）还能放下多少个这种物品
+    private int inventorySpaceFor(ItemStack stack)
+    {
+        int space = 0;
+        for (int index = inventoryStartIndex; index < inventoryEndIndex; index++)
+        {
+            Slot slot = slots.get(index);
+            ItemStack inSlot = slot.getItem();
+            if (inSlot.isEmpty())
+                space += slot.mayPlace(stack) ? slot.getMaxStackSize(stack) : 0;
+            else if (ItemStack.isSameItemSameComponents(inSlot, stack))
+                space += Math.max(0, slot.getMaxStackSize(inSlot) - inSlot.getCount());
+        }
+        return space;
+    }
+
+    /**
+     * 连续合成，每次一份，合成 times 次、产物换了、原料用完或产物放不下时停下。
+     * 这一批沿用同一份配方，产物在结束时同步一次
+     */
+    private void craftRepeatedly(int times, List<Integer> targets)
+    {
+        Slot resultSlot = slots.get(resultSlotIndex);
+        ItemStack product = resultSlot.getItem().copy(); // 锁定本次合成使用的配方成品
+        batchRecipe = recipeInUse(craftSlots.asCraftInput());
+        try
+        {
+            for (int i = 0; i < times && !resultSlot.getItem().isEmpty() && resultSlot.getItem().getItem() == product.getItem(); i++)
+                if (!craftOnce(resultSlot, product, targets))
+                    break;
+        }
+        finally
+        {
+            batchRecipe = null;
+            updateCraftResult();
+        }
+        resultSlot.setChanged();
+    }
+
+    /**
+     * 合成一份：产物先放进背包与原版槽位并记录回滚信息；BD 槽位只模拟，整份产物都放得下并合成成功后才真正放入，
+     * 否则取回已经放进去的部分。返回是否合成了
+     */
+    private boolean craftOnce(Slot resultSlot, ItemStack product, List<Integer> targets)
+    {
+        ItemStack remaining = product.copy();
+        Map<Integer, Integer> insertedToInv = new HashMap<>();
+        Map<Integer, Integer> insertedToSlots = new HashMap<>();
+        Map<Integer, Integer> plannedTypedSlots = new LinkedHashMap<>();
+        Set<Object> simulatedStorages = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (int invSlot = inventoryStartIndex; invSlot < inventoryEndIndex && !remaining.isEmpty(); invSlot++)
+        {
+            Slot targetSlot = slots.get(invSlot);
+            // safeInsert会破坏stack的数量，因此放入一个copy
+            int newSize = targetSlot.safeInsert(remaining.copy()).getCount();
+            if ((remaining.getCount() - newSize) != 0)
+                insertedToInv.put(invSlot, remaining.getCount() - newSize);
+            remaining.setCount(newSize);
+        }
+
+        // 处理剩余物品
+        for (int targetSlotIndex : targets)
+        {
+            if (remaining.isEmpty()) break;
+            Slot targetSlot = slots.get(targetSlotIndex);
+            int newSize;
+            if (targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
+            {
+                // 无序槽位共用一份存储，同一份存储只模拟一次
+                if (!aTargetSlot.isOrdered() && !simulatedStorages.add(aTargetSlot.getStorage()))
+                    continue;
+                // 此处是安全的转换，remaining不会超出int
+                newSize = (int) aTargetSlot.safeInsert(new ItemStackKey(remaining), remaining.getCount(), true).amount();
+                if ((remaining.getCount() - newSize) != 0)
+                    plannedTypedSlots.put(targetSlotIndex, remaining.getCount() - newSize);
+            }
+            else
+            {
+                newSize = targetSlot.safeInsert(remaining.copy()).getCount();
+                if ((remaining.getCount() - newSize) != 0)
+                    insertedToSlots.put(targetSlotIndex, remaining.getCount() - newSize);
+            }
+            remaining.setCount(newSize);
+        }
+
+        // 如果产物能被完整放下，则通过safeTake执行一次完整取出流程
+        if (remaining.isEmpty() && !resultSlot.safeTake(product.getCount(), Integer.MAX_VALUE, player).isEmpty())
+        {
+            for (Map.Entry<Integer, Integer> entry : plannedTypedSlots.entrySet())
+            {
+                AbstractStackTypedSlot aSlot = (AbstractStackTypedSlot) slots.get(entry.getKey());
+                KeyAmount left = aSlot.safeInsert(new ItemStackKey(product), entry.getValue());
+                // 模拟与实际不一致时才会放不下，交给玩家
+                if (!left.isEmpty() && left.toStack() instanceof ItemStack leftStack)
+                    player.getInventory().placeItemBackInInventory(leftStack);
+            }
+            return true;
+        }
+        // 没能完整放下或没能合成，则将之前放进背包与原版槽位的物品取回
+        for (Map.Entry<Integer, Integer> entry : insertedToInv.entrySet())
+            slots.get(entry.getKey()).safeTake(entry.getValue(), Integer.MAX_VALUE, player);
+        for (Map.Entry<Integer, Integer> entry : insertedToSlots.entrySet())
+            slots.get(entry.getKey()).safeTake(entry.getValue(), Integer.MAX_VALUE, player);
+        return false;
     }
 
     @Override
@@ -314,8 +520,10 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
     @Override
     public void slotsChanged(Container container)
     {
+        if (consumingIngredients)
+            return;
         super.slotsChanged(container);
-        slotChangedCraftingGrid(this, player.level(), player, craftSlots, resultSlots, resultSlotIndex);
+        updateCraftResult();
     }
 
     public void cleanCraftSlots(boolean toStorageFirst)

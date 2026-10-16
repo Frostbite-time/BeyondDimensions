@@ -14,6 +14,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDTags;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
@@ -59,6 +60,11 @@ public final class BuiltinSlotInteractions
         add("move_all_stored", c -> c.space() && c.isLeft() && c.kind() == Kind.STORAGE && !c.clicked().isEmpty(),
                 BuiltinSlotInteractions::moveAll);
         add("move_all_ordered", c -> c.space() && c.isLeft() && c.kind() == Kind.ORDERED, BuiltinSlotInteractions::moveAllOrdered);
+        // 空格左键点合成结果：连续合成，直到背包放满或原料用完；点合成格：清空合成格，物品放回网络
+        add("craft_all", c -> c.space() && c.isLeft() && c.menu() instanceof DimensionsCraftMenu craft
+                && c.slot().index == craft.resultSlotIndex, BuiltinSlotInteractions::craftAll);
+        add("craft_grid_clear", c -> c.space() && c.isLeft() && c.menu() instanceof DimensionsCraftMenu craft
+                && craft.isCraftGridSlot(c.slot().index), BuiltinSlotInteractions::clearCraftGrid);
         // 有序槽里是同一种物品时先合并，桶、经验棒与容器也一样
         add("ordered_merge", c -> click(c) && c.kind() == Kind.ORDERED && !c.clicked().isEmpty() && !c.carried().isEmpty()
                         && (c.isLeft() || c.isRight())
@@ -475,6 +481,21 @@ public final class BuiltinSlotInteractions
         List<Integer> targets = c.menu().quickMoveRoutes().targets(c.slot().index);
         if (!targets.isEmpty())
             c.menu().quickMoveHandle(c.player(), c.slot().index, c.sent(), targets);
+        return true;
+    }
+
+    // —— 合成 ——
+
+    private static boolean craftAll(SlotClick c)
+    {
+        ((DimensionsCraftMenu) c.menu()).craftIntoInventory(c.sent());
+        return true;
+    }
+
+    // 合成格里的物品先放回网络，网络放不下的进背包
+    private static boolean clearCraftGrid(SlotClick c)
+    {
+        ((DimensionsCraftMenu) c.menu()).cleanCraftSlots(true);
         return true;
     }
 
