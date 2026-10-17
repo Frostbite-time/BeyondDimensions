@@ -43,7 +43,7 @@
 
 ### Fixes
 
-- Loading a world no longer discards stored resources. Resources whose mod is missing or whose data can't be read are kept as Error Data items and restored once the mod is back.
+- Resources that can't be read for now are no longer discarded, for example items and fluids from a mod you've temporarily removed. They are kept as Error Data items and restored once the mod is back.
 - Players near blocks holding very large items, such as shulker boxes full of written books, are no longer disconnected; block updates carry only what the client uses.
 - Deleted networks no longer accept resources. Storage screens close when their network is deleted or, for screens opened with a key, when you are no longer a member.
 - Fixed duplicating items by filling or emptying containers on machine slots, and an exploit that took items out of virtual slots through vanilla click packets.
@@ -136,7 +136,7 @@ For developers:
 
 ### 修复
 
-- 读档不再丢失资源：所属模组缺失或数据无法解析的资源会保存为“错误数据”物品，模组装回后自动还原。
+- 现在不会丢弃暂时无法解析的资源，例如暂时移除的模组中的物品和流体。它们会保存为“错误数据”物品，模组装回后自动还原。
 - 方块中存放数据量很大的物品（如装满成书的潜影盒）时，附近的玩家不再断线；方块更新只发送客户端需要的数据。
 - 已删除的网络不再接收资源。网络被删除时，或通过快捷键打开存储的玩家已不是成员时，存储界面会关闭。
 - 修复在机器槽位上用容器装入或排出时复制物品的问题，以及通过原版点击数据包从虚拟槽位凭空取出物品的漏洞。
