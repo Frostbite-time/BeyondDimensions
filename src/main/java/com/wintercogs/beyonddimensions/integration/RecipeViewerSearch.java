@@ -9,6 +9,11 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class RecipeViewerSearch
 {
+    /**
+     * JEI 的搜索框最多 128 个字符。更长的文字会让 JEI 与原版输入框来回互设，直到栈溢出
+     */
+    private static final int MAX_LENGTH = 128;
+
     private RecipeViewerSearch()
     {
     }
@@ -29,11 +34,15 @@ public final class RecipeViewerSearch
         return null;
     }
 
+    /**
+     * 设置配方查看器的搜索文字，超出 {@link #MAX_LENGTH} 的部分截去；开启同步时，存储界面的搜索读回后也停在这个长度
+     */
     public static void set(String text)
     {
+        String fitted = text.substring(0, Math.min(text.length(), MAX_LENGTH));
         if (ModPresence.isLoaded(OtherModIds.JEI))
-            JeiSearchText.set(text);
+            JeiSearchText.set(fitted);
         if (ModPresence.isLoaded(OtherModIds.EMI))
-            EmiSearchText.set(text);
+            EmiSearchText.set(fitted);
     }
 }
