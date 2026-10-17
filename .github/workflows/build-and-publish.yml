@@ -98,10 +98,6 @@ jobs:
           curseforge-id: ${{ env.CURSEFORGE_ID }}
           curseforge-token: ${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}
 
-          # Modrinth
-          modrinth-id: ${{ env.MODRINTH_ID }}
-          modrinth-token: ${{ secrets.PUBLISH_MODRINTH_TOKEN }}
-
           # GitHub Release
           github-tag: v${{ steps.props.outputs.display_version }}
           github-token: ${{ secrets.PUBLISH_GITHUB_TOKEN }}

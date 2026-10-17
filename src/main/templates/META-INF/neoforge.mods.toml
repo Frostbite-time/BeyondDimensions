@@ -100,6 +100,9 @@ config="${mod_id}.mixins.json"
     type="optional"
     ordering="AFTER"
     side="BOTH"
+    # 发布时 mc-publish 按项目名关联前置，KFF 在 CurseForge 上的项目名与 modId 不同
+    [dependencies.${mod_id}.mc-publish]
+        curseforge="kotlin-for-forge"
 
 [[dependencies.${mod_id}]]
     modId="create"
