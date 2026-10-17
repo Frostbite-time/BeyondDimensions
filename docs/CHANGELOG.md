@@ -44,7 +44,7 @@
 ### Fixes
 
 - Resources that can't be read for now are no longer discarded, for example items and fluids from a mod you've temporarily removed. They are kept as Error Data items and restored once the mod is back.
-- Players near blocks holding very large items, such as shulker boxes full of written books, are no longer disconnected; block updates carry only what the client uses.
+- Block updates send only the data the client needs.
 - Deleted networks no longer accept resources. Storage screens close when their network is deleted or, for screens opened with a key, when you are no longer a member.
 - Fixed duplicating items by filling or emptying containers on machine slots, and an exploit that took items out of virtual slots through vanilla click packets.
 - When the network can't hold all the experience deposited with the XP Rod, the rest is refunded at the correct rate.
@@ -53,7 +53,7 @@
 - A recipe that would create an oversized Compressed Matter Orb is refused with a message, and orbs nest at most 16 levels deep.
 - Fixed stretched textures on the edges of the Network Pump.
 - Translations completed and corrected for all ten languages.
-- Fuzzy extraction is faster and takes the variant the network holds the most of, and networks no longer mark themselves for saving every tick.
+- Fuzzy extraction is more efficient and takes the variant the network holds the most of, and networks no longer mark themselves for saving every tick.
 
 ### For modpack makers and developers
 
@@ -137,7 +137,7 @@ For developers:
 ### 修复
 
 - 现在不会丢弃暂时无法解析的资源，例如暂时移除的模组中的物品和流体。它们会保存为“错误数据”物品，模组装回后自动还原。
-- 方块中存放数据量很大的物品（如装满成书的潜影盒）时，附近的玩家不再断线；方块更新只发送客户端需要的数据。
+- 方块更新只发送客户端需要的数据。
 - 已删除的网络不再接收资源。网络被删除时，或通过快捷键打开存储的玩家已不是成员时，存储界面会关闭。
 - 修复在机器槽位上用容器装入或排出时复制物品的问题，以及通过原版点击数据包从虚拟槽位凭空取出物品的漏洞。
 - 用经验棒存入经验而网络存不下时，剩余部分按正确的比例退还。
@@ -146,7 +146,7 @@ For developers:
 - 合成会生成数据量过大的压缩物质球时拒绝并提示；压缩物质球最多嵌套 16 层。
 - 修复网络泵边缘的贴图拉伸。
 - 补全并修正十种语言的翻译。
-- 模糊取出更快，并优先取网络中数量最多的变体；网络不再每刻标记为需要保存。
+- 模糊取出性能更佳，并优先取网络中数量最多的变体；网络不再每刻标记为需要保存。
 
 ### 整合包作者与开发者
 
