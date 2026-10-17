@@ -173,7 +173,7 @@ dependencies {
 ## Contributing
 
 Report bugs in the [issue tracker](https://github.com/Frostbite-time/BeyondDimensions/issues). Pull requests are
-welcome; please read [CONTRIBUTING.md](docs/CONTRIBUTING.md) (in Chinese) first.
+welcome; please read [CONTRIBUTING.md](docs/CONTRIBUTING.md) first.
 
 ## License
 
