@@ -58,11 +58,6 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
     public int inventoryStartIndex = -1; //索引开始位置 为54
     public int inventoryEndIndex = -1;   //索引结束位置+1 为90
 
-    // 合成区的产物槽与合成格 [craftSlotStartIndex, craftSlotEndIndex) 的槽位索引，没有合成区时为 -1
-    public int resultSlotIndex = -1;
-    public int craftSlotStartIndex = -1;
-    public int craftSlotEndIndex = -1;
-
     // 原版槽位想要进行快速转移时的目标槽位范围
     protected int vanillaQuickMoveStartIndex = -1;
     protected int vanillaQuickMoveEndIndex = -1;
@@ -165,30 +160,6 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
                 || requested > clickedStack.key().getVanillaMaxStackSize()) return;
         SlotInteractions.dispatch(SlotClick.of(this, player, slots.get(slotIndex), clickedStack, button, modifiers, requested));
     }
-
-    /**
-     * 是否是合成格的槽位，不含产物槽
-     */
-    public boolean isCraftGridSlot(int index)
-    {
-        return index >= craftSlotStartIndex && index < craftSlotEndIndex;
-    }
-
-    /**
-     * 连续合成：其间每次从产物槽取出都会合成一份，有合成区的菜单借此沿用同一份配方
-     */
-    public void craftBatch(Runnable crafts)
-    {
-        crafts.run();
-    }
-
-    /**
-     * 清空合成格，物品按玩家的偏好退回
-     */
-    public void clearCraftGrid()
-    {
-    }
-
 
     // 仅标记，需要时重写
     @Override

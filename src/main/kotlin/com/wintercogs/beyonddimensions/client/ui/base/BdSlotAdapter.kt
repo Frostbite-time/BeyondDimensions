@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
+import com.wintercogs.beyonddimensions.common.menu.ability.CraftableMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot
 import dev.compixel.forge.item.ItemIcon
@@ -130,8 +131,10 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
      */
     private fun isSpaceClick(slotId: Int, button: Int, type: ClickType) =
         type == ClickType.PICKUP && button == 0 && spaceHeld() &&
-                (slotId >= menu.inventoryStartIndex && slotId < menu.inventoryEndIndex ||
-                        slotId == menu.resultSlotIndex || menu.isCraftGridSlot(slotId))
+                (slotId >= menu.inventoryStartIndex && slotId < menu.inventoryEndIndex || isCraftSlot(slotId))
+
+    private fun isCraftSlot(slotId: Int) =
+        menu is CraftableMenu && (menu.isCraftResultSlot(slotId) || menu.isCraftGridSlot(slotId))
 
     /** 普通槽位的 Shift 点击与空格左键由服务端的 BD 命令处理，不额外发送原版的点击 */
     private fun clickVanilla(slotId: Int, slot: Slot, button: Int, type: ClickType) {

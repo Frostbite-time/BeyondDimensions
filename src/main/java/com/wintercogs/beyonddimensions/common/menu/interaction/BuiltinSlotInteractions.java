@@ -15,6 +15,7 @@ import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDTags;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
+import com.wintercogs.beyonddimensions.common.menu.ability.CraftableMenu;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.ItemCapInteractionBlackList;
@@ -60,8 +61,8 @@ public final class BuiltinSlotInteractions
         add("move_all_ordered", c -> c.space() && c.isLeft() && c.kind() == Kind.ORDERED, BuiltinSlotInteractions::moveAllOrdered);
         // 空格左键点合成结果：连续合成，直到背包放满或原料用完；点合成格：清空合成格，物品按玩家的偏好退回
         add("craft_all", c -> c.space() && c.isLeft() && isCraftResult(c), BuiltinSlotInteractions::craftAll);
-        add("craft_grid_clear", c -> c.space() && c.isLeft() && c.menu().isCraftGridSlot(c.slot().index),
-                BuiltinSlotInteractions::clearCraftGrid);
+        add("craft_grid_clear", c -> c.space() && c.isLeft() && c.menu() instanceof CraftableMenu craft
+                && craft.isCraftGridSlot(c.slot().index), BuiltinSlotInteractions::clearCraftGrid);
         // 有序槽里是同一种物品时先合并，桶、经验棒与容器也一样
         add("ordered_merge", c -> click(c) && c.kind() == Kind.ORDERED && !c.clicked().isEmpty() && !c.carried().isEmpty()
                         && (c.isLeft() || c.isRight())
@@ -538,7 +539,7 @@ public final class BuiltinSlotInteractions
 
     private static boolean isCraftResult(SlotClick c)
     {
-        return c.slot().index == c.menu().resultSlotIndex;
+        return c.menu() instanceof CraftableMenu craft && craft.isCraftResultSlot(c.slot().index);
     }
 
     // Shift 点产物合成一组：产物先放进背包，放不下的沿 Shift 路线送走
@@ -580,7 +581,7 @@ public final class BuiltinSlotInteractions
     {
         Slot result = c.slot();
         ItemStack first = result.getItem().copy();
-        c.menu().craftBatch(() -> {
+        ((CraftableMenu) c.menu()).craftBatch(() -> {
             for (int i = 0; i < times; i++)
             {
                 ItemStack product = result.getItem();
@@ -596,7 +597,7 @@ public final class BuiltinSlotInteractions
 
     private static boolean clearCraftGrid(SlotClick c)
     {
-        c.menu().clearCraftGrid();
+        ((CraftableMenu) c.menu()).clearCraftGrid();
         return true;
     }
 

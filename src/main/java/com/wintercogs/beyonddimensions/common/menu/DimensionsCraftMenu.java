@@ -9,6 +9,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
+import com.wintercogs.beyonddimensions.common.menu.ability.CraftableMenu;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AutoRefillResultSlot;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
@@ -44,11 +45,14 @@ import java.util.Optional;
 import static com.wintercogs.beyonddimensions.common.init.BDMenus.Dimensions_Craft_Menu;
 
 // 自带合成台的DimensionsNetMenu
-public class DimensionsCraftMenu extends DimensionsNetMenu
+public class DimensionsCraftMenu extends DimensionsNetMenu implements CraftableMenu
 {
 
     protected CraftingContainer craftSlots;
     protected ResultContainer resultSlots;
+    public int resultSlotIndex;
+    public int craftSlotStartIndex;
+    public int craftSlotEndIndex;
 
     // 扣除一次合成的原料时合成格会逐格改动，扣完之后才重新匹配配方
     private boolean consumingIngredients;
@@ -191,6 +195,18 @@ public class DimensionsCraftMenu extends DimensionsNetMenu
             consumingIngredients = false;
         }
         updateCraftResult();
+    }
+
+    @Override
+    public boolean isCraftResultSlot(int index)
+    {
+        return index == resultSlotIndex;
+    }
+
+    @Override
+    public boolean isCraftGridSlot(int index)
+    {
+        return index >= craftSlotStartIndex && index < craftSlotEndIndex;
     }
 
     /**
