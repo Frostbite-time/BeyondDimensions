@@ -4,7 +4,6 @@ import com.google.common.base.Suppliers;
 import com.wintercogs.beyonddimensions.api.menu.interaction.SlotClick;
 import com.wintercogs.beyonddimensions.api.menu.interaction.SlotInteractions;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuCommands;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
@@ -58,6 +57,11 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
     // 用于快速移动时标记玩家背包的槽位索引 如 索引从0开始 背包为54~89
     public int inventoryStartIndex = -1; //索引开始位置 为54
     public int inventoryEndIndex = -1;   //索引结束位置+1 为90
+
+    // 合成区的产物槽与合成格 [craftSlotStartIndex, craftSlotEndIndex) 的槽位索引，没有合成区时为 -1
+    public int resultSlotIndex = -1;
+    public int craftSlotStartIndex = -1;
+    public int craftSlotEndIndex = -1;
 
     // 原版槽位想要进行快速转移时的目标槽位范围
     protected int vanillaQuickMoveStartIndex = -1;
@@ -162,35 +166,27 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
         SlotInteractions.dispatch(SlotClick.of(this, player, slots.get(slotIndex), clickedStack, button, modifiers, requested));
     }
 
-    // 处理非AbstractStackTypedSlot槽位的快速转移
-    public ItemStack quickMoveHandle(Player player, int slotIndex, KeyAmount clickStack, List<Integer> targets)
+    /**
+     * 是否是合成格的槽位，不含产物槽
+     */
+    public boolean isCraftGridSlot(int index)
     {
-        Slot slot = this.slots.get(slotIndex);
-        if (slot != null && slot.mayPickup(player) && !clickStack.isEmpty()
-                && clickStack.key().equals(new ItemStackKey(slot.getItem())))
-        {
-            ItemStack cacheStack = slot.getItem().copy(); // 完成数据包校验
-            ItemStack remaining = cacheStack.copy();
-            for (int targetSlotIndex : targets)
-            {
-                if (remaining.isEmpty()) break;
-                Slot targetSlot = slots.get(targetSlotIndex);
-                int newSize;
-                if (targetSlot instanceof AbstractStackTypedSlot aTargetSlot)
-                {
-                    // 此处是安全的转换，remaining不会超出int
-                    newSize = (int) aTargetSlot.safeInsert(new ItemStackKey(remaining), remaining.getCount()).amount();
-                }
-                else
-                {
-                    newSize = targetSlot.safeInsert(remaining).getCount();
-                }
-                remaining.setCount(newSize);
-            }
-            slot.tryRemove(cacheStack.getCount() - remaining.getCount(), Integer.MAX_VALUE, player);
-            slot.setChanged();
-        }
-        return ItemStack.EMPTY;
+        return index >= craftSlotStartIndex && index < craftSlotEndIndex;
+    }
+
+    /**
+     * 连续合成：其间每次从产物槽取出都会合成一份，有合成区的菜单借此沿用同一份配方
+     */
+    public void craftBatch(Runnable crafts)
+    {
+        crafts.run();
+    }
+
+    /**
+     * 清空合成格，物品按玩家的偏好退回
+     */
+    public void clearCraftGrid()
+    {
     }
 
 

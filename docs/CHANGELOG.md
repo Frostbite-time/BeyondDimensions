@@ -20,7 +20,7 @@
 - While Shift is held the grid doesn't rearrange; resources you empty stay in place showing 0 until you release it.
 - The grid can be wider than nine columns: set its columns and maximum rows on the settings page, and it narrows to fit the screen.
 - Each player has their own crafting grid, saved on the server and shared by the network screen (O key), the Network Terminal and the Portable Network Terminal. With the new "Keep grid on close" setting its items stay for next time; otherwise they return to the storage or your inventory, as you choose.
-- Space + left-click the crafting result to keep crafting until your inventory is full, or a crafting grid slot to return the whole grid to the network.
+- Space + left-click the crafting result to keep crafting until your inventory is full, or a crafting grid slot to empty the grid into the storage or your inventory, as you choose.
 - Tab only moves the focus into and out of the search box.
 - Switching between storage, crafting and the Primary Network Switcher no longer moves the mouse pointer to the center.
 
@@ -113,7 +113,7 @@ For developers:
 - 按住 Shift 时存储格不重新排列，取空的资源留在原位显示为 0，松开后再整理。
 - 存储格可以超过 9 列：在设置页设置列数和最多行数，屏幕较小时自动收窄。
 - 合成格改为每个玩家各一份，保存在服务器上，由 O 键打开的网络界面、网络终端和便携网络终端共用。开启新增的“关闭后保留合成格”后物品会留到下次；未开启时按设置退回存储或背包。
-- 空格 + 左键点合成结果连续合成，直到背包放满；点合成格则清空合成格，物品放回网络。
+- 空格 + 左键点合成结果连续合成，直到背包放满；点合成格则清空合成格，物品按设置退回存储或背包。
 - Tab 键只用于进入和退出搜索框。
 - 在存储、合成和主网络切换器之间切换时，鼠标指针不再跳到屏幕中央。
 

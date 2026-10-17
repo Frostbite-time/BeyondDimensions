@@ -14,7 +14,6 @@ import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDTags;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
@@ -30,8 +29,7 @@ import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
 import java.util.stream.IntStream;
@@ -60,11 +58,10 @@ public final class BuiltinSlotInteractions
         add("move_all_stored", c -> c.space() && c.isLeft() && c.kind() == Kind.STORAGE && !c.clicked().isEmpty(),
                 BuiltinSlotInteractions::moveAll);
         add("move_all_ordered", c -> c.space() && c.isLeft() && c.kind() == Kind.ORDERED, BuiltinSlotInteractions::moveAllOrdered);
-        // 空格左键点合成结果：连续合成，直到背包放满或原料用完；点合成格：清空合成格，物品放回网络
-        add("craft_all", c -> c.space() && c.isLeft() && c.menu() instanceof DimensionsCraftMenu craft
-                && c.slot().index == craft.resultSlotIndex, BuiltinSlotInteractions::craftAll);
-        add("craft_grid_clear", c -> c.space() && c.isLeft() && c.menu() instanceof DimensionsCraftMenu craft
-                && craft.isCraftGridSlot(c.slot().index), BuiltinSlotInteractions::clearCraftGrid);
+        // 空格左键点合成结果：连续合成，直到背包放满或原料用完；点合成格：清空合成格，物品按玩家的偏好退回
+        add("craft_all", c -> c.space() && c.isLeft() && isCraftResult(c), BuiltinSlotInteractions::craftAll);
+        add("craft_grid_clear", c -> c.space() && c.isLeft() && c.menu().isCraftGridSlot(c.slot().index),
+                BuiltinSlotInteractions::clearCraftGrid);
         // 有序槽里是同一种物品时先合并，桶、经验棒与容器也一样
         add("ordered_merge", c -> click(c) && c.kind() == Kind.ORDERED && !c.clicked().isEmpty() && !c.carried().isEmpty()
                         && (c.isLeft() || c.isRight())
@@ -97,6 +94,7 @@ public final class BuiltinSlotInteractions
                         && c.slot().mayPlace(c.carried()),
                 BuiltinSlotInteractions::insertCarried);
         add("quick_move", c -> c.isResource() && c.shift() && !c.clicked().isEmpty(), BuiltinSlotInteractions::quickMove);
+        add("craft_stack", c -> c.shift() && isCraftResult(c), BuiltinSlotInteractions::craftStack);
         add("quick_move_vanilla", c -> c.kind() == Kind.VANILLA && c.shift(), BuiltinSlotInteractions::quickMoveVanilla);
     }
 
@@ -475,27 +473,130 @@ public final class BuiltinSlotInteractions
         return start >= 0 && start < end ? IntStream.range(start, end).boxed().toList() : List.of();
     }
 
-    // 原版槽位（背包、合成产物等）的 Shift 转移
+    // 原版槽位（背包、合成格等）的 Shift 转移
     private static boolean quickMoveVanilla(SlotClick c)
     {
-        List<Integer> targets = c.menu().quickMoveRoutes().targets(c.slot().index);
-        if (!targets.isEmpty())
-            c.menu().quickMoveHandle(c.player(), c.slot().index, c.sent(), targets);
+        if (sentMatches(c))
+            moveVanilla(c, c.slot().index);
         return true;
+    }
+
+    // 客户端点到的就是槽位里此刻的物品；合成格刚换了配方等情况下两者不同，不再转移
+    private static boolean sentMatches(SlotClick c)
+    {
+        return !c.sent().isEmpty() && c.sent().key().equals(c.clicked().key());
+    }
+
+    // 把一格原版槽位里的物品沿它的 Shift 路线送往下一站，只取出放得下的数量
+    private static void moveVanilla(SlotClick c, int index)
+    {
+        Slot slot = c.menu().slots.get(index);
+        List<Integer> targets = c.menu().quickMoveRoutes().targets(index);
+        ItemStack stack = slot.getItem();
+        int fits = stack.getCount() - insertInto(c, stack, targets, true).getCount();
+        if (fits > 0)
+            putAway(c, slot.safeTake(fits, Integer.MAX_VALUE, c.player()), targets);
+    }
+
+    // 依次放进 targets，返回放不下的部分；simulate 时只计算。共用一份存储的无序槽位只放一次
+    private static ItemStack insertInto(SlotClick c, ItemStack stack, List<Integer> targets, boolean simulate)
+    {
+        ItemStack remaining = stack.copy();
+        Set<Object> storages = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (int index : targets)
+        {
+            if (remaining.isEmpty())
+                break;
+            Slot target = c.menu().slots.get(index);
+            if (target instanceof AbstractStackTypedSlot typed)
+            {
+                if (typed.isOrdered() || storages.add(typed.getStorage()))
+                    remaining.setCount((int) typed.safeInsert(new ItemStackKey(remaining), remaining.getCount(), simulate).amount());
+            }
+            else if (simulate)
+                remaining.shrink((int) accepts(target, remaining));
+            else
+                remaining = target.safeInsert(remaining);
+        }
+        return remaining;
+    }
+
+    // 放进 targets；模拟与实际不一致而放不下的部分交给玩家
+    private static void putAway(SlotClick c, ItemStack stack, List<Integer> targets)
+    {
+        ItemStack left = insertInto(c, stack, targets, false);
+        if (!left.isEmpty())
+            c.player().getInventory().placeItemBackInInventory(left);
+    }
+
+    private static List<Integer> inventorySlots(SlotClick c)
+    {
+        return IntStream.range(c.menu().inventoryStartIndex, c.menu().inventoryEndIndex).boxed().toList();
     }
 
     // —— 合成 ——
 
-    private static boolean craftAll(SlotClick c)
+    private static boolean isCraftResult(SlotClick c)
     {
-        ((DimensionsCraftMenu) c.menu()).craftIntoInventory(c.sent());
+        return c.slot().index == c.menu().resultSlotIndex;
+    }
+
+    // Shift 点产物合成一组：产物先放进背包，放不下的沿 Shift 路线送走
+    private static boolean craftStack(SlotClick c)
+    {
+        if (sentMatches(c))
+        {
+            ItemStack product = c.slot().getItem();
+            List<Integer> targets = new ArrayList<>(inventorySlots(c));
+            targets.addAll(c.menu().quickMoveRoutes().targets(c.slot().index));
+            craft(c, product.getMaxStackSize() / product.getCount(), targets);
+        }
         return true;
     }
 
-    // 合成格里的物品先放回网络，网络放不下的进背包
+    // 空格左键点产物：连续合成，产物只放进背包，直到放满、原料用完或合成格换了配方
+    private static boolean craftAll(SlotClick c)
+    {
+        if (sentMatches(c))
+        {
+            ItemStack product = c.slot().getItem();
+            craft(c, spaceFor(c, product) / product.getCount(), inventorySlots(c));
+        }
+        return true;
+    }
+
+    // 背包（含快捷栏）还能放下多少个这种物品
+    private static int spaceFor(SlotClick c, ItemStack stack)
+    {
+        ItemStack full = stack.copyWithCount(stack.getMaxStackSize());
+        int space = 0;
+        for (int index : inventorySlots(c))
+            space += (int) accepts(c.menu().slots.get(index), full);
+        return space;
+    }
+
+    // 从产物槽合成至多 times 次：产物整份放得进 targets 才取出，取出时合成一份；产物换了或放不下就停
+    private static void craft(SlotClick c, int times, List<Integer> targets)
+    {
+        Slot result = c.slot();
+        ItemStack first = result.getItem().copy();
+        c.menu().craftBatch(() -> {
+            for (int i = 0; i < times; i++)
+            {
+                ItemStack product = result.getItem();
+                if (!ItemStack.isSameItem(product, first) || !insertInto(c, product, targets, true).isEmpty())
+                    return;
+                ItemStack crafted = result.safeTake(product.getCount(), Integer.MAX_VALUE, c.player());
+                if (crafted.isEmpty())
+                    return;
+                putAway(c, crafted, targets);
+            }
+        });
+    }
+
     private static boolean clearCraftGrid(SlotClick c)
     {
-        ((DimensionsCraftMenu) c.menu()).cleanCraftSlots(true);
+        c.menu().clearCraftGrid();
         return true;
     }
 
@@ -532,14 +633,6 @@ public final class BuiltinSlotInteractions
             if (key.equals(new ItemStackKey(c.menu().slots.get(index).getItem())))
                 moveVanilla(c, index);
         return true;
-    }
-
-    private static void moveVanilla(SlotClick c, int index)
-    {
-        ItemStack stack = c.menu().slots.get(index).getItem();
-        List<Integer> targets = c.menu().quickMoveRoutes().targets(index);
-        if (!stack.isEmpty() && !targets.isEmpty())
-            c.menu().quickMoveHandle(c.player(), index, new KeyAmount(new ItemStackKey(stack), stack.getCount()), targets);
     }
 
     // 把这一格的资源反复转移，直到取空或下一站再也放不下

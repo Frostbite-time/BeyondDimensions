@@ -6,9 +6,11 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.common.CommonHooks;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,6 +39,8 @@ public class AutoRefillResultSlot extends ResultSlot
     {
         if (player.level().isClientSide()) return;
 
+        // 发放进度时原版会清掉产物槽记录的配方，剩余物要按这份配方算，先取出来
+        RecipeHolder<?> recipe = ((ResultContainer) this.container).getRecipeUsed();
         this.checkTakeAchievements(craftedStack);
         CraftingInput.Positioned positionedInput = this.craftSlots.asPositionedCraftInput();
         CraftingInput craftingGrid = positionedInput.input();
@@ -44,7 +48,7 @@ public class AutoRefillResultSlot extends ResultSlot
         int gridStartY = positionedInput.top();
 
         CommonHooks.setCraftingPlayer(player);
-        NonNullList<ItemStack> remainingItems = menu.remainingItems(craftingGrid);
+        NonNullList<ItemStack> remainingItems = menu.remainingItems(recipe, craftingGrid);
         CommonHooks.setCraftingPlayer(null);
 
         menu.consumeIngredients(() -> consumeIngredients(player, craftingGrid, gridStartX, gridStartY, remainingItems));
