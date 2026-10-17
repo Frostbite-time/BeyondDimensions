@@ -3,7 +3,6 @@ package com.wintercogs.beyonddimensions.common.init;
 import com.wintercogs.beyonddimensions.api.dimensionnet.data.NetDataType;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
-import com.wintercogs.beyonddimensions.common.dimensionnet.CrystalTimer;
 import com.wintercogs.beyonddimensions.common.menu.state.EnergyHistory;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -21,12 +20,6 @@ public final class BDNetDataTypes
      */
     public static final DeferredHolder<NetDataType<?>, NetDataType<EnergyHistory>> ENERGY_HISTORY = TYPES.register("energy_history",
             () -> NetDataType.builder(EnergyHistory::new).merge((kept, absorbed) -> kept).build());
-
-    /**
-     * 生成破碎时空结晶的计时；只在内存中，合并网络时留下原网络的计时
-     */
-    public static final DeferredHolder<NetDataType<?>, NetDataType<CrystalTimer>> CRYSTAL_TIMER = TYPES.register("crystal_timer",
-            () -> NetDataType.builder(CrystalTimer::new).merge((kept, absorbed) -> kept).build());
 
     private BDNetDataTypes()
     {
