@@ -1,6 +1,6 @@
 ## English
 
-0.8.0 rebuilds every screen on CompixelUI and adds custom category tabs, side configuration for machines, the Machine Configuration Card and the Stock Emitter. It requires CompixelUI and Kotlin; read the breaking changes at the end before updating.
+0.8.0 rebuilds every screen on CompixelUI and adds custom category tabs, side configuration for machines, the Machine Configuration Talisman and the Stock Emitter. It requires CompixelUI and Kotlin; read the breaking changes at the end before updating.
 
 ### Interface
 
@@ -26,7 +26,7 @@
 
 ### Machines
 
-- New **Machine Configuration Card**, crafted from paper, redstone and a Space-Time Ingot. Right-click a machine to copy its settings, Shift + right-click to paste, and Ctrl + right-click to paste to it and every connected machine of the same kind (up to 256). For item machines, hold the card in the off hand and the machine in the main hand.
+- New **Machine Configuration Talisman**, crafted from paper, redstone and a Space-Time Ingot. Right-click a machine to copy its settings, Shift + right-click to paste, and Ctrl + right-click to paste to it and every connected machine of the same kind (up to 256). For item machines, hold the talisman in the off hand and the machine in the main hand.
 - Side configuration for the Network Interface, the Network Furnace, Blast Furnace and Smoker, the Dimensional Network Energy Pathway and the Network Pump: set each face, relative to the machine's front, to input, output, both or disabled. The Network Pump's faces are input or disabled, and it only pulls through input faces.
 - The Network Interface, Dimensional Network Energy Pathway and Network Pump face the player when placed.
 - Fuzzy match switches for the filter slots of the Network Pump, Network Hopper and Network Magnet.
@@ -93,7 +93,7 @@ For developers:
 
 ## 中文
 
-0.8.0 将所有界面改用 CompixelUI 重做，并新增自定义分类标签、机器面配置、机器配置卡和存量发信器。本版需要 CompixelUI 和 Kotlin，更新前请先阅读文末的破坏性改动。
+0.8.0 将所有界面改用 CompixelUI 重做，并新增自定义分类标签、机器面配置、机器配置符和存量发信器。本版需要 CompixelUI 和 Kotlin，更新前请先阅读文末的破坏性改动。
 
 ### 界面
 
@@ -119,7 +119,7 @@ For developers:
 
 ### 机器
 
-- 新增**机器配置卡**，由纸、红石和时空锭合成。右键机器复制设置，Shift + 右键粘贴，Ctrl + 右键粘贴到该机器及所有相连的同类机器（最多 256 台）。物品形式的机器需副手持卡、主手持机器操作。
+- 新增**机器配置符**，由纸、红石和时空锭合成。右键机器复制设置，Shift + 右键粘贴，Ctrl + 右键粘贴到该机器及所有相连的同类机器（最多 256 台）。物品形式的机器需副手持配置符、主手持机器操作。
 - 网络接口、网络熔炉、网络高炉、网络烟熏炉、维度网络能量通道和网络泵新增面配置：以机器正面为基准，每个面可设为输入、输出、双向或禁用。网络泵的面只能设为输入或禁用，且只从输入面抽取。
 - 网络接口、维度网络能量通道和网络泵放置时正面朝向玩家。
 - 网络泵、网络漏斗和网络磁铁的过滤槽新增模糊匹配开关。
