@@ -61,8 +61,8 @@ public final class BuiltinSlotInteractions
         add("move_all_ordered", c -> c.space() && c.isLeft() && c.kind() == Kind.ORDERED, BuiltinSlotInteractions::moveAllOrdered);
         // 空格左键点合成结果：连续合成，直到背包放满或原料用完；点合成格：清空合成格，物品按玩家的偏好退回
         add("craft_all", c -> c.space() && c.isLeft() && isCraftResult(c), BuiltinSlotInteractions::craftAll);
-        add("craft_grid_clear", c -> c.space() && c.isLeft() && c.menu() instanceof CraftableMenu craft
-                && craft.isCraftGridSlot(c.slot().index), BuiltinSlotInteractions::clearCraftGrid);
+        add("craft_grid_clear", c -> c.space() && c.isLeft() && c.menu() instanceof CraftableMenu menu
+                && menu.isCraftGridSlot(c.slot().index), BuiltinSlotInteractions::clearCraftGrid);
         // 有序槽里是同一种物品时先合并，桶、经验棒与容器也一样
         add("ordered_merge", c -> click(c) && c.kind() == Kind.ORDERED && !c.clicked().isEmpty() && !c.carried().isEmpty()
                         && (c.isLeft() || c.isRight())
@@ -539,18 +539,18 @@ public final class BuiltinSlotInteractions
 
     private static boolean isCraftResult(SlotClick c)
     {
-        return c.menu() instanceof CraftableMenu craft && craft.isCraftResultSlot(c.slot().index);
+        return c.menu() instanceof CraftableMenu menu && menu.isCraftResultSlot(c.slot().index);
     }
 
     // Shift 点产物合成一组：产物先放进背包，放不下的沿 Shift 路线送走
     private static boolean craftStack(SlotClick c)
     {
-        if (sentMatches(c))
+        if (c.menu() instanceof CraftableMenu menu && sentMatches(c))
         {
             ItemStack product = c.slot().getItem();
             List<Integer> targets = new ArrayList<>(inventorySlots(c));
             targets.addAll(c.menu().quickMoveRoutes().targets(c.slot().index));
-            craft(c, product.getMaxStackSize() / product.getCount(), targets);
+            craft(c, menu, product.getMaxStackSize() / product.getCount(), targets);
         }
         return true;
     }
@@ -558,10 +558,10 @@ public final class BuiltinSlotInteractions
     // 空格左键点产物：连续合成，产物只放进背包，直到放满、原料用完或合成格换了配方
     private static boolean craftAll(SlotClick c)
     {
-        if (sentMatches(c))
+        if (c.menu() instanceof CraftableMenu menu && sentMatches(c))
         {
             ItemStack product = c.slot().getItem();
-            craft(c, spaceFor(c, product) / product.getCount(), inventorySlots(c));
+            craft(c, menu, spaceFor(c, product) / product.getCount(), inventorySlots(c));
         }
         return true;
     }
@@ -577,11 +577,11 @@ public final class BuiltinSlotInteractions
     }
 
     // 从产物槽合成至多 times 次：产物整份放得进 targets 才取出，取出时合成一份；产物换了或放不下就停
-    private static void craft(SlotClick c, int times, List<Integer> targets)
+    private static void craft(SlotClick c, CraftableMenu menu, int times, List<Integer> targets)
     {
         Slot result = c.slot();
         ItemStack first = result.getItem().copy();
-        ((CraftableMenu) c.menu()).craftBatch(() -> {
+        menu.craftBatch(() -> {
             for (int i = 0; i < times; i++)
             {
                 ItemStack product = result.getItem();
@@ -597,7 +597,8 @@ public final class BuiltinSlotInteractions
 
     private static boolean clearCraftGrid(SlotClick c)
     {
-        ((CraftableMenu) c.menu()).clearCraftGrid();
+        if (c.menu() instanceof CraftableMenu menu)
+            menu.clearCraftGrid();
         return true;
     }
 

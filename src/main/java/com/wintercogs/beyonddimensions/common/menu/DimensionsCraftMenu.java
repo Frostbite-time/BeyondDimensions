@@ -163,11 +163,10 @@ public class DimensionsCraftMenu extends DimensionsNetMenu implements CraftableM
     }
 
     // 合成格仍然符合这份合成配方时返回它，否则为 null
-    @SuppressWarnings("unchecked")
     private @Nullable RecipeHolder<CraftingRecipe> matching(@Nullable RecipeHolder<?> recipe, CraftingInput input)
     {
         return recipe != null && recipe.value() instanceof CraftingRecipe crafting && crafting.matches(input, player.level())
-                ? (RecipeHolder<CraftingRecipe>) recipe : null;
+                ? new RecipeHolder<>(recipe.id(), crafting) : null;
     }
 
     /**

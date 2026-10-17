@@ -3,7 +3,6 @@ package com.wintercogs.beyonddimensions.common.menu.widget.slot;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import net.minecraft.core.NonNullList;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.ResultContainer;
@@ -18,20 +17,22 @@ public class AutoRefillResultSlot extends ResultSlot
 {
 
     private final CraftingContainer craftSlots;
+    private final ResultContainer resultSlots;
     private final Player player;
     private final DimensionsCraftMenu menu;
 
-    public AutoRefillResultSlot(DimensionsCraftMenu menu, Player player, CraftingContainer craftSlots, Container container, int slot, int xPosition, int yPosition)
+    public AutoRefillResultSlot(DimensionsCraftMenu menu, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, int slot, int xPosition, int yPosition)
     {
-        super(player, craftSlots, container, slot, xPosition, yPosition);
+        super(player, craftSlots, resultSlots, slot, xPosition, yPosition);
         this.menu = menu;
         this.player = player;
         this.craftSlots = craftSlots;
+        this.resultSlots = resultSlots;
     }
 
-    public AutoRefillResultSlot(DimensionsCraftMenu menu, Player player, CraftingContainer craftSlots, Container container, int slot)
+    public AutoRefillResultSlot(DimensionsCraftMenu menu, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, int slot)
     {
-        this(menu, player, craftSlots, container, slot, 0, 0);
+        this(menu, player, craftSlots, resultSlots, slot, 0, 0);
     }
 
     @Override
@@ -40,7 +41,7 @@ public class AutoRefillResultSlot extends ResultSlot
         if (player.level().isClientSide()) return;
 
         // 发放进度时原版会清掉产物槽记录的配方，剩余物要按这份配方算，先取出来
-        RecipeHolder<?> recipe = ((ResultContainer) this.container).getRecipeUsed();
+        RecipeHolder<?> recipe = resultSlots.getRecipeUsed();
         this.checkTakeAchievements(craftedStack);
         CraftingInput.Positioned positionedInput = this.craftSlots.asPositionedCraftInput();
         CraftingInput craftingGrid = positionedInput.input();
