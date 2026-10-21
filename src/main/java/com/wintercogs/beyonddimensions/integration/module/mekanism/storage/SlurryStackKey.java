@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import mekanism.api.MekanismAPI;
+import mekanism.api.NBTConstants;
 import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
 import net.minecraft.nbt.CompoundTag;
@@ -52,7 +53,7 @@ public final class SlurryStackKey implements IStackKey<SlurryStack>
         this(stack == null ? MekanismAPI.EMPTY_SLURRY : stack.getType());
     }
 
-    // ---------------- IStackKey ----------------
+    // ---------------- IStackKey 的实现 ----------------
 
     @Override
     public ResourceLocation getTypeId()
@@ -133,6 +134,13 @@ public final class SlurryStackKey implements IStackKey<SlurryStack>
     {
         var key = MekanismAPI.slurryRegistry().getKey(this.slurry);
         return key != null ? key.getNamespace() : "unknown";
+    }
+
+    @Override
+    public ResourceLocation getSourceId()
+    {
+        ResourceLocation id = MekanismAPI.slurryRegistry().getKey(this.slurry);
+        return id != null ? id : getTypeId();
     }
 
     @Override
@@ -260,35 +268,35 @@ public final class SlurryStackKey implements IStackKey<SlurryStack>
         {
             return fromLegacyTypedStack(nbt.getCompound("Stack"));
         }
-        // 新
+        // 新；未注册的浆液如实失败，由 IStackKey.deserializeNBTCommon 封装成错误数据
         return readNewFmt(nbt);
     }
 
     private @NotNull IStackKey<SlurryStack> readNewFmt(@NotNull CompoundTag nbt)
     {
-        ResourceLocation id = ResourceLocation.tryParse(nbt.getString("slurry"));
-        Slurry s = (id == null) ? MekanismAPI.EMPTY_SLURRY : MekanismAPI.slurryRegistry().getValue(id);
-        if (s == null) s = MekanismAPI.EMPTY_SLURRY;
-        return new SlurryStackKey(s);
+        return new SlurryStackKey(registeredSlurry(nbt.getString("slurry")));
     }
 
     private @NotNull IStackKey<SlurryStack> fromLegacyTypedStack(@NotNull CompoundTag stackNbt)
     {
-        try
-        {
-            SlurryStack ss = SlurryStack.readFromNBT(stackNbt);
-            if (ss.isEmpty())
-            {
-                return EMPTY;
-            }
-
-            Slurry s = ss.getType();
-            return new SlurryStackKey(s);
-        }
-        catch (Throwable t)
+        registeredSlurry(stackNbt.getString(NBTConstants.SLURRY_NAME));
+        SlurryStack ss = SlurryStack.readFromNBT(stackNbt);
+        if (ss.isEmpty())
         {
             return EMPTY;
         }
+
+        Slurry s = ss.getType();
+        return new SlurryStackKey(s);
+    }
+
+    // 浆液 id 对应的浆液；未注册的浆液如实失败
+    private static Slurry registeredSlurry(String name)
+    {
+        ResourceLocation id = ResourceLocation.tryParse(name);
+        if (id == null || !MekanismAPI.slurryRegistry().containsKey(id))
+            throw new IllegalArgumentException("Unknown slurry: " + name);
+        return MekanismAPI.slurryRegistry().getValue(id);
     }
 
 

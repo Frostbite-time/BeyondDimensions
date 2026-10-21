@@ -734,6 +734,21 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity implements Mana
         isOutPutting = tag.getBoolean("out_putting");
     }
 
+    // 法杖 HUD 在客户端显示输入或输出方向
+    @Override
+    protected void saveClientData(CompoundTag tag)
+    {
+        super.saveClientData(tag);
+        tag.putBoolean("out_putting", isOutPutting);
+    }
+
+    @Override
+    protected void loadClientData(CompoundTag tag)
+    {
+        super.loadClientData(tag);
+        if (tag.contains("out_putting")) isOutPutting = tag.getBoolean("out_putting");
+    }
+
     // 清除引用
     @Override
     public void setRemoved()

@@ -1,9 +1,11 @@
 package com.wintercogs.beyonddimensions.common.block;
 
 import com.wintercogs.beyonddimensions.common.block.entity.NetTerminalBlockEntity;
+import com.wintercogs.beyonddimensions.common.block.orientation.FacingRule;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -22,9 +24,15 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.Nullable;
 
 public class NetTerminalBlock extends NetedBlock implements EntityBlock
 {
+    /**
+     * 终端贴着的那一面，屏幕朝反方向。屏幕朝上或朝下时 {@link FacingRule#TOP} 是屏幕顶边的朝向；
+     * 旧存档里的终端没有这个属性，读出时顶边朝南，与原来的样子一致
+     */
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
     // 定义6个方向的碰撞箱（单位：1/16方块）
@@ -37,29 +45,29 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
 
     public NetTerminalBlock(Properties properties)
     {
-        super(properties.noOcclusion()
+        super(properties
+                .noOcclusion()
                 .dynamicShape());
-        this.registerDefaultState(this.stateDefinition.any()
-                .setValue(FACING, Direction.NORTH));
+        registerDefaultState(FacingRule.UPRIGHT.defaultState(stateDefinition.any()));
     }
 
     // 注册方块状态属性
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
     {
-        builder.add(FACING);
+        FacingRule.UPRIGHT.addProperties(builder);
     }
 
     @Override
     public BlockState rotate(BlockState state, Rotation rot)
     {
-        return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
+        return FacingRule.UPRIGHT.rotate(state, rot);
     }
 
     @Override
     public BlockState mirror(BlockState state, Mirror mirror)
     {
-        return state.rotate(mirror.getRotation(state.getValue(FACING)));
+        return FacingRule.UPRIGHT.mirror(state, mirror);
     }
 
     @Override
@@ -83,13 +91,13 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
         };
     }
 
-    // 添加放置时自动设置朝向的逻辑
+    // 贴着点击的那个方块，屏幕朝外；放在地上或天花板上时屏幕在玩家看来是正的
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context)
+    public @Nullable BlockState getStateForPlacement(BlockPlaceContext context)
     {
-        // 获取玩家看向的方向的反方向作为方块朝向
-        return this.defaultBlockState()
-                .setValue(FACING, context.getClickedFace().getOpposite());
+        Direction screen = context.getClickedFace();
+        BlockState state = defaultBlockState().setValue(FACING, screen.getOpposite());
+        return screen.getAxis().isVertical() ? state.setValue(FacingRule.TOP, FacingRule.topFor(screen, context)) : state;
     }
 
     @Override
@@ -100,7 +108,7 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
         {
             NetTerminalBlockEntity blockEntity = (NetTerminalBlockEntity) level.getBlockEntity(pos);
             if (blockEntity.getNet() != null)
-                player.openMenu((NetTerminalBlockEntity) level.getBlockEntity(pos));
+                NetworkHooks.openScreen((ServerPlayer) player, (NetTerminalBlockEntity) level.getBlockEntity(pos));
             else
                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_need_bound"));
         }
@@ -108,7 +116,7 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
+    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
     {
         return new NetTerminalBlockEntity(blockPos, blockState);
     }

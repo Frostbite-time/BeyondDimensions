@@ -60,7 +60,7 @@ public class BDFluids
             Function<ForgeFlowingFluid.Properties, F> flowingCtor
     )
     {
-        // 1) FluidType
+        // 1) 流体类型（FluidType）
         RegistryObject<FluidType> type = FLUID_TYPES.register(name, () -> new FluidType(typeProps)
         {
             @Override

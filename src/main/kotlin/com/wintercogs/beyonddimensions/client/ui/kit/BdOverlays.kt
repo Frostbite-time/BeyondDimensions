@@ -1,0 +1,240 @@
+package com.wintercogs.beyonddimensions.client.ui.kit
+
+import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.*
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
+import com.wintercogs.beyonddimensions.client.ui.theme.Bd
+import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
+import dev.compixel.ui.ore.display.OreText
+import kotlin.math.roundToInt
+
+/* 浮在界面上的几种层：悬停提示、点开的浮层与文本框的右键菜单，三者同一种外观 */
+
+/** 悬停提示：指针停在 [content] 上时显示 [text]；[beside] 为 true 时提示在右侧，否则在下方 */
+@Composable
+fun BdTooltip(
+    text: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    beside: Boolean = false,
+    content: @Composable () -> Unit,
+) =
+    BdTooltip(
+        { OreText(text, color = Bd.colors[BdColors.text], style = Bd.caption) },
+        modifier,
+        enabled && text.isNotBlank(),
+        beside,
+        content,
+    )
+
+/** 内容自定的悬停提示，例如多行的说明 */
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun BdTooltip(
+    tooltip: @Composable ColumnScope.() -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    beside: Boolean = false,
+    content: @Composable () -> Unit,
+) {
+    var hovered by remember { mutableStateOf(false) }
+    Box(
+        modifier
+            .onPointerEvent(PointerEventType.Enter) { hovered = true }
+            .onPointerEvent(PointerEventType.Exit) { hovered = false }
+    ) {
+        content()
+        if (hovered && enabled && LocalWindowInfo.current.isWindowFocused) {
+            val gap = with(LocalDensity.current) { 3.dp.roundToPx() }
+            Popup(remember(gap, beside) { TooltipPosition(gap, beside) }) {
+                val colors = Bd.colors
+                Column(
+                    Modifier.widthIn(max = 200.dp)
+                        .bdRaised(colors, fill = colors[BdColors.popover])
+                        .padding(horizontal = 5.dp, vertical = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    content = tooltip,
+                )
+            }
+        }
+    }
+}
+
+/** 提示框的位置：锚点下方或右侧居中，放不下时翻到另一侧，不超出窗口 */
+private class TooltipPosition(private val gap: Int, private val beside: Boolean) : PopupPositionProvider {
+    override fun calculatePosition(
+        anchorBounds: IntRect,
+        windowSize: IntSize,
+        layoutDirection: LayoutDirection,
+        popupContentSize: IntSize,
+    ): IntOffset {
+        val width = popupContentSize.width
+        val height = popupContentSize.height
+        val x: Int
+        val y: Int
+        if (beside) {
+            x = (anchorBounds.right + gap).takeIf { it + width <= windowSize.width }
+                ?: (anchorBounds.left - gap - width)
+            y = anchorBounds.center.y - height / 2
+        } else {
+            x = anchorBounds.center.x - width / 2
+            y = (anchorBounds.bottom + gap).takeIf { it + height <= windowSize.height }
+                ?: (anchorBounds.top - gap - height)
+        }
+        return IntOffset(
+            x.coerceIn(0, (windowSize.width - width).coerceAtLeast(0)),
+            y.coerceIn(0, (windowSize.height - height).coerceAtLeast(0))
+        )
+    }
+}
+
+/**
+ * 有原版槽位的界面里打开着的浮层数。原版槽位不知道浮层的存在，点击会同时落到下面的槽位上，
+ * 所以 [open] 大于 0 时停用槽位
+ */
+class BdPopovers {
+    var open by mutableIntStateOf(0)
+        internal set
+}
+
+val LocalBdPopovers = staticCompositionLocalOf<BdPopovers?> { null }
+
+/** 点开的浮层，例如下拉的选项：在锚点下方、与锚点右边对齐；点击外部关闭 */
+@Composable
+fun BdPopover(onDismissRequest: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    LocalBdPopovers.current?.let { popovers ->
+        DisposableEffect(popovers) {
+            popovers.open++
+            onDispose { popovers.open-- }
+        }
+    }
+    if (!LocalWindowInfo.current.isWindowFocused) return
+    val gap = with(LocalDensity.current) { 2.dp.roundToPx() }
+    Popup(remember(gap) { BelowAnchor(gap) }, onDismissRequest, properties = PopupProperties(focusable = true)) {
+        // 按内容最宽的一行定宽，占满宽度的行不能把浮层撑到全屏
+        OverlayCard(Modifier.width(IntrinsicSize.Max).padding(6.dp), content)
+    }
+}
+
+private class BelowAnchor(private val gap: Int) : PopupPositionProvider {
+    override fun calculatePosition(
+        anchorBounds: IntRect,
+        windowSize: IntSize,
+        layoutDirection: LayoutDirection,
+        popupContentSize: IntSize,
+    ): IntOffset {
+        val width = popupContentSize.width
+        val height = popupContentSize.height
+        val x = anchorBounds.right - width
+        val y =
+            (anchorBounds.bottom + gap).takeIf { it + height <= windowSize.height } ?: (anchorBounds.top - gap - height)
+        return IntOffset(
+            x.coerceIn(0, (windowSize.width - width).coerceAtLeast(0)),
+            y.coerceIn(0, (windowSize.height - height).coerceAtLeast(0))
+        )
+    }
+}
+
+@Composable
+private fun OverlayCard(modifier: Modifier, content: @Composable ColumnScope.() -> Unit) {
+    val colors = Bd.colors
+    Column(
+        Modifier.bdRaised(colors, fill = colors[BdColors.popover]).then(modifier),
+        content = content,
+    )
+}
+
+/** BD 文本框的右键菜单：菜单项由 Compose 按选区给出，这里只负责外观 */
+object BdContextMenu : ContextMenuRepresentation {
+    @Composable
+    override fun Representation(state: ContextMenuState, items: () -> List<ContextMenuItem>) {
+        val status = state.status
+        if (status !is ContextMenuState.Status.Open || !LocalWindowInfo.current.isWindowFocused) return
+        val close = { state.status = ContextMenuState.Status.Closed }
+        val point = IntOffset(status.rect.center.x.roundToInt(), status.rect.center.y.roundToInt())
+        Popup(remember(point) { AtPoint(point) }, close, properties = PopupProperties(focusable = true)) {
+            OverlayCard(Modifier.width(IntrinsicSize.Max).widthIn(min = 40.dp).padding(2.dp)) {
+                for (item in items()) {
+                    BdMenuRow(item.label) {
+                        close()
+                        item.onClick()
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** 在锚点内 [point] 处展开的菜单，例如右键菜单；打开期间计入 [LocalBdPopovers] */
+@Composable
+fun BdPointMenu(point: IntOffset, onDismissRequest: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    LocalBdPopovers.current?.let { popovers ->
+        DisposableEffect(popovers) {
+            popovers.open++
+            onDispose { popovers.open-- }
+        }
+    }
+    if (!LocalWindowInfo.current.isWindowFocused) return
+    Popup(remember(point) { AtPoint(point) }, onDismissRequest, properties = PopupProperties(focusable = true)) {
+        OverlayCard(Modifier.width(IntrinsicSize.Max).widthIn(min = 40.dp).padding(2.dp), content)
+    }
+}
+
+/** 左上角落在锚点内 [point] 处，放不下时翻到指针的左侧或上方 */
+private class AtPoint(private val point: IntOffset) : PopupPositionProvider {
+    override fun calculatePosition(
+        anchorBounds: IntRect,
+        windowSize: IntSize,
+        layoutDirection: LayoutDirection,
+        popupContentSize: IntSize,
+    ): IntOffset {
+        val width = popupContentSize.width
+        val height = popupContentSize.height
+        val px = anchorBounds.left + point.x
+        val py = anchorBounds.top + point.y
+        val x = px.takeIf { it + width <= windowSize.width } ?: (px - width)
+        val y = py.takeIf { it + height <= windowSize.height } ?: (py - height)
+        return IntOffset(
+            x.coerceIn(0, (windowSize.width - width).coerceAtLeast(0)),
+            y.coerceIn(0, (windowSize.height - height).coerceAtLeast(0))
+        )
+    }
+}
+
+/** 菜单中的一行：一行小字，悬停时浅色底；[selected] 为真时文字用强调色，例如下拉菜单里选中的一项 */
+@Composable
+fun BdMenuRow(label: String, selected: Boolean = false, onClick: () -> Unit) {
+    val colors = Bd.colors
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    Box(
+        Modifier.fillMaxWidth()
+            .height(13.dp)
+            .hoverable(interaction)
+            .bdClickable(interaction, onClick = onClick)
+            .background(if (hovered) colors[BdColors.accentSoft] else Color.Transparent)
+            .padding(horizontal = 5.dp),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        OreText(
+            label,
+            color = if (hovered || selected) colors[BdColors.accentDeep] else colors[BdColors.text],
+            style = Bd.caption,
+            maxLines = 1
+        )
+    }
+}

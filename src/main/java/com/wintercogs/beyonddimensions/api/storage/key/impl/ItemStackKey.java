@@ -189,6 +189,12 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     }
 
     @Override
+    public ResourceLocation getSourceId()
+    {
+        return BuiltInRegistries.ITEM.getKey(item);
+    }
+
+    @Override
     public boolean isEmpty()
     {
         return this == EMPTY || this.item == Items.AIR;
@@ -327,7 +333,7 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     {
         if (nbt == null) return EMPTY;
 
-        // 新格式：{ item, tag?, caps? }
+        // 新格式：{ item, tag?, caps? }；物品解析不了时如实失败，由 IStackKey.deserializeNBTCommon 封装成错误数据
         if (nbt.contains("item", Tag.TAG_STRING))
         {
             return readNewFmt(nbt);
@@ -339,53 +345,50 @@ public final class ItemStackKey implements IStackKey<ItemStack>
             return fromLegacyTypedStack(nbt);
         }
 
-        // 2) 其他未知形状：兜底为空
-        return EMPTY;
+        throw new IllegalArgumentException("Unknown item key data: " + nbt.getAllKeys());
     }
 
     private @NotNull IStackKey<ItemStack> fromLegacyTypedStack(@NotNull CompoundTag typed)
     {
+        CompoundTag stackTag = typed.getCompound("Stack");
+
+        // 旧字段：ForgeCaps
+        CompoundTag caps = stackTag.contains("ForgeCaps", net.minecraft.nbt.Tag.TAG_COMPOUND)
+                ? stackTag.getCompound("ForgeCaps")
+                : null;
+
+        // 标准字段：tag
+        CompoundTag tag = stackTag.contains("tag", net.minecraft.nbt.Tag.TAG_COMPOUND)
+                ? stackTag.getCompound("tag")
+                : null;
+
+        Item raw = registeredItem(stackTag.getString("id"));
+
+        Item it;
         try
         {
-            CompoundTag stackTag = typed.getCompound("Stack");
-
-            // 旧字段：ForgeCaps
-            CompoundTag caps = stackTag.contains("ForgeCaps", net.minecraft.nbt.Tag.TAG_COMPOUND)
-                    ? stackTag.getCompound("ForgeCaps")
-                    : null;
-
-            // 标准字段：tag
-            CompoundTag tag = stackTag.contains("tag", net.minecraft.nbt.Tag.TAG_COMPOUND)
-                    ? stackTag.getCompound("tag")
-                    : null;
-
-            // 物品 id
-            var id = net.minecraft.resources.ResourceLocation.tryParse(stackTag.getString("id"));
-            Item raw = (id == null) ? Items.AIR : BuiltInRegistries.ITEM.get(id);
-
-            Item it;
-            try
-            {
-                it = ForgeRegistries.ITEMS.getDelegateOrThrow(raw).get();
-            }
-            catch (Throwable ignored)
-            {
-                it = raw;
-            }
-
-            return new ItemStackKey(it, tag, caps);
+            it = ForgeRegistries.ITEMS.getDelegateOrThrow(raw).get();
         }
-        catch (Throwable t)
+        catch (Throwable ignored)
         {
-            BeyondDimensions.LOGGER.warn("ItemStackKey: failed to decode legacy typed stack. Keys={}", typed.getAllKeys());
-            return EMPTY;
+            it = raw;
         }
+
+        return new ItemStackKey(it, tag, caps);
+    }
+
+    // 物品 id 对应的物品；未注册的物品如实失败
+    private static Item registeredItem(String name)
+    {
+        var id = net.minecraft.resources.ResourceLocation.tryParse(name);
+        if (id == null || !BuiltInRegistries.ITEM.containsKey(id))
+            throw new IllegalArgumentException("Unknown item: " + name);
+        return BuiltInRegistries.ITEM.get(id);
     }
 
     private @NotNull IStackKey<ItemStack> readNewFmt(@NotNull CompoundTag nbt)
     {
-        var id = net.minecraft.resources.ResourceLocation.tryParse(nbt.getString("item"));
-        Item raw = id == null ? Items.AIR : BuiltInRegistries.ITEM.get(id);
+        Item raw = registeredItem(nbt.getString("item"));
 
         Item it;
         try

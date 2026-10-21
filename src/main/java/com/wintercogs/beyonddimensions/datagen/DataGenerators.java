@@ -29,7 +29,7 @@ public class DataGenerators
     @SubscribeEvent
     public static void gatherData(GatherDataEvent event)
     {
-        LOGGER.info("数据生成启动");
+        LOGGER.info("Data generation started");
         DataGenerator generator = event.getGenerator();
         PackOutput packOutput = generator.getPackOutput();
         ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
@@ -59,6 +59,5 @@ public class DataGenerators
         generator.addProvider(event.includeServer(), new ModRecipeProvider(packOutput));
 
         IntegrationManager.onDatagen(event);
-
     }
 }

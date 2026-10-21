@@ -6,10 +6,12 @@ import com.wintercogs.beyonddimensions.common.menu.NetMagnetMenu;
 import com.wintercogs.beyonddimensions.util.InventoryHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.NetworkHooks;
 
 import java.util.function.Supplier;
 
@@ -23,7 +25,7 @@ public record OpenMagnetGuiPacket()
             return;
         }
 
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
         if (net == null)
         {
             return;
@@ -35,7 +37,7 @@ public record OpenMagnetGuiPacket()
             return;
         }
 
-        player.openMenu(new SimpleMenuProvider((containerId, inv, serverPlayer) ->
+        NetworkHooks.openScreen((ServerPlayer) player, new SimpleMenuProvider((containerId, inv, serverPlayer) ->
                 new NetMagnetMenu(containerId, inv, itemStack),
                 Component.translatable("menu.title.beyonddimensions.magnet_menu")));
     }

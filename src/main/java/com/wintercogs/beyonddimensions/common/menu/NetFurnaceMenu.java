@@ -1,32 +1,39 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.machine.Machine;
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.common.block.entity.BaseNetFurnaceBlockEntity;
-import com.wintercogs.beyonddimensions.common.init.BDMenus;
-import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
-import com.wintercogs.beyonddimensions.common.machine.PopMode;
-import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineMenu;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.OrderedStackTypedSlot;
-import net.minecraft.nbt.CompoundTag;
+import dev.compixel.forge.sync.MenuAction;
+import dev.compixel.forge.sync.MenuSync;
+import dev.compixel.sync.state.SyncCodec;
+import dev.compixel.sync.state.SyncCodecs;
+import dev.compixel.sync.state.SyncSchema;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public class NetFurnaceMenu extends BDBaseMenu
+import static com.wintercogs.beyonddimensions.common.init.BDMenus.Net_Furnace_Menu;
+
+/**
+ * 维度网络熔炉：九条产线的实时进度
+ */
+public class NetFurnaceMenu extends BDBaseMenu implements MachineMenu
 {
-
-    private static final int invSlotStartY = 128;
 
     private final IStackHandler inputFilterSlots;
     private final IStackHandler fuelFilterSlots;
@@ -35,13 +42,81 @@ public class NetFurnaceMenu extends BDBaseMenu
     private final IStackHandler fuelStorageSlots;
     private final IStackHandler fuelReturnSlots;
 
-    // 用于对比上一tick所用的信息缓存
-    private List<Integer> lastLitTime = new ArrayList<>();
-    private List<Integer> lastLitDuration = new ArrayList<>();
-    private List<Integer> lastCookTime = new ArrayList<>();
-    private List<Integer> lastCookTimeTotal = new ArrayList<>();
+    // 各槽位组的起始索引，由构造过程记录，供客户端页面分区显示
+    private int inputFilterStart, fuelFilterStart, inputStorageStart, fuelStorageIndex, fuelReturnIndex, outputStorageStart;
+
+    public record Lane(int index, int cooking, int cookingTotal, int burning, int burningTotal)
+    {
+    }
+
+    private static final SyncCodec<Lane> LANE_CODEC = SyncCodec.of("beyonddimensions:furnace_lane/1",
+            (out, lane) -> {
+                out.writeInt(lane.index());
+                out.writeInt(lane.cooking());
+                out.writeInt(lane.cookingTotal());
+                out.writeInt(lane.burning());
+                out.writeInt(lane.burningTotal());
+            },
+            in -> {
+                var lane = new Lane(in.readInt(), in.readInt(), in.readInt(), in.readInt(), in.readInt());
+                if (lane.index() < 0 || lane.index() >= 9 || lane.cooking() < 0 || lane.cookingTotal() < 0 || lane.burning() < 0 || lane.burningTotal() < 0)
+                    throw new java.io.IOException("Invalid furnace progress");
+                return lane;
+            });
+    private List<Lane> lanes = IntStream.range(0, 9).mapToObj(i -> new Lane(i, 0, 0, 0, 0)).toList();
+
+    public List<Lane> lanes()
+    {
+        return lanes;
+    }
+
+    private List<Lane> captureLanes()
+    {
+        if (player.level().isClientSide()) return lanes;
+        var current = new ArrayList<Lane>(9);
+        for (int i = 0; i < 9; i++)
+            current.add(new Lane(i, be.getCookTime().get(i), be.getCookTimeTotal().get(i), be.getLitTime().get(i), be.getLitDuration().get(i)));
+        if (!current.equals(lanes)) lanes = List.copyOf(current);
+        return lanes;
+    }
 
     public final BaseNetFurnaceBlockEntity<?> be;
+
+    private static final SyncSchema<NetFurnaceMenu> SCHEMA = MachineSettingsSync.field(SyncSchema.<NetFurnaceMenu>builder("beyonddimensions:furnace", 2))
+            .keyedCollection("lanes", SyncCodecs.INT, LANE_CODEC, Lane::index, NetFurnaceMenu::captureLanes, (m, value) -> m.lanes = value)
+            .build();
+
+    private static final MenuAction<NetFurnaceMenu, MachineSettingsSync.Change> SET_SETTING = MachineSettingsSync.action();
+
+    private final MachineSettingsSync.Mirror machineSettings = new MachineSettingsSync.Mirror();
+
+    private final MenuSync<NetFurnaceMenu> synchronization;
+
+    @Override
+    public MenuSync<NetFurnaceMenu> menuSync()
+    {
+        return synchronization;
+    }
+
+    @Override
+    public @Nullable Machine machine()
+    {
+        return be == null || be.isRemoved() ? null : be;
+    }
+
+    @Override
+    public MachineSettingsSync.Mirror machineSettings()
+    {
+        return machineSettings;
+    }
+
+    /**
+     * 客户端：按控件给出的值修改设置，见 {@link MachineSettingsSync#valueAt}
+     */
+    public boolean requestSetting(ResourceLocation setting, long pick)
+    {
+        return MachineSettingsSync.request(this, synchronization, SET_SETTING, setting, pick);
+    }
 
     public NetFurnaceMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
@@ -50,18 +125,18 @@ public class NetFurnaceMenu extends BDBaseMenu
 
     public NetFurnaceMenu(int containerId, Inventory playerInventory, BaseNetFurnaceBlockEntity<?> be)
     {
-        super(BDMenus.Net_Furnace_Menu.get(), containerId, playerInventory);
+        super(Net_Furnace_Menu.get(), containerId, playerInventory);
 
         this.be = be;
 
         if (playerInventory.player.level().isClientSide())
         {
-            this.inputFilterSlots = new StackHandler(be.getFilterCapacity());
-            this.fuelFilterSlots = new StackHandler(be.getFilterCapacity());
-            this.inputStorageSlots = new StackHandler(be.getCapacity());
-            this.outputStorageSlots = new StackHandler(be.getCapacity());
-            this.fuelStorageSlots = new StackHandler(be.getFuelCapacity());
-            this.fuelReturnSlots = new StackHandler(be.getFuelCapacity());
+            this.inputFilterSlots = new StackHandler(8);
+            this.fuelFilterSlots = new StackHandler(8);
+            this.inputStorageSlots = new StackHandler(9);
+            this.outputStorageSlots = new StackHandler(9);
+            this.fuelStorageSlots = new StackHandler(1);
+            this.fuelReturnSlots = new StackHandler(1);
         }
         else
         {
@@ -73,44 +148,86 @@ public class NetFurnaceMenu extends BDBaseMenu
             this.fuelReturnSlots = be.getFuelReturnSlots();
         }
 
-
         addPlayerInv(playerInventory);
         addFilterSlots();
         addStorageSlots();
+        synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SCHEMA)).action(SET_SETTING));
+    }
 
+    // 槽位分组：由本页建立，也由本页回答各自的下标范围
+
+    public List<Integer> inputFilterSlotIds()
+    {
+        return ids(inputFilterStart, 8);
+    }
+
+    public List<Integer> fuelFilterSlotIds()
+    {
+        return ids(fuelFilterStart, 8);
+    }
+
+    public List<Integer> inputStorageSlotIds()
+    {
+        return ids(inputStorageStart, 9);
+    }
+
+    public List<Integer> fuelStorageSlotIds()
+    {
+        return List.of(fuelStorageIndex);
+    }
+
+    public List<Integer> fuelReturnSlotIds()
+    {
+        return List.of(fuelReturnIndex);
+    }
+
+    public List<Integer> outputStorageSlotIds()
+    {
+        return ids(outputStorageStart, 9);
+    }
+
+    private static List<Integer> ids(int start, int count)
+    {
+        return IntStream.range(start, start + count).boxed().toList();
     }
 
     private void addFilterSlots()
     {
+        inputFilterStart = slots.size();
         for (int i = 0; i < 8; i++)
         {
-            FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, inputFilterSlots, i, 7, 38 + i * 18);
+            FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, inputFilterSlots, i);
             this.addSlot(flagSlot);
         }
+        fuelFilterStart = slots.size();
         for (int i = 0; i < 8; i++)
         {
-            FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, fuelFilterSlots, i, 207, 38 + i * 18);
+            FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, fuelFilterSlots, i);
             this.addSlot(flagSlot);
         }
     }
 
     private void addStorageSlots()
     {
+        inputStorageStart = slots.size();
         vanillaQuickMoveStartIndex = slots.size();
         for (int i = 0; i < 9; i++)
         {
-            OrderedStackTypedSlot storageSlot = new OrderedStackTypedSlot(this, inputStorageSlots, i, inventoryStartIndex, inventoryEndIndex, 31 + i * 19, 38);
+            OrderedStackTypedSlot storageSlot = new OrderedStackTypedSlot(this, inputStorageSlots, i, inventoryStartIndex, inventoryEndIndex, 0, 0);
             this.addSlot(storageSlot);
         }
         //燃料
-        this.addSlot(new OrderedStackTypedSlot(this, fuelStorageSlots, 0, inventoryStartIndex, inventoryEndIndex, 207, 186));
+        fuelStorageIndex = slots.size();
+        this.addSlot(new OrderedStackTypedSlot(this, fuelStorageSlots, 0, inventoryStartIndex, inventoryEndIndex, 0, 0));
         vanillaQuickMoveEndIndex = slots.size();
         // 燃料返回物槽
-        this.addSlot(new OrderedStackTypedSlot(this, fuelReturnSlots, 0, inventoryStartIndex, inventoryEndIndex, 7, 186));
+        fuelReturnIndex = slots.size();
+        this.addSlot(new OrderedStackTypedSlot(this, fuelReturnSlots, 0, inventoryStartIndex, inventoryEndIndex, 0, 0));
         // 输出槽
+        outputStorageStart = slots.size();
         for (int i = 0; i < 9; i++)
         {
-            OrderedStackTypedSlot storageSlot = new OrderedStackTypedSlot(this, outputStorageSlots, i, inventoryStartIndex, inventoryEndIndex, 31 + i * 19, 90);
+            OrderedStackTypedSlot storageSlot = new OrderedStackTypedSlot(this, outputStorageSlots, i, inventoryStartIndex, inventoryEndIndex, 0, 0);
             this.addSlot(storageSlot);
         }
     }
@@ -123,12 +240,12 @@ public class NetFurnaceMenu extends BDBaseMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 35 + col * 18, invSlotStartY + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 0, 0));
             }
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 35 + col * 18, 4 + invSlotStartY + 3 * 18));
+            this.addSlot(new Slot(playerInventory, col, 0, 0));
         }
         inventoryEndIndex = slots.size();
     }
@@ -137,69 +254,5 @@ public class NetFurnaceMenu extends BDBaseMenu
     public boolean stillValid(@NotNull Player player)
     {
         return be != null && !be.isRemoved();
-    }
-
-    // 服务端在数值不同时主动发送消息
-    @Override
-    protected boolean shouldSendQuickData()
-    {
-        boolean shouldSendQuickData = super.shouldSendQuickData()
-                || !Objects.equals(lastLitTime, be.getLitTime())
-                || !Objects.equals(lastLitDuration, be.getLitDuration())
-                || !Objects.equals(lastCookTime, be.getCookTime())
-                || !Objects.equals(lastCookTimeTotal, be.getCookTimeTotal());
-        if (shouldSendQuickData)
-        {
-            lastLitTime = new ArrayList<>(be.getLitTime());
-            lastLitDuration = new ArrayList<>(be.getLitDuration());
-            lastCookTime = new ArrayList<>(be.getCookTime());
-            lastCookTimeTotal = new ArrayList<>(be.getCookTimeTotal());
-        }
-        return shouldSendQuickData;
-    }
-
-    @Override
-    protected void writeQuickDataTag(CompoundTag tag)
-    {
-        super.writeQuickDataTag(tag);
-        tag.putString("pop_mode", be.popMode.name());
-        tag.putString("receive_mode", be.receiveMode.name());
-        tag.putString("control_mode", be.controlMode.name());
-        tag.putString("sort_mode", be.sortMode.name());
-        tag.putIntArray("lit_time", be.getLitTime());
-        tag.putIntArray("lit_duration", be.getLitDuration());
-        tag.putIntArray("cook_time", be.getCookTime());
-        tag.putIntArray("cook_time_total", be.getCookTimeTotal());
-    }
-
-    @Override
-    public void readQuickDataTag(CompoundTag tag)
-    {
-        super.readQuickDataTag(tag);
-        if (!player.level().isClientSide()) // 服务端读取按钮信息并广播到所有玩家
-        {
-            be.popMode = PopMode.valueOf(tag.getString("pop_mode"));
-            be.receiveMode = ReceiveMode.valueOf(tag.getString("receive_mode"));
-            be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
-            be.sortMode = AutoSortMode.valueOf(tag.getString("sort_mode"));
-            if (!player.level().isClientSide())
-            {
-                // 服务端接收到更新信息后立刻通知保存
-                player.level().blockEntityChanged(be.getBlockPos());
-                player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);
-            }
-        }
-        else // 客户端读取全部信息
-        {
-            be.popMode = PopMode.valueOf(tag.getString("pop_mode"));
-            be.receiveMode = ReceiveMode.valueOf(tag.getString("receive_mode"));
-            be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
-            be.sortMode = AutoSortMode.valueOf(tag.getString("sort_mode"));
-            be.setLitTime(Arrays.stream(tag.getIntArray("lit_time")).boxed().collect(Collectors.toList()));
-            be.setLitDuration(Arrays.stream(tag.getIntArray("lit_duration")).boxed().collect(Collectors.toList()));
-            be.setCookTime(Arrays.stream(tag.getIntArray("cook_time")).boxed().collect(Collectors.toList()));
-            be.setCookTimeTotal(Arrays.stream(tag.getIntArray("cook_time_total")).boxed().collect(Collectors.toList()));
-        }
-
     }
 }

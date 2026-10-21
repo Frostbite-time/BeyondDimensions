@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
@@ -15,13 +16,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.WeakHashMap;
 
 public class NetTerminalItem extends NetedItem implements MenuProvider
 {
-
     public NetTerminalItem(Properties properties)
     {
         super(properties.stacksTo(1));
@@ -31,7 +34,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
+    public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
     {
         super.use(level, player, usedHand);
         ItemStack itemstack = player.getItemInHand(usedHand);
@@ -42,14 +45,13 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
 
         if (!level.isClientSide())
         {
-
             if (NetedItem.getNetId(itemstack) >= 0)
             {
                 DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack));
                 if (net != null)
                 {
                     contextMap.put(player, new MenuTriggerContext(usedHand, itemstack));
-                    player.openMenu(this);
+                    NetworkHooks.openScreen((ServerPlayer) player, this);
                 }
             }
             else
@@ -68,7 +70,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
     }
 
     @Override
-    public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
+    public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
 
         // 从上下文映射中获取触发时的物品
@@ -79,35 +81,33 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
             ctx = new MenuTriggerContext(player.getUsedItemHand(), player.getItemInHand(player.getUsedItemHand()));
         }
         // 验证物品是否仍是有效的NetTerminalItem
-        if (ctx.stack.getItem() != this)
+        if (ctx.stack.getItem() != this || NetedItem.getNetId(ctx.stack) < 0)
         {
             return null;
         }
         // 使用上下文中的物品栈
         DimensionsNet net = DimensionsNet.getNetFromId(NetedItem.getNetId(ctx.stack));
         if (net == null) return null;
-
-        // 从NBT获取合成槽位
-        CompoundTag tag = ctx.stack.getOrCreateTag();
-        if (!tag.contains("craft_slots", Tag.TAG_LIST))
-        {
-            // 初始化默认的9个空槽位
-            ListTag slots = new ListTag();
-            for (int i = 0; i < 9; i++)
-            {
-                slots.add(ItemStack.EMPTY.save(new CompoundTag()));
-            }
-            tag.put("craft_slots", slots);
-        }
-        ListTag slotsTag = tag.getList("craft_slots", Tag.TAG_COMPOUND);
-        NonNullList<ItemStack> craftSlots = NonNullList.withSize(9, ItemStack.EMPTY);
-        for (int i = 0; i < slotsTag.size() && i < 9; i++)
-        {
-            craftSlots.set(i, ItemStack.of(slotsTag.getCompound(i)));
-        }
-        return new DimensionsCraftMenuTerminal(containerId, inventory, net.getUnifiedStorage(), craftSlots, ctx.stack, null);
+        // 旧版本的终端物品带着合成格的物品，先还给玩家
+        NonNullList<ItemStack> legacy = removeLegacyCraftSlots(ctx.stack);
+        if (legacy != null)
+            DimensionsCraftMenuTerminal.returnLegacyCraftItems(player, net.getUnifiedStorage(), legacy);
+        return new DimensionsCraftMenuTerminal(containerId, inventory, net.getUnifiedStorage(), ctx.stack, null);
     }
 
+    // 旧版本终端物品 NBT 中的合成格物品，取出后从物品上移除；没有时返回 null
+    private static @Nullable NonNullList<ItemStack> removeLegacyCraftSlots(ItemStack stack)
+    {
+        CompoundTag tag = stack.getTag();
+        if (tag == null || !tag.contains("craft_slots", Tag.TAG_LIST))
+            return null;
+        ListTag slotsTag = tag.getList("craft_slots", Tag.TAG_COMPOUND);
+        tag.remove("craft_slots");
+        NonNullList<ItemStack> items = NonNullList.withSize(9, ItemStack.EMPTY);
+        for (int i = 0; i < slotsTag.size() && i < 9; i++)
+            items.set(i, ItemStack.of(slotsTag.getCompound(i)));
+        return items;
+    }
 
     // 创建一个内部类来存储触发时的上下文
     public static class MenuTriggerContext

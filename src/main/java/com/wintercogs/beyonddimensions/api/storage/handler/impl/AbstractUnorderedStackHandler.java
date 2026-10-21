@@ -4,19 +4,17 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.ErrorData;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.init.BDItems;
-import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
@@ -46,9 +44,33 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     protected final Map<IStackKey<?>, Long> storage = new HashMap<>();
     protected final ArrayList<IStackKey<?>> slotIndex = new ArrayList<>();
     protected final Map<IStackKey<?>, Integer> posMap = new HashMap<>();
+    /**
+     * 对外输出用的堆叠（能力按槽位读取时使用），首次读取时才建立，见 {@link #getOutStackByKey}
+     */
     protected final Map<IStackKey<?>, Object> key2stackMap = new HashMap<>();
     protected final Map<ResourceLocation, TypeBucket> type2buckets = new HashMap<>();
+    /**
+     * 标签索引，首次按标签取出时才建立，标签重载后重建；读取请用 {@link #tagIndex()}
+     */
     protected final Multimap<TagKey<?>, IStackKey<?>> tag2stackMap = HashMultimap.create();
+
+    /* ---------- 模糊匹配索引：(类型, 模糊分组) → 变体，按加入顺序 ---------- */
+    private record FuzzyGroup(ResourceLocation type, Object group)
+    {
+        static FuzzyGroup of(IStackKey<?> key)
+        {
+            return new FuzzyGroup(key.getTypeId(), key.fuzzyGroup());
+        }
+    }
+
+    private final Map<FuzzyGroup, LinkedHashSet<IStackKey<?>>> fuzzyIndex = new HashMap<>();
+
+    /* ---------- 标签索引的代次：标签重载时加一，各存储的标签索引随之过期 ---------- */
+    private static volatile int tagGeneration;
+    private int tagIndexGeneration = -1;
+
+    /* ---------- 存档：每个键编码后的 NBT。键不可变，编码结果不再修改，可直接复用 ---------- */
+    private final Map<IStackKey<?>, CompoundTag> encodedKeys = new HashMap<>();
 
     /* ---------- 仅供 UI 使用的时间表 ---------- */
     /**
@@ -179,7 +201,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     /**
-     * 获取“建槽位时间表”的引用（按你的要求，返回真实引用）
+     * 获取“建槽位时间表”，返回的是真实引用而不是副本
      */
     public Map<IStackKey<?>, Long> getCreationTimeMap()
     {
@@ -187,7 +209,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     /**
-     * 获取“最后修改时间表”的引用（按你的要求，返回真实引用）
+     * 获取“最后修改时间表”，返回的是真实引用而不是副本
      */
     public Map<IStackKey<?>, Long> getLastModifiedTimeMap()
     {
@@ -227,7 +249,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     /**
-     * 在状态切换到remove zero时，做一个零键清理
+     * 零值策略切换到 REMOVE_ON_ZERO 时，清理数量为零的键
      */
     private void reconcileAfterZeroPolicyChange()
     {
@@ -372,15 +394,23 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     @Override
     public void clearStorage()
     {
+        resetContents();
+        onChange();
+    }
+
+    private void resetContents()
+    {
         storage.clear();
         slotIndex.clear();
         posMap.clear();
         key2stackMap.clear();
         type2buckets.clear();
         tag2stackMap.clear();
+        tagIndexGeneration = -1;
+        fuzzyIndex.clear();
+        encodedKeys.clear();
         creationTimeMap.clear();
         lastModifiedTimeMap.clear();
-        onChange();
     }
 
     @Override
@@ -434,7 +464,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
                 }
             }
             else
-            { // KEEP_ZERO
+            { // 策略为 KEEP_ZERO：保留数量为零的键
                 storage.put(key, 0L);
                 ensureInIndex(key); // ensureInIndex 内部会做“建槽位时间”记录（首次）
                 if (uiTimestampPolicy == UiTimestampPolicy.AUTO)
@@ -447,7 +477,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             return 0L;
         }
 
-        // target > 0
+        // 以下是 target 大于 0 的情况
         boolean isNew = (current == 0L) && !posMap.containsKey(key);
         if (isNew && slotIndex.size() >= slotMaxSize)
         {
@@ -524,11 +554,6 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         long add = Math.max(0L, amount);
         if (add == 0L) return new KeyAmount(key, 0L);
 
-        if (key instanceof ItemStackKey itemKey && itemKey.getSource() == BDItems.MATTER_COMPRESS_BALL.get())
-        {
-            return unzipMatterBall(itemKey, add, simulate);
-        }
-
         long current = storage.getOrDefault(key, 0L);
         boolean needNewSlot = (current == 0L) && !posMap.containsKey(key);
         if (needNewSlot && slotIndex.size() >= slotMaxSize)
@@ -554,98 +579,6 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             onContentChanged(key, actual, true);
         }
         return new KeyAmount(key, leftover);
-    }
-
-    protected KeyAmount unzipMatterBall(ItemStackKey ballKey, long ballCount, boolean simulate)
-    {
-        ItemStack ballStack = ballKey.copyStackWithCount(ballCount);
-        if (ballStack.isEmpty() || !(ballStack.getItem() instanceof MatterCompressionBall))
-        {
-            return new KeyAmount(ballKey, ballCount);
-        }
-
-        // 1.20.1：从 NBT stack_list 读取 contents
-        List<KeyAmount> contents;
-        if (!MatterCompressionBall.hasIStackList(ballStack))
-        {
-            contents = Collections.emptyList();
-        }
-        else
-        {
-            try
-            {
-                contents = MatterCompressionBall.getIStackList(ballStack);
-            }
-            catch (Throwable t)
-            {
-                contents = Collections.emptyList();
-            }
-        }
-
-        if (contents.isEmpty()) return new KeyAmount(ballKey, 0L);
-
-        final Map<IStackKey<?>, Long> needMap = new HashMap<>();
-        try
-        {
-            for (KeyAmount entry : contents)
-            {
-                if (entry.isEmpty()) continue;
-                long scaled = Math.multiplyExact(entry.amount(), ballCount);
-                needMap.merge(entry.key(), scaled, Math::addExact);
-            }
-        }
-        catch (ArithmeticException e)
-        {
-            return new KeyAmount(ballKey, ballCount);
-        }
-
-        int freeSlots = Math.max(0, slotMaxSize - slotIndex.size());
-        int newKeysNeeded = 0;
-        for (Map.Entry<IStackKey<?>, Long> e : needMap.entrySet())
-        {
-            IStackKey<?> k = e.getKey();
-            long need = e.getValue();
-            long current = storage.getOrDefault(k, 0L);
-            boolean isNew = (current == 0L) && !posMap.containsKey(k);
-            if (isNew && ++newKeysNeeded > freeSlots) return new KeyAmount(ballKey, ballCount);
-            long room = (slotCapacity <= current) ? 0L : (slotCapacity - current);
-            if (need > room) return new KeyAmount(ballKey, ballCount);
-        }
-
-        if (simulate) return new KeyAmount(ballKey, 0L);
-
-        final ArrayList<KeyAmount> applied = new ArrayList<>();
-        for (KeyAmount entry : contents)
-        {
-            if (entry.isEmpty()) continue;
-            long scaled;
-            try
-            {
-                scaled = Math.multiplyExact(entry.amount(), ballCount);
-            }
-            catch (ArithmeticException e)
-            {
-                for (int i = applied.size() - 1; i >= 0; i--)
-                {
-                    KeyAmount a = applied.get(i);
-                    extract(a.key(), a.amount(), false, false);
-                }
-                return new KeyAmount(ballKey, ballCount);
-            }
-            KeyAmount leftover = insert(entry.key(), scaled, false);
-            long ok = scaled - leftover.amount();
-            if (ok > 0L) applied.add(new KeyAmount(entry.key(), ok));
-            if (leftover.amount() > 0L)
-            {
-                for (int i = applied.size() - 1; i >= 0; i--)
-                {
-                    KeyAmount a = applied.get(i);
-                    extract(a.key(), a.amount(), false, false);
-                }
-                return new KeyAmount(ballKey, ballCount);
-            }
-        }
-        return new KeyAmount(ballKey, 0L);
     }
 
     private @NotNull KeyAmount extractByKey(IStackKey<?> key, long count, boolean simulate)
@@ -698,23 +631,104 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         return extractByKey(key, count, simulate);
     }
 
+    /**
+     * 模糊匹配时取数量最多的变体，数量相同时取先加入的
+     */
     @Override
     public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate, boolean fuzzy)
     {
-        if (fuzzy)
+        if (fuzzy && key != null)
         {
-            var fuzzyKey = key;
-            key = slotIndex.stream().filter(x -> x.isSame(fuzzyKey)).findFirst().orElse(null);
+            key = mostAbundantVariant(key);
         }
         if (key == null || amount <= 0L) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         return extractByKey(key, amount, simulate);
     }
 
+    /**
+     * 与 key 模糊匹配、数量最多的变体；数量相同时取先加入的，没有时返回 null
+     */
+    protected @Nullable IStackKey<?> mostAbundantVariant(IStackKey<?> key)
+    {
+        Set<IStackKey<?>> variants = fuzzyIndex.get(FuzzyGroup.of(key));
+        if (variants == null) return null;
+        IStackKey<?> best = null;
+        long most = 0L;
+        for (IStackKey<?> variant : variants)
+        {
+            long amount = storage.getOrDefault(variant, 0L);
+            if (amount > most && variant.isSame(key))
+            {
+                most = amount;
+                best = variant;
+            }
+        }
+        return best;
+    }
+
+    @Override
+    public List<KeyAmount> getFuzzyMatches(IStackKey<?> key)
+    {
+        if (key == null) return List.of();
+        Set<IStackKey<?>> variants = fuzzyIndex.get(FuzzyGroup.of(key));
+        if (variants == null) return List.of();
+        List<KeyAmount> out = new ArrayList<>(variants.size());
+        for (IStackKey<?> variant : variants)
+        {
+            long amount = storage.getOrDefault(variant, 0L);
+            if (amount > 0L && variant.isSame(key)) out.add(new KeyAmount(variant, amount));
+        }
+        return out;
+    }
+
     public @NotNull KeyAmount extract(TagKey<?> tagKey, long amount, boolean simulate)
     {
-        var key = tag2stackMap.get(tagKey).stream().findFirst();
+        var key = tagIndex().get(tagKey).stream().findFirst();
         if (key.isEmpty() || amount <= 0L) return new KeyAmount(EmptyStackKey.INSTANCE, 0L);
         return extractByKey(key.get(), amount, simulate);
+    }
+
+    /**
+     * 标签到资源的索引，首次调用时建立，标签重载后重建
+     */
+    protected Multimap<TagKey<?>, IStackKey<?>> tagIndex()
+    {
+        if (tagIndexGeneration != tagGeneration)
+        {
+            tag2stackMap.clear();
+            for (IStackKey<?> key : slotIndex)
+            {
+                key.getTags().forEach(tag -> tag2stackMap.put(tag, key));
+            }
+            tagIndexGeneration = tagGeneration;
+        }
+        return tag2stackMap;
+    }
+
+    /**
+     * 标签重载后调用，让所有存储的标签索引在下次使用时重建
+     */
+    public static void invalidateTagIndexes()
+    {
+        tagGeneration++;
+    }
+
+    /**
+     * 直接加入数量：不经过插入钩子，不受容量与种类上限约束，用于读档与合并网络。
+     * 只发出增量通知，调用方在一批之后调用 {@link #onChange()}
+     */
+    public void restore(IStackKey<?> key, long amount)
+    {
+        if (key == null || key.isEmpty() || amount <= 0L) return;
+        long current = storage.getOrDefault(key, 0L);
+        long next = current + amount;
+        storage.put(key, next < 0L ? Long.MAX_VALUE : next);
+        ensureInIndex(key);
+        if (uiTimestampPolicy == UiTimestampPolicy.AUTO)
+        {
+            lastModifiedTimeMap.put(key, nowMillis());
+        }
+        fireDelta(key, amount, true);
     }
 
     @Override
@@ -743,10 +757,11 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         slotIndex.add(key);
         posMap.put(key, idx);
         bucketOf(key.getTypeId()).add(key);
-        if (!key2stackMap.containsKey(key)) key2stackMap.put(key, key.copyStack());
-        key.getTags().forEach(tag -> {
-            tag2stackMap.put(tag, key);
-        });
+        fuzzyIndex.computeIfAbsent(FuzzyGroup.of(key), g -> new LinkedHashSet<>()).add(key);
+        if (tagIndexGeneration == tagGeneration)
+        {
+            key.getTags().forEach(tag -> tag2stackMap.put(tag, key));
+        }
         // 新建槽位时间
         if (uiTimestampPolicy == UiTimestampPolicy.AUTO)
         {
@@ -768,9 +783,14 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         slotIndex.remove(last);
         bucketOf(key.getTypeId()).remove(key);
         key2stackMap.remove(key);
-        key.getTags().forEach(tag -> {
-            tag2stackMap.remove(tag, key);
-        });
+        FuzzyGroup group = FuzzyGroup.of(key);
+        Set<IStackKey<?>> variants = fuzzyIndex.get(group);
+        if (variants != null && variants.remove(key) && variants.isEmpty()) fuzzyIndex.remove(group);
+        if (tagIndexGeneration == tagGeneration)
+        {
+            key.getTags().forEach(tag -> tag2stackMap.remove(tag, key));
+        }
+        encodedKeys.remove(key);
         // 为避免无上限增长，这里选择在移除槽位时一并清理时间记录
         creationTimeMap.remove(key);
         lastModifiedTimeMap.remove(key);
@@ -825,9 +845,18 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         return Optional.ofNullable(type2buckets.get(type));
     }
 
+    /**
+     * 对外输出用的堆叠，同一资源每次返回同一个对象；首次读取时建立，存储里没有的资源返回 null
+     */
     public Object getOutStackByKey(IStackKey<?> key)
     {
-        return key2stackMap.get(key);
+        Object out = key2stackMap.get(key);
+        if (out == null && key != null && posMap.containsKey(key))
+        {
+            out = key.copyStack();
+            key2stackMap.put(key, out);
+        }
+        return out;
     }
 
     public CompoundTag serializeNBT()
@@ -846,8 +875,15 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             if (key == null || key.isEmpty()) continue;
             if (!writeZero && amount <= 0L) continue;
 
+            CompoundTag ct = encodedKeys.get(key);
+            if (ct == null)
+            {
+                ct = IStackKey.serializeNBTCommon(key);
+                encodedKeys.put(key, ct);
+            }
+
             CompoundTag one = new CompoundTag();
-            one.put("key", IStackKey.serializeNBTCommon(key));
+            one.put("key", ct);
             one.putLong("amount", amount);
             stacksTag.add(one);
         }
@@ -857,13 +893,25 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     /**
+     * 读档：条目按存档原样恢复，不经过插入钩子，也不受容量与种类上限约束；解析不了的资源封装成错误数据
+     */
+    public void deserializeNBT(CompoundTag tag)
+    {
+        try (ErrorData.Report ignored = ErrorData.report("storage"))
+        {
+            readEntries(tag);
+        }
+        onChange();
+    }
+
+    /**
      * 读取：
      * - 新格式优先：stacks
      * - 否则旧格式回退：Stacks
      */
-    public void deserializeNBT(CompoundTag tag)
+    private void readEntries(CompoundTag tag)
     {
-        clearStorage();
+        resetContents();
         if (tag == null) return;
 
         slotCapacity = tag.contains("slotCapacity", Tag.TAG_LONG) ? tag.getLong("slotCapacity") : Long.MAX_VALUE;
@@ -885,7 +933,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
                 }
                 catch (Throwable t)
                 {
-                    BeyondDimensions.LOGGER.warn("反序列化 stacks[{}].key 失败: {}", i, t.toString());
+                    BeyondDimensions.LOGGER.warn("Error while decoding new-format entry {}: {}", i, t.toString());
                     continue;
                 }
 
@@ -924,11 +972,24 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     /**
-     * 将解码得到的 (key, amount) 写入当前结构（遵守 zeroPolicy 与 UI 时间策略）
+     * 将解码得到的 (key, amount) 原样写入当前结构（遵守 zeroPolicy 与 UI 时间策略）
      */
-    protected void acceptEntry(IStackKey<?> key, long amount)
+    private void acceptEntry(IStackKey<?> key, long amount)
     {
         if (key == null || key.isEmpty()) return;
+
+        if (amount <= 0L)
+        {
+            if (zeroPolicy == ZeroPolicy.KEEP_ZERO && !storage.containsKey(key))
+            {
+                storage.put(key, 0L);
+                ensureInIndex(key);
+            }
+        }
+        else
+        {
+            restore(key, amount);
+        }
 
         if (uiTimestampPolicy == UiTimestampPolicy.AUTO)
         {
@@ -936,18 +997,6 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             creationTimeMap.put(key, now);
             lastModifiedTimeMap.put(key, now);
         }
-
-        if (amount <= 0L)
-        {
-            if (zeroPolicy == ZeroPolicy.KEEP_ZERO)
-            {
-                storage.put(key, 0L);
-                ensureInIndex(key);
-            }
-            return;
-        }
-
-        insert(key, amount, false);
     }
 
 

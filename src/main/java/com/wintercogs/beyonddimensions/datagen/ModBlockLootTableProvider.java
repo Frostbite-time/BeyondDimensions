@@ -4,13 +4,12 @@ import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.datagen.util.BDBlockLootSubProvider;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraftforge.registries.RegistryObject;
+import org.jetbrains.annotations.NotNull;
 
 public class ModBlockLootTableProvider extends BDBlockLootSubProvider
 {
-
 
     protected ModBlockLootTableProvider()
     {
@@ -30,13 +29,14 @@ public class ModBlockLootTableProvider extends BDBlockLootSubProvider
         dropSelf(BDBlocks.NET_FURNACE_BLOCK.get());
         dropSelf(BDBlocks.NET_BLAST_FURNACE_BLOCK.get());
         dropSelf(BDBlocks.NET_SMOKER_BLOCK.get());
+        dropSelf(BDBlocks.NET_STOCK_EMITTER.get());
         dropSelf(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
-
-        BDFluids.ALL.forEach(e -> add((LiquidBlock) BDFluids.XP_FLUID.block().get(), LootTable.lootTable()));
+        // 1.20.1 复制水的方块属性时不带「无战利品表」，流体方块要给空表
+        BDFluids.ALL.forEach(fluid -> add(fluid.block().get(), LootTable.lootTable()));
     }
 
     @Override
-    protected Iterable<Block> getKnownBlocks()
+    protected @NotNull Iterable<Block> getKnownBlocks()
     {
         return BDBlocks.BLOCKS.getEntries().stream().flatMap(RegistryObject::stream)::iterator;
     }

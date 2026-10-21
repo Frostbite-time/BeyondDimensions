@@ -1,13 +1,12 @@
 package com.wintercogs.beyonddimensions.client.init;
 
+
 import com.mojang.blaze3d.platform.InputConstants;
-import com.wintercogs.beyonddimensions.api.ButtonState;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.gui.MagnetToggleType;
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType;
 import com.wintercogs.beyonddimensions.common.init.BDPackets;
 import com.wintercogs.beyonddimensions.config.ClientConfigRuntime;
-import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
 import com.wintercogs.beyonddimensions.network.packet.c2s.*;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -126,14 +125,8 @@ public class BDShortKeys
                 return;
             }
 
-            if (CommonConfigRuntime.uiCraftButton == ButtonState.ENABLED)
-            {
-                BDPackets.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_CRAFT_MENU));
-            }
-            else if (CommonConfigRuntime.uiCraftButton == ButtonState.DISABLED)
-            {
-                BDPackets.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_MENU));
-            }
+            NetMenuType type = ClientConfigRuntime.storageOpenCrafting ? NetMenuType.NET_CRAFT_MENU : NetMenuType.NET_MENU;
+            BDPackets.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), type));
         });
         BDShortKeys.registerKey(OPEN_TERMINAL_QUICK_KEY, () -> {
             LocalPlayer player = Minecraft.getInstance().player;
@@ -147,13 +140,14 @@ public class BDShortKeys
         });
         BDShortKeys.registerKey(MAIN_HAND_ITEM_TRANSFER_KEY, () -> {
             Player player = Minecraft.getInstance().player;
-            if (player == null || player.isCreative()) return;
+            if (player == null || player.isCreative()) return; // 不影响原版创造模式
             if (!player.getMainHandItem().isEmpty())
             {
                 if (player.isShiftKeyDown())
                 {
                     BDPackets.INSTANCE.sendToServer(new PutHandItemToNetPacket(InteractionHand.MAIN_HAND));
                 }
+
             }
             else
             {

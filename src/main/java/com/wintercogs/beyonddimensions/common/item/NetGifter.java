@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
+// 网络赠送符
 public class NetGifter extends NetedItem
 {
 
@@ -34,13 +35,14 @@ public class NetGifter extends NetedItem
                 DimensionsNet itemNet = DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack));
                 if (itemNet != null)
                 {
-                    DimensionsNet playerNet = DimensionsNet.getNetFromPlayer(player);
+                    DimensionsNet playerNet = DimensionsNet.getPrimaryNetFromPlayer(player);
                     // 只有网络主人能合并其他人的网络
                     if (playerNet != null && playerNet.getId() != itemNet.getId() && playerNet.isOwner(player))
                     {
                         int id = itemNet.getId();
                         playerNet.mergeOtherNet(itemNet);
-                        itemstack.shrink(1);
+                        if (!player.getAbilities().instabuild)
+                            itemstack.shrink(1);
                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.net_gift_done", id));
                     }
                     else

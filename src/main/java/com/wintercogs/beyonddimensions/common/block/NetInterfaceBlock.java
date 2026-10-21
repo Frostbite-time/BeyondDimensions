@@ -13,10 +13,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-public class NetInterfaceBlock extends BaseMachineBlock
+public class NetInterfaceBlock extends SidedMachineBlock
 {
 
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -26,11 +26,10 @@ public class NetInterfaceBlock extends BaseMachineBlock
         super(properties);
     }
 
-
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
+    protected InteractionResult useWithoutWrench(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
     {
-        super.use(state, level, pos, player, hand, hitResult);
+        super.useWithoutWrench(state, level, pos, player, hand, hitResult);
         if (!level.isClientSide() && !player.isShiftKeyDown())
         {
             NetworkHooks.openScreen((ServerPlayer) player, (NetInterfaceBlockEntity) level.getBlockEntity(pos), buf -> {

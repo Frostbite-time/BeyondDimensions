@@ -1,7 +1,19 @@
 {
   "variants": {
-    "": {
+    "facing=east": {
+      "model": "beyonddimensions:block/net_energy_pathway",
+      "y": 90
+    },
+    "facing=north": {
       "model": "beyonddimensions:block/net_energy_pathway"
+    },
+    "facing=south": {
+      "model": "beyonddimensions:block/net_energy_pathway",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "beyonddimensions:block/net_energy_pathway",
+      "y": 270
     }
   }
 }

@@ -1,17 +1,20 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
 import com.mojang.datafixers.util.Pair;
+import com.wintercogs.beyonddimensions.api.machine.Machine;
+import com.wintercogs.beyonddimensions.api.machine.MachineItem;
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
-import com.wintercogs.beyonddimensions.common.init.BDMenus;
 import com.wintercogs.beyonddimensions.common.item.BaseMachineItem;
-import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
-import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineMenu;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
-import net.minecraft.nbt.CompoundTag;
+import dev.compixel.forge.sync.MenuAction;
+import dev.compixel.forge.sync.MenuSync;
+import dev.compixel.sync.state.SyncSchema;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -21,17 +24,18 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NetRestockerMenu extends BDBaseMenu
-{
-    private static final int slotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.COMMON_CONNECTION_HEIGHT * 2 + 1;
-    private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.COMMON_CONNECTION_HEIGHT * 2 + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + 7;
-    public static final int EXTRA_SLOT_START_X = 8;
-    public static final int EXTRA_SLOT_Y = CommonTextures.TOP_BASE_COMMON_HEIGHT - 1;
+import static com.wintercogs.beyonddimensions.common.init.BDMenus.Net_Restocker_Menu;
 
+/**
+ * 网络装配器：五个装备模板槽与玩家背包，设置保存在物品上
+ */
+public class NetRestockerMenu extends BDBaseMenu implements MachineMenu
+{
     private final IStackHandler storage = new StackHandler(41)
     {
         @Override
@@ -46,9 +50,40 @@ public class NetRestockerMenu extends BDBaseMenu
 
     public final ItemStack menuStack;
 
-    private RedStoneControlMode lastControlMode;
-    private FuzzyMode lastFuzzyMode;
-    private ReceiveMode lastReceiveMode;
+    private static final SyncSchema<NetRestockerMenu> SCHEMA =
+            MachineSettingsSync.field(SyncSchema.<NetRestockerMenu>builder("beyonddimensions:restocker", 2)).build();
+
+    private static final MenuAction<NetRestockerMenu, MachineSettingsSync.Change> SET_SETTING = MachineSettingsSync.action();
+
+    private final MachineSettingsSync.Mirror machineSettings = new MachineSettingsSync.Mirror();
+
+    private final MenuSync<NetRestockerMenu> synchronization;
+
+    @Override
+    public MenuSync<NetRestockerMenu> menuSync()
+    {
+        return synchronization;
+    }
+
+    @Override
+    public @Nullable Machine machine()
+    {
+        return !player.level().isClientSide() && menuStack.getItem() instanceof MachineItem item ? item.machine(menuStack) : null;
+    }
+
+    @Override
+    public MachineSettingsSync.Mirror machineSettings()
+    {
+        return machineSettings;
+    }
+
+    /**
+     * 客户端：按控件给出的值修改设置，见 {@link MachineSettingsSync#valueAt}
+     */
+    public boolean requestSetting(ResourceLocation setting, long pick)
+    {
+        return MachineSettingsSync.request(this, synchronization, SET_SETTING, setting, pick);
+    }
 
     public NetRestockerMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
@@ -57,8 +92,10 @@ public class NetRestockerMenu extends BDBaseMenu
 
     public NetRestockerMenu(int containerId, Inventory playerInventory, ItemStack menuStack)
     {
-        super(BDMenus.Net_Restocker_Menu.get(), containerId, playerInventory);
-        this.menuStack = menuStack;
+        super(Net_Restocker_Menu.get(), containerId, playerInventory);
+        this.menuStack = java.util.Objects.requireNonNullElse(menuStack, ItemStack.EMPTY);
+        if (!playerInventory.player.level().isClientSide() && this.menuStack.getItem() instanceof com.wintercogs.beyonddimensions.common.item.BaseMachineItem device)
+            device.checkComponents(this.menuStack);
 
         initialized = false;
         if (!playerInventory.player.level().isClientSide())
@@ -73,6 +110,7 @@ public class NetRestockerMenu extends BDBaseMenu
 
         addPlayerInv(playerInventory);
         addFlagSlots();
+        synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SCHEMA)).action(SET_SETTING));
     }
 
     private void addFlagSlots()
@@ -81,21 +119,21 @@ public class NetRestockerMenu extends BDBaseMenu
         {
             for (int col = 0; col < 9; col++)
             {
-                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, storage, row * 9 + col, 8 + col * 18, slotStartY + row * 18);
+                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, storage, row * 9 + col);
                 this.addSlot(flagSlot);
             }
         }
 
-        this.addSlot(createExtraSlot(36, EXTRA_SLOT_START_X, EXTRA_SLOT_Y, InventoryMenu.EMPTY_ARMOR_SLOT_HELMET));
-        this.addSlot(createExtraSlot(37, EXTRA_SLOT_START_X + 18, EXTRA_SLOT_Y, InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE));
-        this.addSlot(createExtraSlot(38, EXTRA_SLOT_START_X + 36, EXTRA_SLOT_Y, InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS));
-        this.addSlot(createExtraSlot(39, EXTRA_SLOT_START_X + 54, EXTRA_SLOT_Y, InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS));
-        this.addSlot(createExtraSlot(40, EXTRA_SLOT_START_X + 72, EXTRA_SLOT_Y, InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD));
+        this.addSlot(createExtraSlot(36, InventoryMenu.EMPTY_ARMOR_SLOT_HELMET));
+        this.addSlot(createExtraSlot(37, InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE));
+        this.addSlot(createExtraSlot(38, InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS));
+        this.addSlot(createExtraSlot(39, InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS));
+        this.addSlot(createExtraSlot(40, InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD));
     }
 
-    private Slot createExtraSlot(int slotIndex, int x, int y, ResourceLocation noItemIcon)
+    private Slot createExtraSlot(int slotIndex, ResourceLocation noItemIcon)
     {
-        return new FlagStackTypedSlot(this, storage, slotIndex, x, y)
+        return new FlagStackTypedSlot(this, storage, slotIndex)
         {
             @Override
             public Pair<ResourceLocation, ResourceLocation> getNoItemIcon()
@@ -112,12 +150,12 @@ public class NetRestockerMenu extends BDBaseMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, invSlotStartY + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 0, 0));
             }
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 4 + invSlotStartY + 3 * 18));
+            this.addSlot(new Slot(playerInventory, col, 0, 0));
         }
         inventoryEndIndex = slots.size();
     }
@@ -125,42 +163,6 @@ public class NetRestockerMenu extends BDBaseMenu
     @Override
     public boolean stillValid(@NotNull Player player)
     {
-        return menuStack != null && !menuStack.isEmpty();
-    }
-
-    @Override
-    protected boolean shouldSendQuickData()
-    {
-        boolean result = super.shouldSendQuickData()
-                || lastControlMode != BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE)
-                || lastFuzzyMode != BaseMachineItem.getFuzzyModeOrDefault(menuStack, FuzzyMode.DISABLE)
-                || lastReceiveMode != BaseMachineItem.getReceiveModeOrDefault(menuStack, ReceiveMode.STOP);
-
-        if (result)
-        {
-            lastControlMode = BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE);
-            lastFuzzyMode = BaseMachineItem.getFuzzyModeOrDefault(menuStack, FuzzyMode.DISABLE);
-            lastReceiveMode = BaseMachineItem.getReceiveModeOrDefault(menuStack, ReceiveMode.STOP);
-        }
-
-        return result;
-    }
-
-    @Override
-    protected void writeQuickDataTag(CompoundTag tag)
-    {
-        super.writeQuickDataTag(tag);
-        tag.putString("control_mode", BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE).name());
-        tag.putString("fuzzy_mode", BaseMachineItem.getFuzzyModeOrDefault(menuStack, FuzzyMode.DISABLE).name());
-        tag.putString("receive_mode", BaseMachineItem.getReceiveModeOrDefault(menuStack, ReceiveMode.STOP).name());
-    }
-
-    @Override
-    public void readQuickDataTag(CompoundTag tag)
-    {
-        super.readQuickDataTag(tag);
-        BaseMachineItem.setControlMode(menuStack, RedStoneControlMode.valueOf(tag.getString("control_mode")));
-        BaseMachineItem.setFuzzyMode(menuStack, FuzzyMode.valueOf(tag.getString("fuzzy_mode")));
-        BaseMachineItem.setReceiveMode(menuStack, ReceiveMode.valueOf(tag.getString("receive_mode")));
+        return player.level().isClientSide() || com.wintercogs.beyonddimensions.util.InventoryHelper.containsExactStack(player, menuStack);
     }
 }

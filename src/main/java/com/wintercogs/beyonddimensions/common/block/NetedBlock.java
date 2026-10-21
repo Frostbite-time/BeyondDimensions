@@ -15,8 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class NetedBlock extends Block
 {
@@ -37,11 +36,12 @@ public class NetedBlock extends Block
                 {
                     if (blockEntity.getNetId() == -1)
                     {
-                        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+                        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
                         if (net != null)
                         {
                             if (net.isManager(player))
                             {
+                                // 成功设置网络id
                                 blockEntity.setNetId(net.getId());
                                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.block_net_bound", net.getId()));
                             }
@@ -65,7 +65,7 @@ public class NetedBlock extends Block
             {
                 if (blockEntity.getNetId() < 0)
                 {
-                    DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+                    DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
                     if (net != null)
                     {
                         if (net.isManager(player))
@@ -78,7 +78,6 @@ public class NetedBlock extends Block
                         {
                             player.sendSystemMessage(Component.translatable("msg.beyonddimensions.no_right_to_bound_block"));
                         }
-
                     }
                 }
                 else
@@ -117,4 +116,6 @@ public class NetedBlock extends Block
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }
+
+
 }

@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import mekanism.api.MekanismAPI;
+import mekanism.api.NBTConstants;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import net.minecraft.nbt.CompoundTag;
@@ -53,7 +54,7 @@ public final class GasStackKey implements IStackKey<GasStack>
         this(stack == null ? MekanismAPI.EMPTY_GAS : stack.getType());
     }
 
-    // ---------------- IStackKey ----------------
+    // ---------------- IStackKey 的实现 ----------------
 
     @Override
     public ResourceLocation getTypeId()
@@ -134,6 +135,13 @@ public final class GasStackKey implements IStackKey<GasStack>
     {
         var key = MekanismAPI.gasRegistry().getKey(this.gas);
         return key != null ? key.getNamespace() : "unknown";
+    }
+
+    @Override
+    public ResourceLocation getSourceId()
+    {
+        ResourceLocation id = MekanismAPI.gasRegistry().getKey(this.gas);
+        return id != null ? id : getTypeId();
     }
 
     @Override
@@ -262,35 +270,35 @@ public final class GasStackKey implements IStackKey<GasStack>
             return fromLegacyTypedStack(nbt.getCompound("Stack"));
         }
 
-        // 新
+        // 新；未注册的气体如实失败，由 IStackKey.deserializeNBTCommon 封装成错误数据
         return readNewFmt(nbt);
     }
 
     private @NotNull IStackKey<GasStack> readNewFmt(@NotNull CompoundTag nbt)
     {
-        ResourceLocation id = ResourceLocation.tryParse(nbt.getString("gas"));
-        Gas g = (id == null) ? MekanismAPI.EMPTY_GAS : MekanismAPI.gasRegistry().getValue(id);
-        if (g == null) g = MekanismAPI.EMPTY_GAS;
-        return new GasStackKey(g);
+        return new GasStackKey(registeredGas(nbt.getString("gas")));
     }
 
     private @NotNull IStackKey<GasStack> fromLegacyTypedStack(@NotNull CompoundTag stackNbt)
     {
-        try
-        {
-            GasStack gs = GasStack.readFromNBT(stackNbt);
-            if (gs.isEmpty())
-            {
-                return EMPTY;
-            }
-
-            Gas g = gs.getType();
-            return new GasStackKey(g);
-        }
-        catch (Throwable t)
+        registeredGas(stackNbt.getString(NBTConstants.GAS_NAME));
+        GasStack gs = GasStack.readFromNBT(stackNbt);
+        if (gs.isEmpty())
         {
             return EMPTY;
         }
+
+        Gas g = gs.getType();
+        return new GasStackKey(g);
+    }
+
+    // 气体 id 对应的气体；未注册的气体如实失败
+    private static Gas registeredGas(String name)
+    {
+        ResourceLocation id = ResourceLocation.tryParse(name);
+        if (id == null || !MekanismAPI.gasRegistry().containsKey(id))
+            throw new IllegalArgumentException("Unknown gas: " + name);
+        return MekanismAPI.gasRegistry().getValue(id);
     }
 
 

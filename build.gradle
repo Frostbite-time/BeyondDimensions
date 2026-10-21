@@ -3,6 +3,8 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'net.neoforged.moddev.legacyforge' version '2.0.91'
+    id 'org.jetbrains.kotlin.jvm' version '2.4.10'
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.4.10'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -19,6 +21,18 @@ group = mod_group_id
 
 repositories {
     mavenCentral()
+    // CompixelUI is published only here; other repositories are never asked for it, so their outages cannot fail
+    // the build.
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'CompixelUI'
+                // Local development can override this with -Pcompixel_repository=<Maven directory>.
+                url = uri(providers.gradleProperty('compixel_repository').orElse('https://maven.wintercogs.com/releases').get())
+            }
+        }
+        filter { includeGroup 'dev.compixel' }
+    }
     mavenLocal()
     maven {
         name = "Jared's maven"
@@ -81,6 +95,10 @@ base {
 
 // Mojang ships Java 17 to end users in 1.20.1, so mods should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+kotlin.jvmToolchain(17)
+
+// 发布时附带源码包，引用 BD 的项目在 IDE 里能直接看到原始代码
+java.withSourcesJar()
 
 legacyForge {
     // Specify the version of MinecraftForge to use.
@@ -173,6 +191,15 @@ dependencies {
 
     compileOnly "org.jetbrains:annotations:26.0.2"
 
+    // CompixelUI 单独安装：编译用带 Kotlin 的坐标，运行用标准版并由 Kotlin for Forge 提供 Kotlin，与玩家装 KFF 时相同。
+    // 标准版写进发布的 POM，引用 BD 的项目会自动带上它。1.20.1 的构件是 SRG 名，要同时经重映射配置声明；
+    // 重映射配置不带传递依赖，Compose 运行库由普通配置带入，其中的 CompixelUI 仍按重映射解析
+    modCompileOnly "dev.compixel:compixel-forge-1.20.1:${compixel_version}"
+    compileOnly "dev.compixel:compixel-forge-1.20.1-with-kotlin:${compixel_version}"
+    modRuntimeOnly "dev.compixel:compixel-forge-1.20.1:${compixel_version}"
+    runtimeOnly "dev.compixel:compixel-forge-1.20.1:${compixel_version}"
+    localRuntime "maven.modrinth:kotlin-for-forge:${kff_version}"
+
     // 引入对拼音库的依赖 并将其打包到模组
     jarJar(implementation group: 'com.github.promeg', name: 'tinypinyin', version: '2.0.3'){
         version {
@@ -185,7 +212,8 @@ dependencies {
 
 
     // 通用机械 以便使用化学品存储
-    modImplementation "mekanism:Mekanism:${mekanism_version}"
+    modCompileOnly "mekanism:Mekanism:${mekanism_version}"
+    modLocalRuntime "mekanism:Mekanism:${mekanism_version}"
 
     // EMI支持
     modCompileOnly "dev.emi:emi-forge:${emi_version}:api"
@@ -284,7 +312,8 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_license              : mod_license,
             mod_version              : mod_version,
             mod_authors              : mod_authors,
-            mod_description          : mod_description
+            mod_description          : mod_description,
+            compixel_version         : compixel_version
     ]
     inputs.properties replaceProperties
     expand replaceProperties
@@ -313,16 +342,19 @@ tasks.named('processResources', ProcessResources).configure {
 // To avoid having to run "generateModMetadata" manually, make it run on every project reload
 legacyForge.ideSyncTask generateModMetadata
 
-// Example configuration to allow publishing using the maven-publish plugin
+// 发布到 wintercogs Maven：模组 jar、源码包与 POM。上传凭据读 Gradle 属性 wintercogsUsername 与 wintercogsPassword
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
+            artifactId = base.archivesName.get()
             from components.java
         }
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            name = 'wintercogs'
+            url = 'https://maven.wintercogs.com/releases'
+            credentials(PasswordCredentials)
         }
     }
 }

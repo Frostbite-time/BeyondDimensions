@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.common.item;
 
+import com.mojang.logging.LogUtils;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.event.dimensionnet.NetedItemEvent;
 import net.minecraft.network.chat.Component;
@@ -13,6 +14,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class NetedItem extends Item
 {
@@ -20,6 +23,9 @@ public class NetedItem extends Item
     {
         super(properties);
     }
+
+    public static final Logger LOGGER = LogUtils.getLogger();
+
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand)
@@ -29,6 +35,7 @@ public class NetedItem extends Item
         {
             return InteractionResultHolder.fail(itemstack);
         }
+
         if (!level.isClientSide())
         {
             if (setNet(itemstack, player))
@@ -40,6 +47,7 @@ public class NetedItem extends Item
                 return InteractionResultHolder.fail(itemstack);
             }
         }
+
         return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
 
@@ -51,14 +59,14 @@ public class NetedItem extends Item
         if (level.isClientSide())
             return;
 
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
         if (net != null)
         {
             setNet(stack, player);
         }
     }
 
-    public static DimensionsNet getNet(ItemStack stack)
+    public static @Nullable DimensionsNet getNet(ItemStack stack)
     {
         int netId = getNetId(stack);
         if (netId >= 0)
@@ -68,6 +76,7 @@ public class NetedItem extends Item
         return null;
     }
 
+    // 返回值表示是否成功进行修改操作
     public static boolean setNet(ItemStack itemstack, Player player)
     {
         if (itemstack.getItem() instanceof NetedItem item)
@@ -93,7 +102,7 @@ public class NetedItem extends Item
                 return true;
             }
 
-            DimensionsNet playerNet = DimensionsNet.getNetFromPlayer(player);
+            DimensionsNet playerNet = DimensionsNet.getPrimaryNetFromPlayer(player);
             if (playerNet != null && item.validToReWrite(playerNet, player))
             {
                 setNetId(itemstack, playerNet.getId());
@@ -112,7 +121,7 @@ public class NetedItem extends Item
         return false;
     }
 
-    // 可以通过这个方法获取存储的 NetId
+    // 物品上的网络 ID，没有时为 -1
     public static int getNetId(ItemStack stack)
     {
         if (stack.hasTag() && stack.getTag().contains("NetId"))
@@ -127,6 +136,7 @@ public class NetedItem extends Item
         stack.getOrCreateTag().putInt("NetId", netId);
     }
 
+    // 覆写此方法以实现自定义网络覆写规则
     protected boolean validToReWrite(DimensionsNet net, Player player)
     {
         return net.isManager(player);

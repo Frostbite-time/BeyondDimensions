@@ -3,46 +3,67 @@ package com.wintercogs.beyonddimensions.common.menu;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel;
 import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetOption;
-import com.wintercogs.beyonddimensions.common.init.BDMenus;
-import com.wintercogs.beyonddimensions.common.init.BDPackets;
-import com.wintercogs.beyonddimensions.network.packet.both.QuickDataTagPacket;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
+import dev.compixel.forge.sync.MenuSync;
+import dev.compixel.forge.sync.SyncedMenu;
+import dev.compixel.sync.state.SyncCodec;
+import dev.compixel.sync.state.SyncCodecs;
+import dev.compixel.sync.state.SyncSchema;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
-public class PrimaryNetSwitcherMenu extends BDBaseMenu
+import static com.wintercogs.beyonddimensions.common.init.BDMenus.Primary_Net_Switcher_Menu;
+
+public class PrimaryNetSwitcherMenu extends BDBaseMenu implements SyncedMenu
 {
-    private static final String CURRENT_PRIMARY_NET_ID = "CurrentPrimaryNetId";
-    private static final String OPTIONS = "Options";
+    private static final SyncCodec<String> NAME_CODEC = SyncCodecs.STRING;
+    private static final NetPermissionlevel[] PERMISSIONS = NetPermissionlevel.values();
+    private static final SyncCodec<PrimaryNetOption> OPTION_CODEC = SyncCodec.of(
+            "beyonddimensions:primary_option/1",
+            (out, option) -> {
+                out.writeInt(option.netId());
+                out.writeByte(option.permission().ordinal());
+                NAME_CODEC.write(out, option.customName());
+            }, in -> {
+                int id = in.readInt();
+                int permission = in.readUnsignedByte();
+                if (permission >= PERMISSIONS.length) throw new java.io.IOException("Invalid network permission");
+                return new PrimaryNetOption(id, PERMISSIONS[permission], NAME_CODEC.read(in));
+            });
+    private static final SyncSchema<PrimaryNetSwitcherMenu> SYNC_SCHEMA =
+            SyncSchema.<PrimaryNetSwitcherMenu>builder("beyonddimensions:primary_net_menu", 1)
+                    .field("primary", SyncCodecs.INT, menu -> menu.currentPrimaryNetId,
+                            (menu, value) -> menu.currentPrimaryNetId = value)
+                    .keyedCollection("networks", SyncCodecs.INT, OPTION_CODEC, PrimaryNetOption::netId,
+                            menu -> menu.options, (menu, values) -> menu.options = values.stream()
+                                    .sorted(java.util.Comparator.comparingInt(PrimaryNetOption::netId)).toList())
+                    .build();
 
     public int currentPrimaryNetId = DimensionsNet.NO_PRIMARY_NET_ID;
     public List<PrimaryNetOption> options = List.of();
+    private final MenuSync<PrimaryNetSwitcherMenu> synchronization = BdMenuActions.attach(this, MenuSync.bind(this, SYNC_SCHEMA));
 
-    private CompoundTag lastSnapshotTag = new CompoundTag();
+    @Override
+    public MenuSync<PrimaryNetSwitcherMenu> menuSync()
+    {
+        return synchronization;
+    }
 
-    public PrimaryNetSwitcherMenu(int id, Inventory playerInventory, net.minecraft.network.FriendlyByteBuf data)
+    public PrimaryNetSwitcherMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
         this(id, playerInventory);
     }
 
     public PrimaryNetSwitcherMenu(int containerId, Inventory playerInventory)
     {
-        this(BDMenus.Primary_Net_Switcher_Menu.get(), containerId, playerInventory);
-    }
-
-    public PrimaryNetSwitcherMenu(MenuType<?> menuType, int containerId, Inventory playerInventory)
-    {
-        super(menuType, containerId, playerInventory);
+        super(Primary_Net_Switcher_Menu.get(), containerId, playerInventory);
 
         if (!player.level().isClientSide())
         {
@@ -51,47 +72,13 @@ public class PrimaryNetSwitcherMenu extends BDBaseMenu
     }
 
     @Override
-    protected void initUpdate()
+    public void broadcastChanges()
     {
-        sendSnapshot();
-    }
+        super.broadcastChanges();
 
-    @Override
-    protected void updateChange()
-    {
-        if (refreshSnapshot())
-        {
-            sendSnapshot();
-        }
-    }
+        if (player.level().isClientSide()) return;
 
-    @Override
-    protected void writeQuickDataTag(CompoundTag tag)
-    {
-        super.writeQuickDataTag(tag);
-        tag.putInt(CURRENT_PRIMARY_NET_ID, currentPrimaryNetId);
-
-        ListTag optionList = new ListTag();
-        for (PrimaryNetOption option : options)
-        {
-            optionList.add(option.save());
-        }
-        tag.put(OPTIONS, optionList);
-    }
-
-    @Override
-    public void readQuickDataTag(CompoundTag tag)
-    {
-        super.readQuickDataTag(tag);
-        currentPrimaryNetId = tag.contains(CURRENT_PRIMARY_NET_ID) ? tag.getInt(CURRENT_PRIMARY_NET_ID) : DimensionsNet.NO_PRIMARY_NET_ID;
-
-        ListTag optionList = tag.getList(OPTIONS, 10);
-        List<PrimaryNetOption> loadedOptions = new ArrayList<>(optionList.size());
-        for (int i = 0; i < optionList.size(); i++)
-        {
-            loadedOptions.add(PrimaryNetOption.load(optionList.getCompound(i)));
-        }
-        options = loadedOptions;
+        refreshSnapshot();
     }
 
     @Override
@@ -100,35 +87,13 @@ public class PrimaryNetSwitcherMenu extends BDBaseMenu
         return true;
     }
 
-    private boolean refreshSnapshot()
+    private void refreshSnapshot()
     {
-        if (!(player instanceof ServerPlayer serverPlayer))
-        {
-            return false;
-        }
-
-        int nextPrimaryNetId = resolveCurrentPrimaryNetId(serverPlayer);
-        List<PrimaryNetOption> nextOptions = buildOptions(serverPlayer);
-        CompoundTag nextSnapshotTag = createSnapshotTag(nextPrimaryNetId, nextOptions);
-        if (Objects.equals(nextSnapshotTag, lastSnapshotTag))
-        {
-            return false;
-        }
-
-        currentPrimaryNetId = nextPrimaryNetId;
-        options = nextOptions;
-        lastSnapshotTag = nextSnapshotTag.copy();
-        return true;
-    }
-
-    private void sendSnapshot()
-    {
-        if (player instanceof ServerPlayer serverPlayer)
-        {
-            CompoundTag snapshotTag = new CompoundTag();
-            writeQuickDataTag(snapshotTag);
-            BDPackets.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer), new QuickDataTagPacket(snapshotTag));
-        }
+        if (!(player instanceof ServerPlayer serverPlayer)) return;
+        currentPrimaryNetId = resolveCurrentPrimaryNetId(serverPlayer);
+        List<PrimaryNetOption> next = buildOptions(serverPlayer);
+        // 内容没变时沿用原来的不可变列表，库就会跳过集合比较。
+        if (!next.equals(options)) options = List.copyOf(next);
     }
 
     private static int resolveCurrentPrimaryNetId(ServerPlayer player)
@@ -164,16 +129,4 @@ public class PrimaryNetSwitcherMenu extends BDBaseMenu
         return NetPermissionlevel.Member;
     }
 
-    private static CompoundTag createSnapshotTag(int primaryNetId, List<PrimaryNetOption> options)
-    {
-        CompoundTag snapshotTag = new CompoundTag();
-        snapshotTag.putInt(CURRENT_PRIMARY_NET_ID, primaryNetId);
-        ListTag optionList = new ListTag();
-        for (PrimaryNetOption option : options)
-        {
-            optionList.add(option.save());
-        }
-        snapshotTag.put(OPTIONS, optionList);
-        return snapshotTag;
-    }
 }

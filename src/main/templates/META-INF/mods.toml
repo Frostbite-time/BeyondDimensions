@@ -73,6 +73,26 @@ description='''${mod_description}'''
     side="BOTH"
 
 [[dependencies.${mod_id}]]
+    modId="compixel"
+    mandatory=true
+    versionRange="[${compixel_version},0.2)"
+    ordering="AFTER"
+    side="BOTH"
+
+# 只需 Kotlin 运行库，不依赖 KFF 的特定 API，因此不限制其版本。
+# Kotlin 运行库可由 KFF 或 CompixelUI 的 with-kotlin 版本提供。
+[[dependencies.${mod_id}]]
+    modId="kotlinforforge"
+    mandatory=false
+    # Forge 1.20.1 不写范围时视为不接受任何版本，用 * 表示任意版本
+    versionRange="*"
+    ordering="AFTER"
+    side="BOTH"
+    # 发布时 mc-publish 按项目名关联前置，KFF 在 CurseForge 上的项目名与 modId 不同
+    [dependencies.${mod_id}.mc-publish]
+        curseforge="kotlin-for-forge"
+
+[[dependencies.${mod_id}]]
     modId="create"
     mandatory=false
     versionRange="[6.0.0,)"

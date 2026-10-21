@@ -4,16 +4,18 @@ import com.wintercogs.beyonddimensions.datagen.util.BDBlockStateProvider;
 import com.wintercogs.beyonddimensions.integration.module.ars.init.ArsModuleBlocks;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import org.jetbrains.annotations.NotNull;
 
 public class ArsModuleBlockStateProvider extends BDBlockStateProvider
 {
+
     public ArsModuleBlockStateProvider(PackOutput output, ExistingFileHelper exFileHelper)
     {
         super(output, exFileHelper);
     }
 
     @Override
-    public String getName()
+    public @NotNull String getName()
     {
         return "BeyondDimensions ArsModule BlockState Provider";
     }
@@ -21,6 +23,6 @@ public class ArsModuleBlockStateProvider extends BDBlockStateProvider
     @Override
     protected void registerStatesAndModels()
     {
-        blockWithItem(ArsModuleBlocks.ARS_SOURCE_PATHWAY);
+        sixFaced(ArsModuleBlocks.ARS_SOURCE_PATHWAY).build();
     }
 }

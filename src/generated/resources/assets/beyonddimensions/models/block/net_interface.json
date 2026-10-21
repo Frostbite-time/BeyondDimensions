@@ -1,6 +1,12 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "all": "beyonddimensions:block/net_interface"
+    "down": "beyonddimensions:block/net_interface/bottom",
+    "east": "beyonddimensions:block/net_interface/left",
+    "north": "beyonddimensions:block/net_interface/front",
+    "particle": "beyonddimensions:block/net_interface/front",
+    "south": "beyonddimensions:block/net_interface/back",
+    "up": "beyonddimensions:block/net_interface/top",
+    "west": "beyonddimensions:block/net_interface/right"
   }
 }

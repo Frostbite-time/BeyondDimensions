@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "beyonddimensions:block/net_stock_emitter/on/bottom",
+    "east": "beyonddimensions:block/net_stock_emitter/on/left",
+    "north": "beyonddimensions:block/net_stock_emitter/on/front",
+    "particle": "beyonddimensions:block/net_stock_emitter/on/front",
+    "south": "beyonddimensions:block/net_stock_emitter/on/back",
+    "up": "beyonddimensions:block/net_stock_emitter/on/top",
+    "west": "beyonddimensions:block/net_stock_emitter/on/right"
+  }
+}

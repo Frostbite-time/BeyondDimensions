@@ -19,7 +19,7 @@ public record PutHandItemToNetPacket(InteractionHand hand)
     {
         Player player = context.getSender();
         if (player.getMainHandItem().isEmpty()) return;
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
         if (net == null) return;
         UnifiedStorage storage = net.getUnifiedStorage();
         KeyAmount remaining = storage.insert(new ItemStackKey(player.getMainHandItem()), player.getMainHandItem().getCount(), false);

@@ -1,23 +1,22 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHandlerRemoveZero;
-import com.wintercogs.beyonddimensions.common.init.BDMenus;
-import com.wintercogs.beyonddimensions.common.item.NetTerminalItem;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static com.wintercogs.beyonddimensions.common.init.BDMenus.Dimensions_Craft_Menu_Terminal;
+
+/**
+ * 存储终端（方块或物品）打开的合成菜单，合成格是玩家自己的 {@link PlayerCraftingGrid}
+ */
 public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
 {
     private ItemStack terminalStack = null;
@@ -25,12 +24,12 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
 
     public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE), null, null, null);
+        this(id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE), null, null);
     }
 
-    public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, AbstractUnorderedStackHandler data, NonNullList<ItemStack> craftItems, @Nullable ItemStack terminalItem, @Nullable BlockPos entityPos)
+    public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, AbstractUnorderedStackHandler data, @Nullable ItemStack terminalItem, @Nullable BlockPos entityPos)
     {
-        super(BDMenus.Dimensions_Craft_Menu_Terminal.get(), id, playerInventory, data, craftItems, entityPos);
+        super(Dimensions_Craft_Menu_Terminal.get(), id, playerInventory, data);
         if (!player.level().isClientSide)
         {
             this.terminalStack = terminalItem;
@@ -38,71 +37,28 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
         }
     }
 
-    @Override
-    protected void initCraftSlots(Inventory playerInventory, @Nullable TransientCraftingContainer craftSlots)
+    /**
+     * 旧版本的终端把合成格的物品存在自己身上，打开这样的终端时把物品还给玩家
+     */
+    public static void returnLegacyCraftItems(Player player, IStackHandler storage, Iterable<ItemStack> items)
     {
-        super.initCraftSlots(playerInventory, craftSlots);
-        // 父函数处理完毕后更新一次结果槽
-        DimensionsCraftMenu.slotChangedCraftingGrid(this, player.level(), player, craftSlots, resultSlots, resultSlotIndex);
+        for (ItemStack stack : items)
+        {
+            if (!stack.isEmpty())
+                returnStack(player, storage, stack.copy(), true);
+        }
     }
 
-    @Override
-    public void removed(@NotNull Player player)
-    {
-        // 处理光标物品
-        if (player instanceof ServerPlayer)
-        {
-            ItemStack itemstack = this.getCarried();
-            if (!itemstack.isEmpty())
-            {
-                if (player.isAlive() && !((ServerPlayer) player).hasDisconnected())
-                {
-                    player.getInventory().placeItemBackInInventory(itemstack);
-                }
-                else
-                {
-                    player.drop(itemstack, false);
-                }
-
-                this.setCarried(ItemStack.EMPTY);
-            }
-        }
-
-        if (player instanceof ServerPlayer)
-        {
-            // 处理合成槽物品
-            NonNullList<ItemStack> nonNullList = NonNullList.withSize(9, ItemStack.EMPTY);
-            for (int i = 0; i < craftSlots.getItems().size(); i++)
-            {
-                ItemStack stack = craftSlots.getItems().get(i);
-                nonNullList.set(i, stack);
-            }
-            if (terminalStack != null && terminalStack.getItem() instanceof NetTerminalItem)
-            {
-                // 将数据写入物品的 NBT
-                CompoundTag tag = terminalStack.getOrCreateTag();
-                ListTag slotsTag = new ListTag();
-                for (ItemStack stack : nonNullList)
-                {
-                    CompoundTag itemTag = new CompoundTag();
-                    if (!stack.isEmpty())
-                    {
-                        stack.save(itemTag); // 非空物品序列化为 CompoundTag
-                    }
-                    slotsTag.add(itemTag); // 空物品也会保存为空的 CompoundTag
-                }
-                tag.put("craft_slots", slotsTag); // 存储到 NBT
-                terminalStack.setTag(tag); // 回写至 ItemStack
-                // 同步更新玩家手中的物品
-                player.getInventory().setChanged();
-            }
-        }
-
-    }
-
+    /**
+     * 终端谁拿到谁能用，不看玩家是不是网络成员；网络被删除、终端被拆除或物品不在时失效
+     */
     @Override
     public boolean stillValid(@NotNull Player player)
     {
+        if (player.level().isClientSide())
+            return true;
+        if (!networkExists())
+            return false;
         if (entityPos != null)
         {
             BlockEntity be = player.level().getBlockEntity(entityPos);

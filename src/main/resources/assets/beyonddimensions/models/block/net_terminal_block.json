@@ -1,20 +1,32 @@
 {
-  "loader": "forge:obj",
-  "model": "beyonddimensions:models/block/net_terminal_block.obj",
-  "flip_v": true,
   "textures": {
+    "terminal": "beyonddimensions:block/net_terminal_block_texture",
     "particle": "beyonddimensions:block/net_terminal_block_texture"
   },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 3],
+      "faces": {
+        "north": {"uv": [0, 0, 4, 4], "texture": "#terminal"},
+        "east": {"uv": [4, 0, 4.75, 4], "texture": "#terminal"},
+        "south": {"uv": [0, 4, 4, 8], "texture": "#terminal"},
+        "west": {"uv": [4, 4, 4.75, 8], "texture": "#terminal"},
+        "up": {"uv": [8.75, 0.75, 4.75, 0], "texture": "#terminal"},
+        "down": {"uv": [8.75, 0.75, 4.75, 1.5], "texture": "#terminal"}
+      }
+    }
+  ],
   "display": {
     "gui": {
-      "rotation": [ 30, 45, 0 ],
-      "translation": [ 2, -1, 0 ],
-      "scale":[ 0.625, 0.625, 0.625 ]
+      "rotation": [30, 45, 0],
+      "translation": [2, -1, 0],
+      "scale": [0.625, 0.625, 0.625]
     },
     "fixed": {
-      "rotation": [ 0, 180, 0 ],
-      "translation": [ 0, 0, -2 ],
-      "scale":[ 0.5, 0.5, 0.5 ]
+      "rotation": [0, 180, 0],
+      "translation": [0, 0, -2],
+      "scale": [0.5, 0.5, 0.5]
     }
   }
 }

@@ -1,16 +1,13 @@
 package com.wintercogs.beyonddimensions.integration.module.ars.storage;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.util.IngredientRenderer;
-import com.wintercogs.beyonddimensions.util.StringFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -41,34 +38,6 @@ public class SourceStackKeyRender implements IStackRender
     }
 
     @Override
-    public void renderAmount(GuiGraphics gui, long amount, int x, int y)
-    {
-        String text = getCountText(amount);
-        if (text.isEmpty()) return;
-
-        float scale = 0.666f;
-        var pose = gui.pose();
-        pose.pushPose();
-        pose.translate(0, 0, 200);
-        pose.scale(scale, scale, scale);
-        RenderSystem.disableBlend();
-
-        int w = Minecraft.getInstance().font.width(text);
-        final int X = (int) ((x - 1 + 16.0f + 2.0f - w * 0.666f) / 0.666f);
-        final int Y = (int) ((y - 1 + 16.0f - 5.0f * 0.666f) / 0.666f);
-        gui.drawString(Minecraft.getInstance().font, text, X, Y, 0xFFFFFF);
-
-        pose.popPose();
-    }
-
-    @Override
-    public String getCountText(long count)
-    {
-        if (count < 0) return "";
-        return StringFormat.formatCount(count);
-    }
-
-    @Override
     public Component getDisplayName(IStackKey<?> key)
     {
         return SourceStackKey.INSTANCE.getRenderStack().getName();
@@ -76,7 +45,7 @@ public class SourceStackKeyRender implements IStackRender
 
     @Override
     public List<Component> getTooltipLines(IStackKey<?> key, long amount,
-                                           @Nullable Player player,
+                                           @Nullable net.minecraft.world.entity.player.Player player,
                                            TooltipFlag tooltipFlag)
     {
         return List.of(
@@ -97,7 +66,9 @@ public class SourceStackKeyRender implements IStackRender
         var mc = Minecraft.getInstance();
         gui.renderTooltip(
                 mc.font,
-                getTooltipLines(key, amount, mc.player, mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL),
+                getTooltipLines(key, amount, mc.player,
+                        mc.options.advancedItemTooltips
+                                ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL),
                 getTooltipImage(key),
                 ItemStack.EMPTY,
                 mouseX, mouseY

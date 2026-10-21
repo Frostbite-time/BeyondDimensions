@@ -5,9 +5,9 @@ import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.FluidStackKey;
-import com.wintercogs.beyonddimensions.common.init.BDFluidTags;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
-import com.wintercogs.beyonddimensions.common.machine.XpTransferSpeedMode;
+import com.wintercogs.beyonddimensions.common.init.BDTags;
+import com.wintercogs.beyonddimensions.common.machine.setting.XpTransferSpeedMode;
 import com.wintercogs.beyonddimensions.common.menu.XpExchangeMenu;
 import com.wintercogs.beyonddimensions.util.BDMath;
 import com.wintercogs.beyonddimensions.util.XpUtil;
@@ -28,12 +28,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+// 经验交换棒
 public class XpExchangeItem extends NetedItem
 {
     public static List<Fluid> xpFluids = new ArrayList<>();
@@ -44,25 +46,20 @@ public class XpExchangeItem extends NetedItem
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected)
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected)
     {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
-        checkComponents(stack);
+        XpExchangeSettings.ensureComponents(stack);
         if (xpFluids.isEmpty())
             xpFluids = getExperienceFluids(level);
         if (entity instanceof Player player && !level.isClientSide() && getOrDefaultXpNetKeepMode(stack, false))
             keepXpLevel(stack, player, level);
     }
 
-    private void checkComponents(ItemStack stack)
-    {
-        XpExchangeSettings.ensureComponents(stack);
-    }
-
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced)
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> tooltipComponents, TooltipFlag tooltipFlag)
     {
-        super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
+        super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
         String[] tooltipLines = Component.translatable("tooltip.beyonddimensions.item.xp_exchange").getString().split("\\n");
         for (String tooltipLine : tooltipLines)
         {
@@ -90,29 +87,21 @@ public class XpExchangeItem extends NetedItem
         if (available.isEmpty())
             return 0;
 
-        // 先留下库存中不足 1 XP 的零头，避免正常路径依赖回插成功。
+        // 先模拟能取出多少，只按整点 XP 取出，不足 1 XP 的零头留在库存里
         long requestedXp = Math.min((long) maxXp, available.amount() / conversionRate);
         if (requestedXp <= 0)
             return 0;
-
-        long requestedUnits = requestedXp * conversionRate;
-        KeyAmount extracted = slot >= 0
-                ? storage.extract(slot, requestedUnits, false)
-                : storage.extract(key, requestedUnits, false, false);
-        if (extracted.isEmpty())
+        KeyAmount offer = extract(storage, key, slot, requestedXp * conversionRate, true);
+        long gainedXp = Math.min(requestedXp, offer.amount() / conversionRate);
+        if (gainedXp <= 0)
             return 0;
+        KeyAmount extracted = extract(storage, key, slot, gainedXp * conversionRate, false);
+        return (int) Math.min(gainedXp, extracted.amount() / conversionRate);
+    }
 
-        int gainedXp = (int) Math.min(requestedXp, extracted.amount() / conversionRate);
-        long remainder = extracted.amount() - (long) gainedXp * conversionRate;
-        // 提取处理器改变实际数量时，退回不足 1 XP 或超出预算的部分。
-        if (remainder > 0)
-        {
-            if (slot >= 0)
-                storage.insert(slot, extracted.key(), remainder, false);
-            else
-                storage.insert(extracted.key(), remainder, false);
-        }
-        return gainedXp;
+    private static KeyAmount extract(IStackHandler storage, FluidStackKey key, int slot, long amount, boolean simulate)
+    {
+        return slot >= 0 ? storage.extract(slot, amount, simulate) : storage.extract(key, amount, simulate, false);
     }
 
     @Override
@@ -210,7 +199,7 @@ public class XpExchangeItem extends NetedItem
         final Registry<Fluid> reg = level.registryAccess().registryOrThrow(Registries.FLUID);
         final LinkedHashSet<Fluid> set = new LinkedHashSet<>();
         // 追加所有带 C_EXPERIENCE 标签的流体
-        reg.getTag(BDFluidTags.C_EXPERIENCE).ifPresent((HolderSet<Fluid> holders) -> {
+        reg.getTag(BDTags.C_EXPERIENCE).ifPresent((HolderSet<Fluid> holders) -> {
             for (Holder<Fluid> h : holders)
             {
                 set.add(h.value());

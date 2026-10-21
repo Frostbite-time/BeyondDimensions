@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import mekanism.api.MekanismAPI;
+import mekanism.api.NBTConstants;
 import mekanism.api.chemical.pigment.Pigment;
 import mekanism.api.chemical.pigment.PigmentStack;
 import net.minecraft.nbt.CompoundTag;
@@ -52,7 +53,7 @@ public final class PigmentStackKey implements IStackKey<PigmentStack>
         this(stack == null ? MekanismAPI.EMPTY_PIGMENT : stack.getType());
     }
 
-    // ---------------- IStackKey ----------------
+    // ---------------- IStackKey 的实现 ----------------
 
     @Override
     public ResourceLocation getTypeId()
@@ -133,6 +134,13 @@ public final class PigmentStackKey implements IStackKey<PigmentStack>
     {
         var key = MekanismAPI.pigmentRegistry().getKey(this.pigment);
         return key != null ? key.getNamespace() : "unknown";
+    }
+
+    @Override
+    public ResourceLocation getSourceId()
+    {
+        ResourceLocation id = MekanismAPI.pigmentRegistry().getKey(this.pigment);
+        return id != null ? id : getTypeId();
     }
 
     @Override
@@ -259,35 +267,35 @@ public final class PigmentStackKey implements IStackKey<PigmentStack>
         {
             return fromLegacyTypedStack(nbt.getCompound("Stack"));
         }
-        // 新
+        // 新；未注册的颜料如实失败，由 IStackKey.deserializeNBTCommon 封装成错误数据
         return readNewFmt(nbt);
     }
 
     private @NotNull IStackKey<PigmentStack> readNewFmt(@NotNull CompoundTag nbt)
     {
-        ResourceLocation id = ResourceLocation.tryParse(nbt.getString("pigment"));
-        Pigment p = (id == null) ? MekanismAPI.EMPTY_PIGMENT : MekanismAPI.pigmentRegistry().getValue(id);
-        if (p == null) p = MekanismAPI.EMPTY_PIGMENT;
-        return new PigmentStackKey(p);
+        return new PigmentStackKey(registeredPigment(nbt.getString("pigment")));
     }
 
     private @NotNull IStackKey<PigmentStack> fromLegacyTypedStack(@NotNull CompoundTag stackNbt)
     {
-        try
-        {
-            PigmentStack ps = PigmentStack.readFromNBT(stackNbt);
-            if (ps.isEmpty())
-            {
-                return EMPTY;
-            }
-
-            Pigment p = ps.getType();
-            return new PigmentStackKey(p);
-        }
-        catch (Throwable t)
+        registeredPigment(stackNbt.getString(NBTConstants.PIGMENT_NAME));
+        PigmentStack ps = PigmentStack.readFromNBT(stackNbt);
+        if (ps.isEmpty())
         {
             return EMPTY;
         }
+
+        Pigment p = ps.getType();
+        return new PigmentStackKey(p);
+    }
+
+    // 颜料 id 对应的颜料；未注册的颜料如实失败
+    private static Pigment registeredPigment(String name)
+    {
+        ResourceLocation id = ResourceLocation.tryParse(name);
+        if (id == null || !MekanismAPI.pigmentRegistry().containsKey(id))
+            throw new IllegalArgumentException("Unknown pigment: " + name);
+        return MekanismAPI.pigmentRegistry().getValue(id);
     }
 
 

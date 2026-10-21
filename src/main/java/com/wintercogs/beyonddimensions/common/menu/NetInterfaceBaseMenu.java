@@ -1,32 +1,78 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.machine.Machine;
+import com.wintercogs.beyonddimensions.api.machine.MachineSettings;
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
-import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
-import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
-import com.wintercogs.beyonddimensions.common.machine.PopMode;
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineMenu;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.OrderedStackTypedSlot;
+import dev.compixel.forge.sync.MenuAction;
+import dev.compixel.forge.sync.MenuSync;
+import dev.compixel.slots.SlotTransferRoutes;
+import dev.compixel.sync.state.SyncSchema;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static com.wintercogs.beyonddimensions.common.init.BDMenus.Net_Interface_Menu;
 
 // 网络接口的UI
-// 管理一组虚拟槽、以及一组
-public class NetInterfaceBaseMenu extends BDBaseMenu
+// 管理一组虚拟槽、以及一组标记槽
+public class NetInterfaceBaseMenu extends BDBaseMenu implements MachineMenu
 {
-    private static final int slotStartY = 1 + CommonTextures.TOP_BASE_COMMON_HEIGHT;
-    private static final int invSlotStartY = 6 + slotStartY + CommonTextures.COMMON_SLOTS_HEIGHT * 3 + CommonTextures.FILTER_SLOTS_HEIGHT * 3 + CommonTextures.COMMON_CONNECTION_HEIGHT;
+    private static final SyncSchema<NetInterfaceBaseMenu> SYNC_SCHEMA =
+            MachineSettingsSync.field(SyncSchema.<NetInterfaceBaseMenu>builder("beyonddimensions:interface", 2)).build();
+
+    private static final MenuAction<NetInterfaceBaseMenu, MachineSettingsSync.Change> SET_SETTING = MachineSettingsSync.action();
+
+    private final MachineSettingsSync.Mirror machineSettings = new MachineSettingsSync.Mirror();
+
+    private final MenuSync<NetInterfaceBaseMenu> synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SYNC_SCHEMA)).action(SET_SETTING));
+
+    @Override
+    public MenuSync<NetInterfaceBaseMenu> menuSync()
+    {
+        return synchronization;
+    }
+
+    @Override
+    public @Nullable Machine machine()
+    {
+        return player.level().isClientSide() || access instanceof ClientAccess ? null : access;
+    }
+
+    @Override
+    public MachineSettingsSync.Mirror machineSettings()
+    {
+        return machineSettings;
+    }
+
+    /**
+     * 客户端：按控件给出的值修改设置，见 {@link MachineSettingsSync#valueAt}
+     */
+    public boolean requestSetting(ResourceLocation setting, long pick)
+    {
+        return MachineSettingsSync.request(this, synchronization, SET_SETTING, setting, pick);
+    }
+
+    @Override
+    protected SlotTransferRoutes createQuickMoveRoutes()
+    {
+        return SlotTransferRoutes.builder(slots.size())
+                .group("player", inventoryStartIndex, inventoryEndIndex)
+                .group("storage", vanillaQuickMoveStartIndex, vanillaQuickMoveEndIndex)
+                .route("player", "storage")
+                .route("storage", "player")
+                .build();
+    }
 
 
     public final StackHandler storage;
@@ -60,7 +106,15 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
 
     public static NetInterfaceBaseMenu mounted(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        return new NetInterfaceBaseMenu(id, playerInventory, new ClientAccess(playerInventory.player.level().registryAccess(), data));
+        return new NetInterfaceBaseMenu(id, playerInventory, new ClientAccess(data));
+    }
+
+    // 打开数据只携带槽位结构，资源内容与设置由菜单同步负责
+    public static void writeMountedOpeningData(FriendlyByteBuf data, NetInterfaceAccess access)
+    {
+        data.writeBoolean(true);
+        data.writeVarInt(access.getStackHandler().getSlots());
+        data.writeVarInt(access.getFakeStackHandler().getSlots());
     }
 
     public NetInterfaceBaseMenu(int id, Inventory playerInventory, BlockPos pos)
@@ -100,27 +154,9 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         vanillaQuickMoveStartIndex = this.slots.size();
 
         final int slotCount = storage.getSlots();
-        final int cols = 9;                // 每行列数
-        final int x0 = 8;                  // 起始 X
-        final int y0 = slotStartY + 18;    // 起始 Y（保持原偏移）
-        final int dx = 18;                 // 横向间距
-        final int dy = 36;                 // 纵向间距（保持原来的 36）
-
         for (int i = 0; i < slotCount; i++)
         {
-            int col = i % cols;
-            int row = i / cols;
-            int x = x0 + col * dx;
-            int y = y0 + row * dy;
-
-            this.addSlot(new OrderedStackTypedSlot(
-                    this,
-                    storage,
-                    i, // 槽索引
-                    inventoryStartIndex,
-                    inventoryEndIndex,
-                    x, y
-            ));
+            this.addSlot(new OrderedStackTypedSlot(this, storage, i, inventoryStartIndex, inventoryEndIndex, 0, 0));
         }
 
         vanillaQuickMoveEndIndex = this.slots.size();
@@ -130,20 +166,9 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
     {
         // 动态添加标记槽
         final int slotCount = flagStorage.getSlots();
-        final int cols = 9;             // 每行列数
-        final int x0 = 8;               // 起始 X
-        final int y0 = slotStartY;      // 起始 Y（保持原定位）
-        final int dx = 18;              // 横向间距
-        final int dy = 36;              // 纵向间距
-
         for (int i = 0; i < slotCount; i++)
         {
-            int col = i % cols;
-            int row = i / cols;
-            int x = x0 + col * dx;
-            int y = y0 + row * dy;
-
-            this.addSlot(new FlagStackTypedSlot(this, flagStorage, i, x, y));
+            this.addSlot(new FlagStackTypedSlot(this, flagStorage, i));
         }
     }
 
@@ -155,53 +180,15 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, invSlotStartY + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 0, 0));
             }
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 4 + invSlotStartY + 3 * 18));
+            this.addSlot(new Slot(playerInventory, col, 0, 0));
         }
         inventoryEndIndex = slots.size();
     }
-
-    @Override
-    protected boolean shouldSendQuickData()
-    {
-        // 阻止服务端主动同步，将同步权交给sendBlockUpdated
-        return false;
-    }
-
-    @Override
-    protected void writeQuickDataTag(CompoundTag tag)
-    {
-        super.writeQuickDataTag(tag);
-        tag.putString("popMode", access.getPopMode().name());
-        tag.putString("controlMode", access.getControlMode().name());
-        tag.putString("fuzzyMode", access.getFuzzyMode().name());
-    }
-
-    @Override
-    public void readQuickDataTag(CompoundTag tag)
-    {
-        super.readQuickDataTag(tag);
-        if (access == null || !access.isMenuValid())
-        {
-            return;
-        }
-        if (access.canConfigurePopMode())
-        {
-            access.setPopMode(PopMode.valueOf(tag.getString("popMode")));
-        }
-        access.setControlMode(RedStoneControlMode.valueOf(tag.getString("controlMode")));
-        access.setFuzzyMode(FuzzyMode.valueOf(tag.getString("fuzzyMode")));
-        // 服务端读取新数据之后利用sendBlockUpdated将数据发送给附近所有玩家
-        if (!player.level().isClientSide())
-        {
-            access.onMenuDataChanged();
-        }
-    }
-
 
     @Override
     public boolean stillValid(@NotNull Player player)
@@ -209,22 +196,21 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         return access != null && access.isMenuValid();
     }
 
+    // 客户端打开动态结构里的接口时的占位：设置由菜单同步
     private static final class ClientAccess implements NetInterfaceAccess
     {
         private final StackHandler stackHandler;
         private final StackHandler fakeStackHandler;
-        private final NetInterfaceSettings settings = new NetInterfaceSettings();
-        private RedStoneControlMode controlMode;
 
-        private ClientAccess(HolderLookup.Provider registries, FriendlyByteBuf data)
+        private ClientAccess(FriendlyByteBuf data)
         {
-            CompoundTag inventory = data.readNbt();
-            CompoundTag flags = data.readNbt();
-            this.stackHandler = decodeStackHandler(registries, inventory);
-            this.fakeStackHandler = decodeStackHandler(registries, flags);
-            settings.setPopMode(PopMode.valueOf(data.readUtf()));
-            settings.setFuzzyMode(FuzzyMode.valueOf(data.readUtf()));
-            this.controlMode = RedStoneControlMode.valueOf(data.readUtf());
+            // 槽位数来自服务端配置的接口容量，标记槽与资源槽一一对应
+            int slots = data.readVarInt();
+            int flags = data.readVarInt();
+            if (slots < 1 || slots > 27 || flags != slots)
+                throw new IllegalArgumentException("Invalid interface slot structure");
+            this.stackHandler = new StackHandler(slots);
+            this.fakeStackHandler = new StackHandler(flags);
         }
 
         @Override
@@ -240,25 +226,18 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         }
 
         @Override
-        public NetInterfaceSettings getNetInterfaceSettings()
+        public MachineSettings settings()
         {
-            return this.settings;
+            return MachineSettings.EMPTY;
         }
 
         @Override
-        public RedStoneControlMode getControlMode()
+        public void setSettings(MachineSettings settings)
         {
-            return this.controlMode;
         }
 
         @Override
-        public void setControlMode(RedStoneControlMode controlMode)
-        {
-            this.controlMode = controlMode;
-        }
-
-        @Override
-        public boolean canConfigurePopMode()
+        public boolean canConfigureSides()
         {
             return false;
         }
@@ -274,18 +253,6 @@ public class NetInterfaceBaseMenu extends BDBaseMenu
         {
         }
 
-        private static StackHandler decodeStackHandler(HolderLookup.Provider registries, CompoundTag tag)
-        {
-            if (tag == null)
-            {
-                return new StackHandler(0);
-            }
-            RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, registries);
-            return StackHandler.CODEC.parse(ops, tag)
-                    .getOrThrow(false, error -> {
-                        throw new IllegalStateException(error);
-                    });
-        }
     }
 
 }

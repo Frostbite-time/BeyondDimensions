@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import com.wintercogs.beyonddimensions.api.capability.helper.CapabilityHelper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.IStackHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.api.storage.handler.impl.RestrictedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
@@ -14,13 +15,12 @@ import com.wintercogs.beyonddimensions.api.util.CommonHandler;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
-import com.wintercogs.beyonddimensions.common.machine.FuzzyMode;
-import com.wintercogs.beyonddimensions.common.machine.PopMode;
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.machine.MachineSides;
+import com.wintercogs.beyonddimensions.common.machine.setting.FuzzyMode;
+import com.wintercogs.beyonddimensions.common.machine.setting.PopMode;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceAccess;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
-import com.wintercogs.beyonddimensions.common.menu.NetInterfaceSettings;
-import com.wintercogs.beyonddimensions.config.CommonConfigRuntime;
+import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
 import com.wintercogs.beyonddimensions.util.SidedCapId;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -38,9 +38,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,8 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 {
     private final Map<SidedCapId, LazyOptional<?>> caps = new HashMap<>();
 
-    private static final int capacity = CommonConfigRuntime.interfaceUsableCapacity;
+    // 槽位数在创建时按服务端配置确定
+    private final int capacity = ServerConfigRuntime.interfaceCapacity;
 
     // 用来标记物品或者流体的槽位，只由UI控制
     private final StackHandler fakeStackHandler = new StackHandler(capacity)
@@ -74,16 +76,17 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         }
     };
 
-    private final NetInterfaceSettings settings = new NetInterfaceSettings();
+    // 只许放入、只许取出的面各用一个视图
+    private final StackHandler inputOnly = new RestrictedStackHandler(stackHandler, true, false);
+    private final StackHandler outputOnly = new RestrictedStackHandler(stackHandler, false, true);
 
     private final Direction[] directions = Direction.values();
 
     private int redstoneLevel = 0;
 
-
-    // 存储相邻方块的能力
-    // 按照 typedId -> 堆叠处理器 的结构存储，使用Multimap，因为一个typedId可以对应多个处理器
-    private final Multimap<ResourceLocation, Object> handlerCache = ArrayListMultimap.create();
+    // 存储相邻方块的能力，按面分开
+    // 每个面按照 typedId -> 堆叠处理器 的结构存储，使用Multimap，因为一个typedId可以对应多个处理器
+    private final Map<Direction, Multimap<ResourceLocation, Object>> handlerCache = new EnumMap<>(Direction.class);
     private boolean needsCapabilityUpdate = true;
 
     public StackHandler getStackHandler()
@@ -94,18 +97,6 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     public StackHandler getFakeStackHandler()
     {
         return this.fakeStackHandler;
-    }
-
-    @Override
-    public NetInterfaceSettings getNetInterfaceSettings()
-    {
-        return this.settings;
-    }
-
-    @Override
-    public void setControlMode(RedStoneControlMode controlMode)
-    {
-        this.controlMode = controlMode;
     }
 
     @Override
@@ -120,7 +111,6 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         if (this.level != null && !this.level.isClientSide())
         {
             this.level.blockEntityChanged(this.getBlockPos());
-            this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 2);
         }
     }
 
@@ -162,13 +152,13 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
         if (getNet() != null)
         {
-            if (CommonConfigRuntime.interfaceCanReceiveResource)
+            if (ServerConfigRuntime.interfaceReceive)
                 transferToNet();
-            if (CommonConfigRuntime.interfaceCanOutputResource)
+            if (ServerConfigRuntime.interfaceOutput)
                 transferFromNet();
         }
 
-        if (CommonConfigRuntime.interfaceCanPopResource)
+        if (ServerConfigRuntime.interfacePushOut)
         {
             // 尝试输出物品到周围
             if (getPopMode() == PopMode.OPEN)
@@ -193,14 +183,14 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
             BlockEntity neighbor = level.getBlockEntity(targetPos);
             if (neighbor != null && !(neighbor instanceof NetedBlockEntity))
             {
-
+                Multimap<ResourceLocation, Object> handlers = ArrayListMultimap.create();
                 CapabilityHelper.BlockCapabilityMap.forEach(
                         (resourceLocation, cap) -> {
                             LazyOptional<?> handler = neighbor.getCapability(cap, dir.getOpposite());
-                            handler.ifPresent(delegate -> handlerCache.put(resourceLocation, delegate));
+                            handler.ifPresent(delegate -> handlers.put(resourceLocation, delegate));
                         }
                 );
-
+                handlerCache.put(dir, handlers);
             }
         }
 
@@ -217,6 +207,28 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
     {
         super.invalidateCaps();
         clearCapCache(); // clearCapCache是用于方块自身的
+        setNeedsCapabilityUpdate();
+    }
+
+    @Override
+    protected void onSettingsChanged()
+    {
+        super.onSettingsChanged();
+        // 面配置可能变了，相邻方块要重新取能力
+        clearCapCache();
+        setNeedsCapabilityUpdate();
+    }
+
+    // 按面限制：只许放入的面取不出，只许取出的面放不进，禁用的面没有能力
+    private @Nullable StackHandler storageFor(@Nullable Direction side)
+    {
+        return switch (MachineSides.mode(this, side))
+        {
+            case INPUT -> inputOnly;
+            case OUTPUT -> outputOnly;
+            case BOTH -> stackHandler;
+            case NONE -> null;
+        };
     }
 
     private void clearCapCache()
@@ -245,8 +257,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
             // 检查当前请求的能力是否匹配注册的能力
             if (entry.getValue() == cap)
             {
-
-                final SidedCapId capId = new SidedCapId(cap, null); //此处无需面信息
+                final SidedCapId capId = new SidedCapId(cap, side);
                 if (caps.containsKey(capId) && caps.get(capId).isPresent())
                 {
                     return caps.get(capId).cast();
@@ -255,13 +266,14 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                 {
                     // 从类型映射表中获取对应的处理器构造函数
                     CommonHandler handler = CapabilityHelper.CommonHandlerMap.get(entry.getKey());
-                    if (handler != null)
+                    StackHandler storage = storageFor(side);
+                    if (handler != null && storage != null)
                     {
                         Object result;
                         if (handler.isContextual())
-                            result = handler.apply(stackHandler, new CapCtx(level, getBlockPos(), this));
+                            result = handler.apply(storage, new CapCtx(level, getBlockPos(), this));
                         else
-                            result = handler.apply(stackHandler, null);
+                            result = handler.apply(storage, null);
 
                         if (result != null)
                         {
@@ -273,7 +285,7 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
                             return opt.cast();
                         }
                     }
-                    return LazyOptional.empty(); // 无对应handler的回调
+                    return LazyOptional.empty(); // 没有对应的处理器，或者这一面被禁用
                 }
             }
         }
@@ -295,8 +307,16 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
 
     public void popStack()
     {
+        // 只送往允许输出的面
+        handlerCache.forEach((dir, handlers) -> {
+            if (MachineSides.mode(this, dir).allowsOutput())
+                popStack(handlers);
+        });
+    }
 
-        handlerCache.forEach(
+    private void popStack(Multimap<ResourceLocation, Object> handlers)
+    {
+        handlers.forEach(
                 (typeId, handler) -> {
                     Function handlerGetter = StackHandlerWrapperHelper.stackWrappers.get(typeId);
 
@@ -371,31 +391,6 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         super.load(tag);
         this.stackHandler.deserializeNBT(tag.getCompound("inventory"));
         this.fakeStackHandler.deserializeNBT(tag.getCompound("flags"));
-
-        // 旧数据兼容
-        String popModeNew = tag.getString("pop_mode");
-        if (!popModeNew.isEmpty())
-        {
-            setPopMode(PopMode.valueOf(popModeNew));
-        }
-        else if (!tag.getString("popMode").isEmpty())
-        {
-            setPopMode(PopMode.valueOf(tag.getString("popMode")));
-        }
-        else if (tag.getBoolean("popMode"))
-        {
-            setPopMode(PopMode.OPEN);
-        }
-        else
-        {
-            setPopMode(PopMode.STOP);
-        }
-
-        String fuzzyModeNew = tag.getString("fuzzy_mode");
-        if (!fuzzyModeNew.isEmpty())
-        {
-            setFuzzyMode(FuzzyMode.valueOf(fuzzyModeNew));
-        }
     }
 
     @Override
@@ -412,8 +407,6 @@ public class NetInterfaceBlockEntity extends BaseMachineBlockEntity implements M
         super.saveAdditional(tag);
         tag.put("inventory", stackHandler.serializeNBT());
         tag.put("flags", fakeStackHandler.serializeNBT());
-        tag.putString("pop_mode", getPopMode().name());
-        tag.putString("fuzzy_mode", getFuzzyMode().name());
     }
 
     @Override

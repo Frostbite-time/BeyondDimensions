@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -146,6 +145,12 @@ public final class FluidStackKey implements IStackKey<FluidStack>
         ResourceLocation key = ForgeRegistries.FLUIDS.getKey(this.fluid);
         if (key == null) key = BuiltInRegistries.FLUID.getKey(this.fluid);
         return key.getNamespace();
+    }
+
+    @Override
+    public ResourceLocation getSourceId()
+    {
+        return BuiltInRegistries.FLUID.getKey(fluid);
     }
 
     @Override
@@ -285,7 +290,7 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     {
         if (nbt == null) return EMPTY;
 
-        // 新
+        // 新；流体解析不了时如实失败，由 IStackKey.deserializeNBTCommon 封装成错误数据
         if (nbt.contains("fluid", net.minecraft.nbt.Tag.TAG_STRING))
         {
             return readNewFmt(nbt);
@@ -300,37 +305,32 @@ public final class FluidStackKey implements IStackKey<FluidStack>
 
     private @NotNull IStackKey<FluidStack> readNewFmt(@NotNull CompoundTag nbt)
     {
-        ResourceLocation id = ResourceLocation.tryParse(nbt.getString("fluid"));
-        Fluid f = Fluids.EMPTY;
-
-        if (id != null)
-        {
-            Fluid fromForge = ForgeRegistries.FLUIDS.getValue(id);
-            f = Objects.requireNonNullElseGet(fromForge, () -> BuiltInRegistries.FLUID.get(id));
-        }
-
+        Fluid f = registeredFluid(nbt.getString("fluid"));
         CompoundTag tag = nbt.contains("tag", Tag.TAG_COMPOUND) ? nbt.getCompound("tag") : null;
         return new FluidStackKey(f, tag);
     }
 
     private @NotNull IStackKey<FluidStack> fromLegacyTypedStack(@NotNull CompoundTag stackNbt)
     {
-        try
-        {
-            FluidStack fs = FluidStack.loadFluidStackFromNBT(stackNbt);
-            if (fs == null || fs.isEmpty())
-            {
-                return EMPTY;
-            }
-
-            Fluid f = fs.getFluid();
-            CompoundTag tag = fs.hasTag() ? fs.getTag() : null;
-            return new FluidStackKey(f, tag);
-        }
-        catch (Throwable t)
+        registeredFluid(stackNbt.getString("FluidName"));
+        FluidStack fs = FluidStack.loadFluidStackFromNBT(stackNbt);
+        if (fs == null || fs.isEmpty())
         {
             return EMPTY;
         }
+
+        Fluid f = fs.getFluid();
+        CompoundTag tag = fs.hasTag() ? fs.getTag() : null;
+        return new FluidStackKey(f, tag);
+    }
+
+    // 流体 id 对应的流体；未注册的流体如实失败
+    private static Fluid registeredFluid(String name)
+    {
+        ResourceLocation id = ResourceLocation.tryParse(name);
+        if (id == null || !ForgeRegistries.FLUIDS.containsKey(id))
+            throw new IllegalArgumentException("Unknown fluid: " + name);
+        return ForgeRegistries.FLUIDS.getValue(id);
     }
 
     @Override

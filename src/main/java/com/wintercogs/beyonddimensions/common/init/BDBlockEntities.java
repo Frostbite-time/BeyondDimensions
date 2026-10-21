@@ -91,6 +91,15 @@ public class BDBlockEntities
             ).build(null)
     );
 
+    public static final Supplier<BlockEntityType<NetStockEmitterBlockEntity>> NET_STOCK_EMITTER_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(
+            "net_stock_emitter_block_entity",
+            () -> BlockEntityType.Builder.of(
+                    NetStockEmitterBlockEntity::new,
+                    BDBlocks.NET_STOCK_EMITTER.get()
+            ).build(null)
+    );
+
+
     public static void register(IEventBus eventBus)
     {
         BLOCK_ENTITY_TYPES.register(eventBus);

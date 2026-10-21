@@ -12,7 +12,8 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.data.BlockTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -25,13 +26,13 @@ public class ModBlockTagProvider extends BlockTagsProvider
     }
 
     @Override
-    public String getName()
+    public @NotNull String getName()
     {
         return "BeyondDimensions BlockTag Provider";
     }
 
     @Override
-    protected void addTags(HolderLookup.Provider provider)
+    protected void addTags(@NotNull HolderLookup.Provider provider)
     {
         // 标记以下方块使用镐子挖掘更快
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
@@ -45,6 +46,7 @@ public class ModBlockTagProvider extends BlockTagsProvider
                 .add(BDBlocks.NET_FURNACE_BLOCK.get())
                 .add(BDBlocks.NET_BLAST_FURNACE_BLOCK.get())
                 .add(BDBlocks.NET_SMOKER_BLOCK.get())
+                .add(BDBlocks.NET_STOCK_EMITTER.get())
                 .add(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
 
         IntegrationManager.onBlockTagDatagen(provider, new IIntegrationModule.BlockTagAppender()

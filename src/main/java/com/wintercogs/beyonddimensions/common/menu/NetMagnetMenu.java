@@ -1,35 +1,49 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.machine.Machine;
+import com.wintercogs.beyonddimensions.api.machine.MachineItem;
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
-import com.wintercogs.beyonddimensions.common.init.BDItems;
-import com.wintercogs.beyonddimensions.common.init.BDMenus;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
 import com.wintercogs.beyonddimensions.common.item.BaseMachineItem;
-import com.wintercogs.beyonddimensions.common.machine.*;
+import com.wintercogs.beyonddimensions.common.item.NetMagnetItem;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineMenu;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
-import com.wintercogs.beyonddimensions.util.InventoryHelper;
-import net.minecraft.nbt.CompoundTag;
+import dev.compixel.forge.sync.MenuAction;
+import dev.compixel.forge.sync.MenuSync;
+import dev.compixel.sync.state.SyncSchema;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NetMagnetMenu extends BDBaseMenu
+import static com.wintercogs.beyonddimensions.common.init.BDMenus.Net_Magnet_Menu;
+
+// 网络磁铁菜单：收集过滤槽、背包保留槽与玩家背包，设置保存在物品上
+public class NetMagnetMenu extends BDBaseMenu implements MachineMenu
 {
-
-    private static final int slotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + 1;
-    private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + 7;
-
     // storage的初始数据由itemStack提供，随后storage每次变化都重新向其中写入数据
-    private final IStackHandler storage = new StackHandler(36)
+    private final IStackHandler storage = new StackHandler(NetMagnetItem.capacity)
     {
+        @Override
+        public boolean isStackValid(int slot, IStackKey<?> key)
+        {
+            return super.isStackValid(slot, key)
+                    && (slot < NetMagnetItem.FILTER_SLOTS || key.isEmpty() || key instanceof ItemStackKey);
+        }
+
         @Override
         public void onChange()
         {
@@ -43,41 +57,69 @@ public class NetMagnetMenu extends BDBaseMenu
 
     public final ItemStack menuStack;
 
-    private RedStoneControlMode lastControlMode;
-    private FilterMode lastFilterMode;
-    private HopperItemMode lastHopperItemMode;
-    private HopperXpMode lastHopperXpMode;
-    private HopperNBTMode lastHopperNBTMode;
-    private HopperFluidMode lastHopperFluidMode;
-    private HopperRangeMode lastHopperRangeMode;
+    private static final SyncSchema<NetMagnetMenu> SCHEMA =
+            MachineSettingsSync.field(SyncSchema.<NetMagnetMenu>builder("beyonddimensions:magnet", 2)).build();
 
+    private static final MenuAction<NetMagnetMenu, MachineSettingsSync.Change> SET_SETTING = MachineSettingsSync.action();
+
+    private final MachineSettingsSync.Mirror machineSettings = new MachineSettingsSync.Mirror();
+
+    private final MenuSync<NetMagnetMenu> synchronization;
+
+    @Override
+    public MenuSync<NetMagnetMenu> menuSync()
+    {
+        return synchronization;
+    }
+
+    @Override
+    public @Nullable Machine machine()
+    {
+        return !player.level().isClientSide() && menuStack.getItem() instanceof MachineItem item ? item.machine(menuStack) : null;
+    }
+
+    @Override
+    public MachineSettingsSync.Mirror machineSettings()
+    {
+        return machineSettings;
+    }
+
+    /**
+     * 客户端：按控件给出的值修改设置，见 {@link MachineSettingsSync#valueAt}
+     */
+    public boolean requestSetting(ResourceLocation setting, long pick)
+    {
+        return MachineSettingsSync.request(this, synchronization, SET_SETTING, setting, pick);
+    }
 
     public NetMagnetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
-        this(id, playerInventory, InventoryHelper.findItemInPlayerInventory(playerInventory.player, BDItems.NET_MAGNET_ITEM.get()));
+        // 客户端的设置与过滤器经由服务端主导的同步通道送达。
+        this(id, playerInventory, ItemStack.EMPTY);
     }
 
     public NetMagnetMenu(int containerId, Inventory playerInventory, ItemStack menuStack)
     {
-        super(BDMenus.Net_Magnet_Menu.get(), containerId, playerInventory);
-        this.menuStack = menuStack;
+        super(Net_Magnet_Menu.get(), containerId, playerInventory);
+        this.menuStack = java.util.Objects.requireNonNullElse(menuStack, ItemStack.EMPTY);
+        if (!playerInventory.player.level().isClientSide() && this.menuStack.getItem() instanceof com.wintercogs.beyonddimensions.common.item.BaseMachineItem device)
+            device.checkComponents(this.menuStack);
 
         initialized = false;
         // 为服务端注入真实数据，客户端由槽位同步
         if (!playerInventory.player.level().isClientSide())
         {
             List<KeyAmount> stacks = BaseMachineItem.getFilterSlotsOrDefault(menuStack, new ArrayList<>());
-            for (int i = 0; i < stacks.size(); i++)
+            for (int i = 0; i < Math.min(stacks.size(), storage.getSlots()); i++)
             {
                 storage.insert(i, stacks.get(i).key(), stacks.get(i).amount(), false);
             }
         }
         initialized = true;
 
-
         addPlayerInv(playerInventory);
         addFlagSlots();
-
+        synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SCHEMA)).action(SET_SETTING));
     }
 
     private void addFlagSlots()
@@ -86,10 +128,12 @@ public class NetMagnetMenu extends BDBaseMenu
         {
             for (int col = 0; col < 9; col++)
             {
-                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, storage, row * 9 + col, 8 + col * 18, slotStartY + row * 18);
+                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, storage, row * 9 + col);
                 this.addSlot(flagSlot);
             }
         }
+        for (int i = 0; i < NetMagnetItem.EXCEPTION_SLOTS; i++)
+            this.addSlot(new FlagStackTypedSlot(this, storage, NetMagnetItem.FILTER_SLOTS + i));
     }
 
     private void addPlayerInv(Inventory playerInventory)
@@ -100,12 +144,12 @@ public class NetMagnetMenu extends BDBaseMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, invSlotStartY + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 0, 0));
             }
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 4 + invSlotStartY + 3 * 18));
+            this.addSlot(new Slot(playerInventory, col, 0, 0));
         }
         inventoryEndIndex = slots.size();
     }
@@ -113,58 +157,6 @@ public class NetMagnetMenu extends BDBaseMenu
     @Override
     public boolean stillValid(@NotNull Player player)
     {
-        return menuStack != null && !menuStack.isEmpty();
-    }
-
-    @Override
-    protected boolean shouldSendQuickData()
-    {
-        boolean result = super.shouldSendQuickData()
-                || lastControlMode != BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE)
-                || lastFilterMode != BaseMachineItem.getFilterModeOrDefault(menuStack, FilterMode.BLACK)
-                || lastHopperItemMode != BaseMachineItem.getHopperItemModeOrDefault(menuStack, HopperItemMode.ALLOW)
-                || lastHopperXpMode != BaseMachineItem.getHopperXpModeOrDefault(menuStack, HopperXpMode.DENY)
-                || lastHopperNBTMode != BaseMachineItem.getHopperNBTModeOrDefault(menuStack, HopperNBTMode.DENY)
-                || lastHopperFluidMode != BaseMachineItem.getHopperFluidModeOrDefault(menuStack, HopperFluidMode.DENY)
-                || lastHopperRangeMode != BaseMachineItem.getHopperRangeModeOrDefault(menuStack, HopperRangeMode.RADIUS_MID);
-
-        if (result)
-        {
-            lastControlMode = BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE);
-            lastFilterMode = BaseMachineItem.getFilterModeOrDefault(menuStack, FilterMode.BLACK);
-            lastHopperItemMode = BaseMachineItem.getHopperItemModeOrDefault(menuStack, HopperItemMode.ALLOW);
-            lastHopperXpMode = BaseMachineItem.getHopperXpModeOrDefault(menuStack, HopperXpMode.DENY);
-            lastHopperNBTMode = BaseMachineItem.getHopperNBTModeOrDefault(menuStack, HopperNBTMode.DENY);
-            lastHopperFluidMode = BaseMachineItem.getHopperFluidModeOrDefault(menuStack, HopperFluidMode.DENY);
-            lastHopperRangeMode = BaseMachineItem.getHopperRangeModeOrDefault(menuStack, HopperRangeMode.RADIUS_MID);
-        }
-
-        return result;
-    }
-
-    @Override
-    protected void writeQuickDataTag(CompoundTag tag)
-    {
-        super.writeQuickDataTag(tag);
-        tag.putString("control_mode", BaseMachineItem.getControlModeOrDefault(menuStack, RedStoneControlMode.IGNORE).name());
-        tag.putString("filter_type", BaseMachineItem.getFilterModeOrDefault(menuStack, FilterMode.BLACK).name());
-        tag.putString("hopper_item_mode", BaseMachineItem.getHopperItemModeOrDefault(menuStack, HopperItemMode.ALLOW).name());
-        tag.putString("hopper_xp_mode", BaseMachineItem.getHopperXpModeOrDefault(menuStack, HopperXpMode.DENY).name());
-        tag.putString("hopper_nbt_mode", BaseMachineItem.getHopperNBTModeOrDefault(menuStack, HopperNBTMode.DENY).name());
-        tag.putString("hopper_fluid_mode", BaseMachineItem.getHopperFluidModeOrDefault(menuStack, HopperFluidMode.DENY).name());
-        tag.putString("hopper_range_mode", BaseMachineItem.getHopperRangeModeOrDefault(menuStack, HopperRangeMode.RADIUS_MID).name());
-    }
-
-    @Override
-    public void readQuickDataTag(CompoundTag tag)
-    {
-        super.readQuickDataTag(tag);
-        BaseMachineItem.setControlMode(menuStack, RedStoneControlMode.valueOf(tag.getString("control_mode")));
-        BaseMachineItem.setFilterMode(menuStack, FilterMode.valueOf(tag.getString("filter_type")));
-        BaseMachineItem.setHopperItemMode(menuStack, HopperItemMode.valueOf(tag.getString("hopper_item_mode")));
-        BaseMachineItem.setHopperXpMode(menuStack, HopperXpMode.valueOf(tag.getString("hopper_xp_mode")));
-        BaseMachineItem.setHopperNBTMode(menuStack, HopperNBTMode.valueOf(tag.getString("hopper_nbt_mode")));
-        BaseMachineItem.setHopperFluidMode(menuStack, HopperFluidMode.valueOf(tag.getString("hopper_fluid_mode")));
-        BaseMachineItem.setHopperRangeMode(menuStack, HopperRangeMode.valueOf(tag.getString("hopper_range_mode")));
+        return player.level().isClientSide() || com.wintercogs.beyonddimensions.util.InventoryHelper.containsExactStack(player, menuStack);
     }
 }

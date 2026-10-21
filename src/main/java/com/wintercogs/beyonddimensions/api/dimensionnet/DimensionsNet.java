@@ -1,30 +1,33 @@
 package com.wintercogs.beyonddimensions.api.dimensionnet;
 
+import com.mojang.logging.LogUtils;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.wintercogs.beyonddimensions.api.dimensionnet.data.NetDataType;
 import com.wintercogs.beyonddimensions.api.event.dimensionnet.DimensionsNetEvent;
+import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.ErrorData;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
-import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.init.BDItems;
-import com.wintercogs.beyonddimensions.config.ServerConfigRuntime;
 import com.wintercogs.beyonddimensions.util.PlayerNameHelper;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 
 /**
@@ -35,6 +38,9 @@ import java.util.*;
  */
 public class DimensionsNet extends SavedData
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final String ATTACHMENTS_TAG = "attachments";
+    private static final String QUARANTINE_TAG = "attachments_quarantine";
     static final String NET_DATA_PREFIX = "BDNet_";
     public static final int NO_PRIMARY_NET_ID = -1;
     public static final int MAX_NETWORK_NAME_LENGTH = 48;
@@ -80,29 +86,62 @@ public class DimensionsNet extends SavedData
     private final @NotNull UnifiedStorage unifiedStorage;
 
     /**
-     * 标记网络是否为一个临时网络，临时网络通常用于客户端菜单的同步中，作为资源容器使用
-     * <p>
-     * 临时网络不会执行生成破碎的时空结晶之类的操作
+     * 挂接的数据，见 {@link NetDataType}
      */
-    private final boolean temporary;
+    private final Map<NetDataType<?>, Object> attachments = new LinkedHashMap<>();
 
     /**
-     * currentTime是流动的倒计时，用于生成破碎时空结晶，该数据持久化保存
-     * <p>
-     * holdTime是固定的时间间隔，用于确定多久生成一次时间间隔，每当currentTime归零，holdTime会为它赋值
+     * 类型未注册（例如附属未安装）的挂接数据，原样保留并写回存档
      */
-    private int currentTime = 0;
+    private final Map<String, Tag> unknownAttachments = new LinkedHashMap<>();
+
+    /**
+     * 类型已注册但解析失败的挂接数据，原样隔离保存，不会被自动采用或覆盖
+     */
+    private final Map<String, Tag> quarantinedAttachments = new LinkedHashMap<>();
+
+    /**
+     * 每种挂接数据上一次成功写出的内容，编码失败时沿用，不写成空值
+     */
+    private final Map<NetDataType<?>, Tag> lastWrittenAttachments = new HashMap<>();
+
+    /**
+     * 当前服务器载入的网络，由 {@link #tickLoaded} 每刻运行任务，服务器停止时清空
+     */
+    private static final Set<DimensionsNet> LOADED = Collections.newSetFromMap(new IdentityHashMap<>());
 
     /**
      * 构造函数
      *
-     * @param temporary 为真则说明是临时网络
+     * @param temporary 为真则说明是临时网络，通常用于客户端菜单的同步，作为资源容器使用；临时网络不运行每刻任务
      */
     public DimensionsNet(boolean temporary)
     {
         unifiedStorage = new UnifiedStorage(this, AbstractUnorderedStackHandler.UiTimestampPolicy.AUTO);
-        MinecraftForge.EVENT_BUS.addListener(this::onServerTick);
-        this.temporary = temporary;
+        if (!temporary)
+            LOADED.add(this);
+    }
+
+    /**
+     * 每刻为所有已载入的网络运行 {@link NetTickTasks} 注册的任务，由 BD 注册到事件总线
+     */
+    public static void tickLoaded(TickEvent.ServerTickEvent event)
+    {
+        if (event.phase != TickEvent.Phase.START)
+            return;
+        for (DimensionsNet net : LOADED)
+        {
+            if (!net.deleted)
+                net.onServerTick(event);
+        }
+    }
+
+    /**
+     * 服务器停止时忘掉它的网络，由 BD 注册到事件总线
+     */
+    public static void forgetLoaded(ServerStoppedEvent event)
+    {
+        LOADED.clear();
     }
 
     // 基本函数
@@ -125,7 +164,7 @@ public class DimensionsNet extends SavedData
      */
     public static @Nullable DimensionsNet createNewNetForPlayer(Player player, long defaultSlotCapability, int defaultSlotMaxSize)
     {
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
         if (net != null) return net;
 
         MinecraftServer server = player.getServer();
@@ -148,7 +187,10 @@ public class DimensionsNet extends SavedData
     }
 
     /**
-     * 构建最新的，可用的网络名称，用于创建新网络时确定新网络的id，仅在服务端调用
+     * 构建最新的，可用的网络名称，仅在服务端调用。
+     * <p>
+     * 该方法会通过网络注册表分配一个全新的、单调递增的网络 ID，并基于它构建数据名。
+     * 该操作不会自动把网络登记为有效网络。
      *
      * @param dataProvider 用于获取SavedData
      * @return 最新可用的网络名称，内容为字符串："BDNet_<数字id>"
@@ -158,6 +200,12 @@ public class DimensionsNet extends SavedData
         return buildNetDataName(NetRegistryIndex.get(dataProvider).allocateNetId(dataProvider));
     }
 
+    /**
+     * 根据网络 ID 构建其固定的数据存档名。
+     *
+     * @param netId 网络 ID
+     * @return 对应的 SavedData 名称
+     */
     public static String buildNetDataName(int netId)
     {
         return NET_DATA_PREFIX + netId;
@@ -194,12 +242,21 @@ public class DimensionsNet extends SavedData
      * @param player 玩家
      * @return 返回玩家所在的维度网络，如果不存在，则返回null
      */
-    @Deprecated(forRemoval = false)
+    @Deprecated(forRemoval = true)
     public static @Nullable DimensionsNet getNetFromPlayer(Player player)
     {
         return getPrimaryNetFromPlayer(player);
     }
 
+    /**
+     * 尝试从玩家获取主维度网络，仅在服务端调用。
+     * <p>
+     * 只看主网络：玩家即使仍然属于其他网络，只要主网络被显式清空，
+     * 这里依然会返回 {@code null}。
+     *
+     * @param player 玩家
+     * @return 玩家当前的主网络；如果没有主网络，则返回 {@code null}
+     */
     public static @Nullable DimensionsNet getPrimaryNetFromPlayer(Player player)
     {
         MinecraftServer server = player.getServer();
@@ -215,6 +272,15 @@ public class DimensionsNet extends SavedData
         return getNetFromId(server, primaryNetId);
     }
 
+    /**
+     * 获取玩家所属的全部有效网络，仅在服务端调用。
+     * <p>
+     * 该接口返回运行时维护的全部成员网络，并会自动过滤已删除或无效的网络。
+     * 返回结果不受主网络是否为空影响。
+     *
+     * @param player 玩家
+     * @return 玩家所属的全部有效网络；如果没有任何成员网络，则返回空列表
+     */
     public static @NotNull List<DimensionsNet> getAllNetFromPlayer(Player player)
     {
         MinecraftServer server = player.getServer();
@@ -242,17 +308,41 @@ public class DimensionsNet extends SavedData
         return nets;
     }
 
+    /**
+     * 判断玩家是否属于任意维度网络，仅在服务端调用。
+     * <p>
+     * 该方法检查的是全部成员关系，而不是主网络状态。
+     *
+     * @param player 玩家
+     * @return 玩家只要仍属于任意网络，就返回 {@code true}
+     */
     public static boolean hasAnyNet(Player player)
     {
         MinecraftServer server = player.getServer();
         return server != null && PlayerNetIndex.get(server).hasAnyMembership(player.getUUID());
     }
 
+    /**
+     * 判断玩家当前是否拥有主网络，仅在服务端调用。
+     *
+     * @param player 玩家
+     * @return 玩家存在主网络时返回 {@code true}
+     */
     public static boolean hasPrimaryNet(Player player)
     {
         return getPrimaryNetFromPlayer(player) != null;
     }
 
+    /**
+     * 设置玩家的主网络，仅在服务端调用。
+     * <p>
+     * 传入 {@code null} 时会把玩家切换到空主网络状态，但不会移除其已有的成员网络。
+     * 传入非空网络时，要求玩家已经属于该网络。
+     *
+     * @param player 玩家
+     * @param net    目标主网络；传入 {@code null} 表示清空主网络
+     * @return 主网络状态实际发生变化时返回 {@code true}
+     */
     public static boolean setPrimaryNetForPlayer(Player player, @Nullable DimensionsNet net)
     {
         MinecraftServer server = player.getServer();
@@ -267,6 +357,14 @@ public class DimensionsNet extends SavedData
                 : index.setPrimary(player.getUUID(), net.getId());
     }
 
+    /**
+     * 清空玩家的主网络，仅在服务端调用。
+     * <p>
+     * 该操作不会移除玩家已有的成员关系，因此玩家仍然可能通过
+     * {@link #getAllNetFromPlayer(Player)} 查到其他网络。
+     *
+     * @param player 玩家
+     */
     public static void clearPrimaryNetForPlayer(Player player)
     {
         MinecraftServer server = player.getServer();
@@ -295,31 +393,24 @@ public class DimensionsNet extends SavedData
             net.owner = owner;
         }
 
-        net.unifiedStorage.deserializeNBT(tag.getCompound("UnifiedStorage"));
+        // 解析不了的资源封装成错误数据，汇总成一条带网络 id 的日志
+        try (ErrorData.Report ignored = ErrorData.report("dimensional network #" + net.id))
+        {
+            net.unifiedStorage.deserializeNBT(tag.getCompound("UnifiedStorage"));
+        }
         // 旧数据兼容
         if (tag.contains("EnergyStorage"))
         {
             CompoundTag energyTag = tag.getCompound("EnergyStorage");
             if (energyTag.contains("Energy"))
             {
-                net.unifiedStorage.insert(EnergyStackKey.INSTANCE, energyTag.getLong("Energy"), false);
+                net.unifiedStorage.restore(EnergyStackKey.INSTANCE, energyTag.getLong("Energy"));
             }
         }
 
-        if (tag.contains("Managers"))
-        {
-            ListTag managerList = tag.getList("Managers", 8);
-            managerList.forEach(manager -> net.managers.add(UUID.fromString(manager.getAsString())));
-        }
-
-        if (tag.contains("Players"))
-        {
-            ListTag playerList = tag.getList("Players", 8); // 8 表示 StringTag
-            playerList.forEach(player -> net.players.add(UUID.fromString(player.getAsString())));
-        }
-
-        // 读取倒计时
-        net.currentTime = tag.getInt("currentTime");
+        readMembers(tag, "Managers", net.managers, net.id);
+        readMembers(tag, "Players", net.players, net.id);
+        net.readAttachments(tag);
 
         if (tag.contains("Deleted"))
             net.deleted = tag.getBoolean("Deleted");
@@ -366,13 +457,245 @@ public class DimensionsNet extends SavedData
         // 保存存储
         tag.put("UnifiedStorage", unifiedStorage.serializeNBT());
 
-        // 保存倒计时
-        tag.putInt("currentTime", this.currentTime);
-
         // 保存删除状态
         tag.putBoolean("Deleted", this.deleted);
 
+        writeAttachments(tag);
+
         return tag;
+    }
+
+    // 成员 UUID 逐个解析：坏掉的一条只跳过它本身
+    private static void readMembers(CompoundTag tag, String key, Set<UUID> into, int netId)
+    {
+        for (Tag entry : tag.getList(key, Tag.TAG_STRING))
+        {
+            try
+            {
+                into.add(UUID.fromString(entry.getAsString()));
+            }
+            catch (IllegalArgumentException e)
+            {
+                LOGGER.warn("Dimensional network #{}: skipped an unparsable player UUID in {}: {}", netId, key, entry.getAsString());
+            }
+        }
+    }
+
+    // ---- 挂接数据 ----
+
+    /**
+     * 这种挂接数据的值；网络还没有时以默认值建立
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getOrCreateData(NetDataType<T> type)
+    {
+        Object value = attachments.get(type);
+        if (value == null)
+        {
+            value = type.createDefault();
+            attachments.put(type, value);
+            markChanged(type);
+        }
+        return (T) value;
+    }
+
+    // 只在内存中的数据改动后不必保存网络
+    private void markChanged(NetDataType<?> type)
+    {
+        if (type.isPersistent())
+            setDirty();
+    }
+
+    /**
+     * 这种挂接数据的值，网络没有时为空，不会新建
+     */
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> getExistingData(NetDataType<T> type)
+    {
+        return Optional.ofNullable((T) attachments.get(type));
+    }
+
+    public boolean hasData(NetDataType<?> type)
+    {
+        return attachments.containsKey(type);
+    }
+
+    /**
+     * 替换这种挂接数据的值并标记保存
+     *
+     * @return 原来的值，没有时为 null
+     */
+    @SuppressWarnings("unchecked")
+    public <T> @Nullable T setData(NetDataType<T> type, T value)
+    {
+        Object previous = attachments.put(type, Objects.requireNonNull(value));
+        markChanged(type);
+        return (T) previous;
+    }
+
+    /**
+     * 用 update 的结果替换这种挂接数据的值（没有时先取默认值）并标记保存
+     *
+     * @return 新的值
+     */
+    public <T> T updateData(NetDataType<T> type, UnaryOperator<T> update)
+    {
+        T next = Objects.requireNonNull(update.apply(getOrCreateData(type)));
+        attachments.put(type, next);
+        markChanged(type);
+        return next;
+    }
+
+    /**
+     * 移除这种挂接数据
+     *
+     * @return 移除的值，没有时为空
+     */
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> removeData(NetDataType<T> type)
+    {
+        Object previous = attachments.remove(type);
+        if (previous != null)
+        {
+            lastWrittenAttachments.remove(type);
+            markChanged(type);
+        }
+        return Optional.ofNullable((T) previous);
+    }
+
+    private void writeAttachments(CompoundTag tag)
+    {
+        CompoundTag out = new CompoundTag();
+        unknownAttachments.forEach(out::put);
+        DynamicOps<Tag> ops = NbtOps.INSTANCE;
+        for (Map.Entry<NetDataType<?>, Object> entry : attachments.entrySet())
+        {
+            NetDataType<?> type = entry.getKey();
+            if (!type.isPersistent())
+                continue;
+            ResourceLocation typeId = BDRegistries.NET_DATA_TYPES.get().getKey(type);
+            if (typeId == null)
+            {
+                LOGGER.error("Dimensional network #{}: an attached data type is not registered in {} and cannot be saved", id, BDRegistries.NET_DATA_TYPE_KEY.location());
+                continue;
+            }
+            Tag encoded = encodeAttachment(type, entry.getValue(), ops);
+            if (encoded != null)
+                lastWrittenAttachments.put(type, encoded);
+            else
+                encoded = lastWrittenAttachments.get(type);
+            if (encoded != null)
+                out.put(typeId.toString(), encoded);
+        }
+        if (!out.isEmpty())
+            tag.put(ATTACHMENTS_TAG, out);
+        if (!quarantinedAttachments.isEmpty())
+        {
+            CompoundTag quarantine = new CompoundTag();
+            quarantinedAttachments.forEach(quarantine::put);
+            tag.put(QUARANTINE_TAG, quarantine);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> @Nullable Tag encodeAttachment(NetDataType<T> type, Object value, DynamicOps<Tag> ops)
+    {
+        try
+        {
+            DataResult<Tag> result = type.codec().encodeStart(ops, (T) value);
+            if (result.result().isPresent())
+                return result.result().get();
+            LOGGER.error("Dimensional network #{}: failed to encode attached data {}, keeping the last saved content: {}", id,
+                    BDRegistries.NET_DATA_TYPES.get().getKey(type), result.error().map(DataResult.PartialResult::message).orElse(""));
+        }
+        catch (RuntimeException e)
+        {
+            LOGGER.error("Dimensional network #{}: error while encoding attached data {}, keeping the last saved content", id, BDRegistries.NET_DATA_TYPES.get().getKey(type), e);
+        }
+        return null;
+    }
+
+    private void readAttachments(CompoundTag tag)
+    {
+        // 先读出已在隔离中的数据，新解析失败的另起键名，不会覆盖它们
+        CompoundTag quarantine = tag.getCompound(QUARANTINE_TAG);
+        for (String key : quarantine.getAllKeys())
+            quarantinedAttachments.put(key, quarantine.get(key));
+        if (!quarantine.isEmpty())
+            LOGGER.warn("Dimensional network #{}: {} attached data entries are quarantined: {}", id, quarantine.size(), quarantine.getAllKeys());
+
+        DynamicOps<Tag> ops = NbtOps.INSTANCE;
+        CompoundTag in = tag.getCompound(ATTACHMENTS_TAG);
+        for (String key : in.getAllKeys())
+        {
+            Tag raw = in.get(key);
+            ResourceLocation typeId = ResourceLocation.tryParse(key);
+            NetDataType<?> type = typeId == null ? null : BDRegistries.NET_DATA_TYPES.get().getValue(typeId);
+            if (type == null)
+            {
+                unknownAttachments.put(key, raw);
+                continue;
+            }
+            // 这种数据现在只在内存中，存档里留下的旧内容不再读取
+            if (!type.isPersistent())
+                continue;
+            String failure = decodeAttachment(type, raw, ops);
+            if (failure != null)
+            {
+                quarantine(key, raw);
+                LOGGER.error("Dimensional network #{}: attached data {} cannot be parsed and is kept in quarantine as is: {}", id, key, failure);
+            }
+        }
+        if (!unknownAttachments.isEmpty())
+            LOGGER.warn("Dimensional network #{}: {} attached data entries have unregistered types (is their mod missing?), kept as is: {}", id, unknownAttachments.size(), unknownAttachments.keySet());
+    }
+
+    // 解析成功时放入挂接数据并返回 null，失败时返回原因
+    private <T> @Nullable String decodeAttachment(NetDataType<T> type, Tag raw, DynamicOps<Tag> ops)
+    {
+        try
+        {
+            DataResult<T> result = type.codec().parse(ops, raw);
+            if (result.result().isPresent())
+            {
+                attachments.put(type, result.result().get());
+                lastWrittenAttachments.put(type, raw);
+                return null;
+            }
+            return result.error().map(DataResult.PartialResult::message).orElse("unknown");
+        }
+        catch (RuntimeException e)
+        {
+            return e.toString();
+        }
+    }
+
+    // 合并网络时并入对方的挂接数据，两边都有时按类型声明的方式合并
+    private void absorbAttachments(DimensionsNet other)
+    {
+        for (Map.Entry<NetDataType<?>, Object> entry : other.attachments.entrySet())
+            absorbAttachment(entry.getKey(), entry.getValue());
+        other.unknownAttachments.forEach((key, raw) -> {
+            if (unknownAttachments.putIfAbsent(key, raw) != null)
+                quarantine(key + "@net" + other.id, raw);
+        });
+        other.quarantinedAttachments.forEach(this::quarantine);
+    }
+
+    // 放入隔离区；键名已被占用时加序号，不覆盖已有的数据
+    private void quarantine(String key, Tag raw)
+    {
+        String free = key;
+        for (int n = 2; quarantinedAttachments.containsKey(free); n++)
+            free = key + "#" + n;
+        quarantinedAttachments.put(free, raw);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> void absorbAttachment(NetDataType<T> type, Object absorbed)
+    {
+        T kept = (T) attachments.get(type);
+        attachments.put(type, kept == null ? (T) absorbed : type.merge(kept, (T) absorbed));
     }
 
 
@@ -673,11 +996,14 @@ public class DimensionsNet extends SavedData
             else if (entry.getValue().level() == NetPermissionlevel.Member)
                 addPlayer(entry.getKey());
         }
-        // 合并统一存储系统
+        // 合并统一存储：原样并入，不受容量与种类上限约束
         for (KeyAmount stack : otherNet.getUnifiedStorage().getStorage())
         {
-            unifiedStorage.insert(stack.key(), stack.amount(), false);
+            unifiedStorage.restore(stack.key(), stack.amount());
         }
+        unifiedStorage.onChange();
+        absorbAttachments(otherNet);
+        setDirty();
 
         // 销毁另一个网络
         otherNet.destroySelf();
@@ -700,7 +1026,8 @@ public class DimensionsNet extends SavedData
                 List.copyOf(this.unifiedStorage.getStorage()),
                 this.owner,
                 Set.copyOf(this.managers),
-                Set.copyOf(this.players)
+                Set.copyOf(this.players),
+                Map.copyOf(this.attachments)
         );
 
         List<UUID> playerIds = new ArrayList<>(this.players);
@@ -717,6 +1044,13 @@ public class DimensionsNet extends SavedData
         this.players.clear();
         this.id = -99; // 用-99作为被删除的特殊标记
         this.unifiedStorage.clearStorage();
+        // 容量与种类上限清零：还持有这份存储的界面与设备再存入时会被原样退回
+        this.unifiedStorage.setSlotCapacity(0);
+        this.unifiedStorage.setSlotMaxSize(0);
+        this.attachments.clear();
+        this.unknownAttachments.clear();
+        this.quarantinedAttachments.clear();
+        this.lastWrittenAttachments.clear();
         this.deleted = true;
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server != null)
@@ -764,24 +1098,11 @@ public class DimensionsNet extends SavedData
     }
 
     /**
-     * 用于执行定期操作，目前仅用于生成破碎的时空结晶
+     * 运行 {@link NetTickTasks} 注册的任务。由 {@link #tickLoaded} 统一调用
      */
-    @SubscribeEvent
     public void onServerTick(TickEvent.ServerTickEvent event)
     {
-        // 不对临时网络执行倒计时
-        if (temporary || ServerConfigRuntime.crystalGenerateTime <= 0)
-            return;
-
-        currentTime++;
-        setDirty();
-        if (currentTime >= ServerConfigRuntime.crystalGenerateTime * 20)
-        {
-            ItemStack stack = new ItemStack(BDItems.SHATTERED_SPACE_TIME_CRYSTALLIZATION.get(), 1);
-            this.unifiedStorage.insert(new ItemStackKey(stack), stack.getCount(), false);
-            currentTime = 0;
-        }
-
+        NetTickTasks.run(this);
     }
 
     private void syncPlayerMembership(UUID playerId, boolean switchPrimary)
