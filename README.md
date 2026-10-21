@@ -1,53 +1,182 @@
-# 超越维度
+<div align="center">
 
-**超越维度** 是一个提供存储空间的模组。它引入了一个在原版游戏后期可获得的虚拟存储系统——**维度网络**。这个网络不依赖于任何方块或物品，你可以通过快捷键随时随地访问它。支持流体、Mekanism 的化学品以及 FE 能量存储。
+<img src="docs/images/blocks.png" alt="Beyond Dimensions blocks standing in a meadow" width="100%">
 
+# Beyond Dimensions
 
-## 如何使用存储？
+A storage mod for Minecraft. Store everything and access it from anywhere.
 
-你需要击败凋灵，或者用任何其他方法得到一个**下界之星**，用它合成一个**不稳定时空碎片**，放在背包中一个小时，你将获得一个**稳态时空碎片**。使用它合成一个**维度网络发生器**，使用以创建一个**维度网络**。
+[![CurseForge downloads](https://img.shields.io/curseforge/dt/1222890?logo=curseforge&label=CurseForge&color=F16436)](https://www.curseforge.com/projects/1222890)
+[![Discord](https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white)](https://discord.gg/AgnbJXeEXK)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-你可以使用快捷键（打开维度网络：默认O）打开模组提供的界面来进行交互。模组提供的界面与AE和RS等主流模组的交互逻辑基本一致。在此基础上，手持容器右键在模组提供的界面中可以快速存入或取出容器的内容物，只要是模组支持的资源种类都有效（不包括FE能量）。
+**English** | [简体中文](README.zh-CN.md)
 
-## 自动化功能和联机支持
+</div>
 
-要进行这一步，你必须先获得一些**破碎的时空结晶**，这种物品在你创建维度网络之后每10分钟都会自然生成一个，直接存入你的维度网络中。随着时间的推移，它们将在维度网络中变得越来越多。
+## About
 
-要和你的朋友共享同一个网络，只需合成一个**成员邀请器**，右键将其绑定到你的网络，然后丢给你的朋友使用。这样你的朋友可以访问你的维度网络，但是没有权限将你的网络绑定到其他物品或者方块。你也可以制作一个**网络控制器**为他提升权限，或者使用**管理员成员邀请器**进行邀请。如果你希望共享库存，而不与其使用一个网络，你可以给他一个绑定后的**网络终端**。
+Beyond Dimensions adds the **Dimensional Network**: a storage system you can open anywhere with a hotkey, without keeping
+any chunks loaded. Share it with friends and connect it to pipes, machines and other logistics mods.
 
-模组提供目前仅提供了一个简单但有效自动化方块——**网络接口**，它类似于 **应用能源2 (AE2)** 的 ME 接口。只需空手shift右键绑定，你就可以标记资源，使其不断从网络中抽取，也可以向内输入资源，让其送回网络。**网络接口**提供了一个弹出模式，可以主动向外输出资源，而无需额外使用管道。同时，你也可以不绑定任何网络，将其当一个箱子使用，其可以存储任何模组支持的资源，但是破坏后不会有任何掉落物。
+## Features
 
-如果你是重度模组玩家，那么你还需要**维度网络通道**，将任何物流或存储模组的存储总线接入，就能够读取维度网络内的所有资源。以进行更精细的自动化。它同样可以被接入AE、RS或者汤姆的简易存储这类模组。
+<img src="docs/images/en/terminal.png" align="right" width="320" alt="The crafting terminal holding energy, fluids, chemicals, mana, source and items">
 
+### One network for everything
 
-## 对其他模组的支持
+- Items, fluids and Forge Energy, plus chemicals, mana and source when Mekanism, Botania or Ars Nouveau is installed.
+- Room for more than two billion kinds of resources and up to 2⁶³−1 of each.
+- The screens work with containers: click a storage slot with a bucket, tank or other container to fill or empty it.
 
-* 支持JEI和EMI的拖拽标记和快速配方转移；
-* 为AE2添加了专用的存储元件，用于读取绑定的网络内容。其性能比使用存储总线高10倍以上；
-* Mek的化学品存储支持；
-* 合成界面支持多态合成（Polymorph）；
-* 物品终端可以放入Curios的护符槽中，且同时安装本模组和Curios后，将额外提供一个护符槽；
-* 模组的UI界面禁用了一键背包整理Next（IPN）的功能，模组的UI界面经过大量修改，无法与其一起使用。如需快速转移物品请使用鼠标手势。
+### A terminal for large collections
 
-## 更新计划
+- Press <kbd>O</kbd> anywhere to open your network.
+- Search by name or pinyin, or by mod `@`, tag `#`, tooltip `$`, resource ID `*`, resource type `~`, durability `%<50`
+  and extra data `&`. Leave things out with `-` and allow alternatives with `|`.
+- Make your own category tabs with icons, search rules and hand-picked resources.
+- Sort by name, amount, mod, creative tab, stack size, first stored or last changed.
+- Craft in the built-in grid, with recipe transfer from JEI and EMI.
+- In survival, middle-click a block with an empty hand to take a stack of it from the network; sneak and middle-click
+  to put the stack in your hand into the network.
 
-* 添加发展流程，而非一开始给予无上限的存储；
-* 更多的原生自动化工具；
-* 其他实用工具和装备。
+<br clear="right">
 
-## 其他
+### Machines
 
-可存储资源类型在代码上相当容易拓展，只需实现以下接口并注册资源类型和对应的操作方法
-* [IStackType](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/src/main/java/com/wintercogs/beyonddimensions/DataBase/Stack/IStackType.java) 使模组可以识别和存储此资源类型；
-* [IStackHandlerWrapper](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/src/main/java/com/wintercogs/beyonddimensions/DataBase/StackHandlerWrapper/IStackHandlerWrapper.java) 使模组可以主动操作存储了此资源的其他模组容器；
-* CapabilityHelper.BlockCapabilityMap 使对应资源种类能被其他模组的管道和存储总线获取；
-* CapabilityHelper.ItemCapabilityMap 使UI右键快速可以容器中存取此资源；
-* UnifiedStorage.typedHandlerMap 使得维度网络能操作对应资源；
-* StackTypedHandler.typedHandlerMap 使得网络接口等方块所用的存储空间能操作对应资源。
+<p align="center">
+  <img src="docs/images/en/machines.png" alt="A Network Furnace mid-smelt and the Energy Network screen" width="100%">
+</p>
 
-注册方式可参考[此处](https://github.com/Frostbite-time/BeyondDimensions/blob/1.21.1/src/main/java/com/wintercogs/beyonddimensions/BeyondDimensions.java)，注册方式可能会在未来变动。
+| Block | What it does |
+| --- | --- |
+| Dimensional Network Pathway | Opens the whole network to pipes, hoppers and other mods' storage |
+| Dimensional Network Energy Pathway | Does the same for Forge Energy, with a live flow graph, and can push energy out |
+| Network Interface | Pulls resources out of the network, or takes them in from outside |
+| Network Pump | Pulls resources from neighboring containers into the network |
+| Network Hopper | Collects dropped items, XP orbs and fluids |
+| Network Furnace, Blast Furnace and Smoker | Smelters that take inputs and fuel straight from the network |
+| Stock Emitter | Emits a redstone signal while a resource in the network is above or below a threshold |
+| Network Terminal | Opens the network with a crafting grid |
+| Network Controller | Manages a network's members and permissions |
 
+Machines have filters, per-side input and output settings and redstone control. The **Machine Configuration Card**
+copies and pastes their settings in a few clicks.
 
-## 许可证
+### Tools
 
-本模组使用 **MIT 许可证**。你可以将其添加到整合包内或者对其进行修改。
+| Item | What it does |
+| --- | --- |
+| Portable Network Terminal | Your terminal, in the inventory or a Curios slot |
+| Network Magnet | Collects dropped items, XP orbs and fluids |
+| Network Feeder | Feeds you automatically |
+| Network Restocker | Restocks your inventory automatically |
+| XP Rod | Stores and returns experience, or keeps you at a set level |
+
+### Shared networks
+
+Each network has an owner, managers and members. Bind a **Member Connector** or **Manager Connector** to your network
+and give it to another player; using it brings them in. A player in several networks picks a primary one in the network
+switcher.
+
+### Color schemes
+
+<p align="center">
+  <img src="docs/images/en/schemes.png" alt="The same terminal in the Beyond Dimensions Casing, Glass, Vanilla and Brass color schemes" width="100%">
+</p>
+
+Choose from four color schemes (Beyond Dimensions Casing, Glass, Vanilla and Brass), or change any color in the
+in-game editor, which opens from the palette button on each window. Resource packs can add schemes of their own.
+
+## Getting started
+
+1. Craft an **Unstable Space-Time Fragment** from a Nether Star, four Diamonds and four TNT.
+2. Keep it in your inventory. After about an hour it becomes a **Stable Space-Time Fragment**.
+3. Craft a **Dimensional Network Generator** and use it to create your network.
+4. Press <kbd>O</kbd> to open the network.
+5. Every ten minutes the network produces a **Shattered Space-Time Crystal**. Smelt crystals into **Space-Time Ingots**
+   and craft them into **Stable Space-Time Frames**, which the mod's blocks and tools are made from.
+
+## Compatibility
+
+| Mod | What Beyond Dimensions adds |
+| --- | --- |
+| Applied Energistics 2 | The Dimensional ME Storage Cell puts a network into an ME system, with far better performance than a storage bus |
+| Refined Storage | The RS Dimensional Pathway connects a network to an RS system |
+| Mekanism | Chemical storage |
+| Create | The Schematic Interface supplies Schematicannons from the network |
+| Botania | Mana storage |
+| Ars Nouveau | Source storage |
+| Just Enough Characters | Search uses its pinyin matching when it is installed |
+
+## Installation
+
+Download the file for your Minecraft version from [CurseForge](https://www.curseforge.com/projects/1222890); its file
+page lists the dependencies it needs. Versions with the CompixelUI interface also need:
+
+- [CompixelUI](https://www.curseforge.com/projects/1715758), the library its screens are built with;
+- Kotlin: install [Kotlin for Forge](https://www.curseforge.com/minecraft/mc-mods/kotlin-for-forge), or use the
+  CompixelUI file whose name ends in `-with-kotlin`, which includes it.
+
+### Supported versions
+
+| Minecraft | Loader | Branch | Status |
+| --- | --- | --- | --- |
+| 26.3 | NeoForge | [`26.3`](https://github.com/Frostbite-time/BeyondDimensions/tree/26.3) | Active |
+| 26.2 | NeoForge | [`26.2`](https://github.com/Frostbite-time/BeyondDimensions/tree/26.2) | Active |
+| 26.1 | NeoForge | [`26.1`](https://github.com/Frostbite-time/BeyondDimensions/tree/26.1) | Active |
+| 1.21.11 | NeoForge | [`1.21.11`](https://github.com/Frostbite-time/BeyondDimensions/tree/1.21.11) | No longer updated |
+| 1.21.1 | NeoForge | [`1.21.1`](https://github.com/Frostbite-time/BeyondDimensions/tree/1.21.1) | Active |
+| 1.20.1 | Forge | [`1.20.1`](https://github.com/Frostbite-time/BeyondDimensions/tree/1.20.1) | Active |
+| 1.12.2 | Forge | [`1.12.2`](https://github.com/Frostbite-time/BeyondDimensions/tree/1.12.2) | No longer updated |
+
+## Guides
+
+For modpacks and servers:
+
+- [KubeJS](docs/en/kubejs.md): limit networks, add starting contents and build upgrade progressions with scripts
+- [Storage rules](docs/en/storage-rules.md): refuse, convert and otherwise handle resources as they enter or leave a
+  network
+- [Color schemes](docs/en/color-schemes.md): customize the screens' colors and export them as a resource pack
+- [Commands and configuration](docs/en/commands.md)
+
+For add-on developers:
+
+- [Networks and storage](docs/en/networks.md): find networks, store and take resources, listen to events and keep
+  custom data on a network
+- [Resource types](docs/en/resource-types.md): store a new kind of resource
+- [Machine settings](docs/en/machines.md): settings that save, sync and work with the Machine Configuration Card
+- [Screens](docs/en/screens.md): pages on Beyond Dimensions' screens, server actions and slot clicks
+
+## For developers
+
+[![Maven](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fmaven.wintercogs.com%2Freleases%2Fcom%2Fwintercogs%2Fbeyonddimensions%2Fbeyonddimensions-1.20.1-forge%2Fmaven-metadata.xml&label=maven)](https://maven.wintercogs.com/releases/com/wintercogs/beyonddimensions/beyonddimensions-1.20.1-forge/maven-metadata.xml)
+
+Beyond Dimensions is published to the wintercogs Maven repository. The 1.20.1 artifact uses SRG names, so add it
+through a remapping configuration, as with other Forge mods. With ModDevGradle Legacy:
+
+```groovy
+repositories {
+    maven { url = 'https://maven.wintercogs.com/releases' }
+}
+
+dependencies {
+    modImplementation "com.wintercogs.beyonddimensions:beyonddimensions-1.20.1-forge:${beyond_dimensions_version}"
+
+    // The mod… configurations don't bring dependencies along: development runs also need CompixelUI (the plain line
+    // brings its Compose runtime) and a Kotlin provider
+    modLocalRuntime "dev.compixel:compixel-forge-1.20.1:${compixel_version}"
+    localRuntime "dev.compixel:compixel-forge-1.20.1:${compixel_version}"
+    localRuntime "maven.modrinth:kotlin-for-forge:${kff_version}"
+}
+```
+
+## Contributing
+
+Report bugs in the [issue tracker](https://github.com/Frostbite-time/BeyondDimensions/issues). Pull requests are
+welcome; please read [CONTRIBUTING.md](docs/CONTRIBUTING.md) first.
+
+## License
+
+Beyond Dimensions is released under the [MIT License](LICENSE). Third-party notices are listed in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
