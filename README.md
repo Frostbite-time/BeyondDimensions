@@ -164,9 +164,8 @@ repositories {
 dependencies {
     implementation "com.wintercogs.beyonddimensions:beyonddimensions-1.21.1-neoforge:${beyond_dimensions_version}"
 
-    // Development runs also need a Kotlin provider and the pinyin library Beyond Dimensions uses
+    // Development runs also need a Kotlin provider
     runtimeOnly "maven.modrinth:kotlin-for-forge:${kff_version}"
-    additionalRuntimeClasspath "com.github.promeg:tinypinyin:2.0.3"
 }
 ```
 

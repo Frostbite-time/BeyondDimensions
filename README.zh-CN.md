@@ -152,9 +152,8 @@ repositories {
 dependencies {
     implementation "com.wintercogs.beyonddimensions:beyonddimensions-1.21.1-neoforge:${beyond_dimensions_version}"
 
-    // 开发环境运行时还需要 Kotlin 提供者和超越维度的拼音库
+    // 开发环境运行时还需要 Kotlin 提供者
     runtimeOnly "maven.modrinth:kotlin-for-forge:${kff_version}"
-    additionalRuntimeClasspath "com.github.promeg:tinypinyin:2.0.3"
 }
 ```
 
