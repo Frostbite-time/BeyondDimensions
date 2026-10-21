@@ -75,7 +75,7 @@ description='''${mod_description}'''
 [[dependencies.${mod_id}]]
     modId="compixel"
     mandatory=true
-    versionRange="[${compixel_version},0.2)"
+    versionRange="${compixel_version_range}"
     ordering="AFTER"
     side="BOTH"
 
