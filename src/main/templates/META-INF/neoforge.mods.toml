@@ -89,7 +89,7 @@ config="${mod_id}.mixins.json"
 [[dependencies.${mod_id}]]
     modId="compixel"
     type="required"
-    versionRange="[${compixel_version},0.2)"
+    versionRange="${compixel_version_range}"
     ordering="AFTER"
     side="BOTH"
 
