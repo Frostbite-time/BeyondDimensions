@@ -1,14 +1,11 @@
 package com.wintercogs.beyonddimensions.client.ui.base
 
-import com.wintercogs.beyonddimensions.client.ui.kit.BdBackdrop
-import com.wintercogs.beyonddimensions.client.ui.kit.BdScreen
 import com.wintercogs.beyonddimensions.client.ui.theme.BdDesign
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import dev.compixel.forge.ComposeInventoryScreen
 import dev.compixel.forge.ComposeMenuScreen
 import dev.compixel.forge.item.NativeItemOptions
 import dev.compixel.forge.slots.ComposeMenuSlots
-import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.network.chat.Component
 import net.minecraft.world.inventory.AbstractContainerMenu
 import org.lwjgl.glfw.GLFW
@@ -27,8 +24,7 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
         ComposeMenuSlots(menu, BdSlotAdapter(menu)),
         NativeItemOptions(cacheCapacity = 512, preparationsPerFrame = ICONS_PER_FRAME),
         design = BdDesign,
-    ),
-    BdScreen {
+    ) {
     @Suppress("UNCHECKED_CAST")
     protected val adapter = inventory.adapter as BdSlotAdapter<M>
 
@@ -53,10 +49,6 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
     override fun charTyped(character: Char, modifiers: Int) =
         super.charTyped(character, modifiers).also { pages.update() }
 
-    // 界面本身在背景之后绘制
-    override fun renderBackground(graphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) =
-        BdBackdrop.behindScreen(graphics, partialTick)
-
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         val editing = hasTextInputFocus
         val handled = super.keyPressed(keyCode, scanCode, modifiers)
@@ -78,8 +70,7 @@ abstract class BdMenuScreen<M : AbstractContainerMenu, S, A>(menu: M, title: Com
         title,
         nativeItemOptions = NativeItemOptions(cacheCapacity = 256, preparationsPerFrame = ICONS_PER_FRAME),
         design = BdDesign,
-    ),
-    BdScreen {
+    ) {
     /** 附属模组注入这个界面的页 */
     protected val pages = BdPageHost(container, this, null, ::requestClose)
 
@@ -101,9 +92,4 @@ abstract class BdMenuScreen<M : AbstractContainerMenu, S, A>(menu: M, title: Com
         super.charTyped(character, modifiers).also { pages.update() }
 
     override fun menuClosed() = pages.close()
-
-    override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
-        BdBackdrop.behindScreen(graphics, partialTick)
-        super.render(graphics, mouseX, mouseY, partialTick)
-    }
 }

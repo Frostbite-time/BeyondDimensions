@@ -70,7 +70,7 @@ object BdColors : ColorSchema("beyonddimensions") {
     val lineStrong = color("lineStrong", "window", Color(0x47FFFFFF))
 
     /** 界面打开时铺满屏幕、压暗背后画面的一层 */
-    val backdrop = color("backdrop", "window", Color(0x330A1018))
+    val backdrop = color("backdrop", "window", Color(0xC8101010))
     val text = color("text", "text", Color(0xFFF2F5F9))
     val muted = color("muted", "text", Color(0xFFAEB8C6))
     val faint = color("faint", "text", Color(0xFF8591A2))
