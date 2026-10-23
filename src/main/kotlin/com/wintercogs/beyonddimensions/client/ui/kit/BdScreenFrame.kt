@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.DpSize
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
@@ -39,7 +40,10 @@ fun BdScreenFrame(window: @Composable BoxScope.(available: DpSize) -> Unit) =
         BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             val rise = (constraints.maxHeight * RISE_OF_SCREEN).roundToInt()
             val available = DpSize(maxWidth, maxHeight)
-            Box(Modifier.matchParentSize().background(Bd.colors[BdColors.backdrop]))
+            // 与原版容器界面的背景相同：从上往下渐变，底部的不透明度多 0x10
+            val top = Bd.colors[BdColors.backdrop]
+            val bottom = top.copy(alpha = (top.alpha + 16 / 255f).coerceAtMost(1f))
+            Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(top, bottom))))
             Box(
                 Modifier.animateEnterExit(
                     enter = slideInVertically(tween(OPEN_MILLIS, easing = LinearOutSlowInEasing)) { rise },
