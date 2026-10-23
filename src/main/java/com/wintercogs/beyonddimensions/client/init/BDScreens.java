@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.client.init;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
-import com.wintercogs.beyonddimensions.client.ui.kit.BdBackdrop;
 import com.wintercogs.beyonddimensions.client.ui.machine.*;
 import com.wintercogs.beyonddimensions.client.ui.network.NetControlScreen;
 import com.wintercogs.beyonddimensions.client.ui.network.PrimaryNetScreen;
@@ -9,12 +8,8 @@ import com.wintercogs.beyonddimensions.client.ui.storage.InterfaceScreen;
 import com.wintercogs.beyonddimensions.client.ui.storage.StorageScreen;
 import com.wintercogs.beyonddimensions.common.init.BDMenus;
 import com.wintercogs.beyonddimensions.common.menu.*;
-import dev.compixel.forge.constants.CompixelGuiLayers;
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -43,23 +38,5 @@ public class BDScreens
             MenuScreens.<NetControlMenu, NetControlScreen>register(BDMenus.Net_Control_Menu.get(), NetControlScreen::new);
             MenuScreens.<PrimaryNetSwitcherMenu, PrimaryNetScreen>register(BDMenus.Primary_Net_Switcher_Menu.get(), PrimaryNetScreen::new);
         });
-    }
-
-    @SubscribeEvent
-    public static void registerLayers(RegisterGuiOverlaysEvent event)
-    {
-        // 在 CompixelUI 的退场层之下：BD 界面关闭后、退场播放期间继续模糊背后的画面
-        event.registerBelow(
-                CompixelGuiLayers.SCREEN_EXITS,
-                "backdrop_blur",
-                BdBackdrop.INSTANCE.getLayer()
-        );
-    }
-
-    @SubscribeEvent
-    public static void registerReloadListeners(RegisterClientReloadListenersEvent event)
-    {
-        // 资源重载后重新载入背景模糊的着色器
-        event.registerReloadListener((ResourceManagerReloadListener) manager -> BdBackdrop.INSTANCE.reload());
     }
 }
