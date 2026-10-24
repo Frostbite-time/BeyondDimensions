@@ -1,6 +1,5 @@
 ## English
 
-- Removed the background blur behind screens in exchange for a higher UI frame rate.
 - Dragging a category tab also opens it.
 - New "Right-click menu" setting on the storage settings page. When it is off, right-clicking a resource with an empty hand takes half, as in vanilla.
 - The storage grid opens at its set size instead of showing nine columns first, and changes to its columns and rows apply at once.
@@ -8,7 +7,6 @@
 
 ## 中文
 
-- 取消背景模糊，以换取 UI 帧数提升。
 - 拖动分类标签时也会打开该标签。
 - 存储界面的设置页新增“右键打开菜单”，关闭后空手右键资源会像原版一样取出一半。
 - 存储格打开时直接显示设定的行列数，不再先显示 9 列；修改行列数也会立即生效。
