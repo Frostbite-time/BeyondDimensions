@@ -24,6 +24,7 @@ import com.wintercogs.beyonddimensions.network.packet.c2s.OpenPrimaryNetSwitcher
 import com.wintercogs.beyonddimensions.util.UIDataHelper
 import dev.compixel.forge.item.ItemIcon
 import net.minecraft.Util
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.resources.language.I18n
 import net.neoforged.neoforge.network.PacketDistributor
@@ -61,6 +62,8 @@ data class CraftState(
     val returnToStorage: Boolean,
     /** 多个配方可选时由 Polymorph 提供的候选 */
     val recipeChoices: List<RecipeChoice>,
+    /** 方块终端在本界面隐藏了合成区 */
+    val hidden: Boolean,
 )
 
 data class StorageState(
@@ -97,9 +100,6 @@ sealed interface StorageAction {
     data class Scroll(val rows: Int) : StorageAction
 
     data class ScrollTo(val row: Int) : StorageAction
-
-    /** 界面按可用空间算出的实际行列 */
-    data class Viewport(val columns: Int, val rows: Int) : StorageAction
 
     /** 玩家设定的首选行列，会写入配置 */
     data class PreferredSize(val columns: Int, val rows: Int) : StorageAction
@@ -152,6 +152,9 @@ sealed interface StorageAction {
 
     data object ToggleCraft : StorageAction
 
+    /** 方块终端始终带合成区，只在本界面隐藏或显示它，不重开菜单 */
+    data class HideCraft(val hidden: Boolean) : StorageAction
+
     data object OpenSwitcher : StorageAction
 
     data class ClearCraft(val toStorage: Boolean) : StorageAction
@@ -181,6 +184,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
         StorageCategories.selected[player]?.takeIf { it in categories.indices } ?: if (categories.isEmpty()) -1 else 0
     private var editing = -1
     private var inspected = -1
+    private var craftHidden = false
 
     // 同一条搜索式始终用同一个查询对象，分类的匹配结果才能缓存
     private val queries = HashMap<String, ClientNetStorageSearchHelper.Query>()
@@ -205,6 +209,8 @@ class StorageController(private val menu: DimensionsNetMenu) {
     init {
         menu.loadSearchText(lastSearch)
         menu.setCategory(filterOf(categories.getOrNull(selected)))
+        // 记下的滚动行号按实际列数计算，先定好列数再恢复
+        fitViewport()
         restoreTransferContext()
         sendCraftPreference()
     }
@@ -218,6 +224,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
                     returnToStorage = ClientConfigRuntime.craftingReturnToStorage,
                     recipeChoices = recipeChoices?.snapshot(it)
                         ?.map { choice -> RecipeChoice(choice.id(), choice.label()) }.orEmpty(),
+                    hidden = craftHidden,
                 )
             }
         val stored = menu.storage.storage.size
@@ -256,7 +263,6 @@ class StorageController(private val menu: DimensionsNetMenu) {
 
             is StorageAction.Scroll -> scrollTo(menu.lineData + action.rows)
             is StorageAction.ScrollTo -> scrollTo(action.row)
-            is StorageAction.Viewport -> menu.setViewport(action.columns, action.rows)
             is StorageAction.PreferredSize -> {
                 ClientConfigRuntime.storageColumns = action.columns
                 ClientConfigRuntime.storageRows = action.rows
@@ -357,6 +363,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
             }
 
             StorageAction.ToggleCraft -> toggleCraft()
+            is StorageAction.HideCraft -> craftHidden = action.hidden
             StorageAction.OpenSwitcher -> {
                 saveTransferContext()
                 PacketDistributor.sendToServer(OpenPrimaryNetSwitcherPacket())
@@ -379,6 +386,24 @@ class StorageController(private val menu: DimensionsNetMenu) {
 
             is StorageAction.ChooseRecipe -> craftMenu?.let { recipeChoices?.select(it, action.id) }
         }
+        // 首选行列、编辑区与合成区都影响能放下的格数
+        fitViewport()
+    }
+
+    /** 按屏幕尺寸定下格子的实际行列，设到菜单上 */
+    fun fitViewport() {
+        val window = Minecraft.getInstance().window
+        // 与界面拿到的尺寸相同：1 dp 是一个界面像素
+        val scale = window.guiScale.toFloat()
+        val (columns, rows) = fittedGridSize(
+            screenWidth = (window.width / scale).toInt(),
+            screenHeight = (window.height / scale).toInt(),
+            craftShown = craftMenu != null && !craftHidden,
+            editorOpen = editing in categories.indices,
+            preferredColumns = ClientConfigRuntime.storageColumns,
+            preferredRows = ClientConfigRuntime.storageRows,
+        )
+        menu.setViewport(columns, rows)
     }
 
     /** 合成格的偏好由服务器保存在玩家身上；只有合成菜单接收 */
