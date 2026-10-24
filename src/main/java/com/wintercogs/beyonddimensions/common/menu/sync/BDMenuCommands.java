@@ -60,7 +60,8 @@ public final class BDMenuCommands
     /**
      * 按配方查看器给出的原料填充工作台 {@code workbench}；{@code recipe} 是配方的 ID，没有时为 null
      */
-    public record Recipe(ResourceLocation workbench, List<Key> keys, List<Long> amounts, boolean compress, @Nullable ResourceLocation recipe)
+    public record Recipe(ResourceLocation workbench, List<Key> keys, List<Long> amounts, boolean compress,
+                         @Nullable ResourceLocation recipe)
     {
         public Recipe
         {

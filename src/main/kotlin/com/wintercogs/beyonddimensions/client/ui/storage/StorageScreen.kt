@@ -142,7 +142,7 @@ class StorageText {
     val returnStorage = tr("ui.beyonddimensions.storage.workbench.return.storage")
     val returnInventory = tr("ui.beyonddimensions.storage.workbench.return.inventory")
     val returnSwitch = tr("ui.beyonddimensions.storage.workbench.return.switch")
-    val sortNames =StorageSort.entries.associateWith { tr("ui.beyonddimensions.storage.sort.${it.name.lowercase()}") }
+    val sortNames = StorageSort.entries.associateWith { tr("ui.beyonddimensions.storage.sort.${it.name.lowercase()}") }
 }
 
 /** 存储终端与合成终端 */
@@ -533,11 +533,20 @@ private fun WorkbenchAndInventory(
  * 宽度与背包相差偶数个界面像素，居中后槽位的细框不会落在半个像素上
  */
 @Composable
-private fun InventoryArea(slots: ComposeMenuSlots<DimensionsNetMenu>, layout: StorageLayout, width: Int = INVENTORY_WIDTH) {
+private fun InventoryArea(
+    slots: ComposeMenuSlots<DimensionsNetMenu>,
+    layout: StorageLayout,
+    width: Int = INVENTORY_WIDTH
+) {
     Column(Modifier.width(width.dp)) {
         BdSectionLabel(layout.text.inventory, Modifier.height(LABEL_HEIGHT.dp))
         Spacer(Modifier.height(4.dp))
-        Box(Modifier.align(Alignment.CenterHorizontally).bdSlotFrame(Bd.colors)) { BdPlayerInventory(slots, layout.playerSlots) }
+        Box(Modifier.align(Alignment.CenterHorizontally).bdSlotFrame(Bd.colors)) {
+            BdPlayerInventory(
+                slots,
+                layout.playerSlots
+            )
+        }
     }
 }
 
@@ -590,16 +599,30 @@ private fun WorkbenchArea(
 private fun ReturnToggle(toStorage: Boolean, text: StorageText, onChange: (Boolean) -> Unit) {
     val colors = Bd.colors
     BdTooltip({
-        OreText(if (toStorage) text.returnStorage else text.returnInventory, color = colors[BdColors.text], style = Bd.caption)
+        OreText(
+            if (toStorage) text.returnStorage else text.returnInventory,
+            color = colors[BdColors.text],
+            style = Bd.caption
+        )
         OreText(text.returnSwitch, color = colors[BdColors.faint], style = Bd.caption)
     }) {
-        BdGlyphButton(if (toStorage) BdIcons.ArrowUp else BdIcons.ArrowDown, null, { onChange(!toStorage) }, size = 11.dp)
+        BdGlyphButton(
+            if (toStorage) BdIcons.ArrowUp else BdIcons.ArrowDown,
+            null,
+            { onChange(!toStorage) },
+            size = 11.dp
+        )
     }
 }
 
 /** 选择工作台的下拉框：当前工作台的名称，不带图标，与背包区的标题一样不显眼；点开后列出全部工作台，多到放不下时在列表里滚动 */
 @Composable
-private fun WorkbenchChooser(workbenches: List<WorkbenchInfo>, selected: String, text: StorageText, onSelect: (String) -> Unit) {
+private fun WorkbenchChooser(
+    workbenches: List<WorkbenchInfo>,
+    selected: String,
+    text: StorageText,
+    onSelect: (String) -> Unit
+) {
     val colors = Bd.colors
     val current = workbenches.firstOrNull { it.id == selected } ?: return
     var open by remember { mutableStateOf(false) }
@@ -635,7 +658,10 @@ private fun WorkbenchChooser(workbenches: List<WorkbenchInfo>, selected: String,
         }
         if (open) {
             BdPopover({ open = false }, alignStart = true) {
-                BdScrollColumn(Modifier.heightIn(max = (WORKBENCH_LIST_ROWS * WORKBENCH_ROW_HEIGHT).dp), wheelStep = WORKBENCH_ROW_HEIGHT.dp) {
+                BdScrollColumn(
+                    Modifier.heightIn(max = (WORKBENCH_LIST_ROWS * WORKBENCH_ROW_HEIGHT).dp),
+                    wheelStep = WORKBENCH_ROW_HEIGHT.dp
+                ) {
                     for (workbench in workbenches) {
                         WorkbenchOption(workbench, workbench.id == selected) {
                             onSelect(workbench.id)
@@ -665,7 +691,11 @@ private fun WorkbenchOption(workbench: WorkbenchInfo, selected: Boolean, onClick
     ) {
         Box(Modifier.size(3.dp).background(if (selected) colors[BdColors.accent] else Color.Transparent))
         Spacer(Modifier.width(4.dp))
-        OreText(workbench.title, color = if (selected) colors[BdColors.accentDeep] else colors[BdColors.text], maxLines = 1)
+        OreText(
+            workbench.title,
+            color = if (selected) colors[BdColors.accentDeep] else colors[BdColors.text],
+            maxLines = 1
+        )
     }
 }
 

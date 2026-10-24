@@ -53,7 +53,8 @@ interface StorageWorkbench<S, A> {
 
     /** 下拉框所在一行右端的按钮，高 11 dp，例如 [WorkbenchClearButtons]；退回方向按钮在它们右边 */
     @Composable
-    fun Actions(state: S, scope: StorageWorkbenchScope<A>) {}
+    fun Actions(state: S, scope: StorageWorkbenchScope<A>) {
+    }
 
     /** 工作台的内容，按 [size] 的大小组合；可以直接使用 BD 的界面组件 */
     @Composable

@@ -46,7 +46,8 @@ class StorageWorkbenchHost(
         var width = 0
         var height = 0
         for (workbenchId in menu.workbenches()) {
-            @Suppress("UNCHECKED_CAST") val workbench = StorageWorkbenches.get(workbenchId) as StorageWorkbench<Any?, Any?>?
+            @Suppress("UNCHECKED_CAST") val workbench =
+                StorageWorkbenches.get(workbenchId) as StorageWorkbench<Any?, Any?>?
             if (workbench == null) {
                 logger.warn("Storage workbench {} has no UI registered on the client; it is left out", workbenchId)
                 continue
@@ -63,7 +64,11 @@ class StorageWorkbenchHost(
             width = maxOf(width, size.width.coerceAtMost(StorageWorkbenches.MAX_WIDTH))
             height = maxOf(height, size.height.coerceAtMost(StorageWorkbenches.MAX_HEIGHT))
             mounted[id] = Mounted(workbench, context, UiBinding(workbench.snapshot(context)))
-            described += WorkbenchInfo(id, workbench.title(context).string, menu.workbenchWidget(workbenchId) is ClearableWidget)
+            described += WorkbenchInfo(
+                id,
+                workbench.title(context).string,
+                menu.workbenchWidget(workbenchId) is ClearableWidget
+            )
         }
         info = described
         contentWidth = width

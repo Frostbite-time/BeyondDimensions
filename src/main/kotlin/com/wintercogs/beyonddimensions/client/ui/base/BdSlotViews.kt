@@ -39,7 +39,14 @@ fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier, u
     // 最后一次显示的样子，供淡出时照画
     val last = remember(id) { arrayOfNulls<MenuSlotState>(1) }
     if (!page.current) {
-        Box(modifier.size(SLOT_PITCH.dp)) { if (page.visible) last[0]?.let { SlotLook(it.copy(hovered = false), underlay) } }
+        Box(modifier.size(SLOT_PITCH.dp)) {
+            if (page.visible) last[0]?.let {
+                SlotLook(
+                    it.copy(hovered = false),
+                    underlay
+                )
+            }
+        }
         return
     }
     slots.Slot(id, modifier.size(SLOT_PITCH.dp)) { slot ->
@@ -54,7 +61,11 @@ private fun BoxScope.SlotLook(slot: MenuSlotState, underlay: ItemIcon? = null) {
         if (slot.marked) Box(Modifier.matchParentSize().background(Bd.colors[BdColors.accentSoft]))
         val icon = slot.icon
         if (icon != null) MinecraftItemIcon(icon, Modifier.fillMaxSize())
-        else if (underlay != null) Crossfade(underlay, animationSpec = tween(UNDERLAY_FADE_MILLIS), label = "slot underlay") {
+        else if (underlay != null) Crossfade(
+            underlay,
+            animationSpec = tween(UNDERLAY_FADE_MILLIS),
+            label = "slot underlay"
+        ) {
             MinecraftItemIcon(it, Modifier.fillMaxSize())
         }
     }

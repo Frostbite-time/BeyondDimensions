@@ -24,7 +24,8 @@ public class SmithingWidget extends WorkstationWidget<SmithingWidget.Smithing>
      */
     public static final class Smithing extends SmithingMenu implements Inputs
     {
-        private Runnable inputsChanged = () -> {};
+        private Runnable inputsChanged = () -> {
+        };
 
         Smithing(Inventory inventory, ContainerLevelAccess access)
         {
