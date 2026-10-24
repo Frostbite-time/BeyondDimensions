@@ -3,11 +3,8 @@ package com.wintercogs.beyonddimensions.client.ui.storage
 import com.wintercogs.beyonddimensions.Config
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey
-import com.wintercogs.beyonddimensions.client.gui.NetMenuType
 import com.wintercogs.beyonddimensions.client.ui.base.resourceIcon
 import com.wintercogs.beyonddimensions.common.init.BDPackets
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
 import com.wintercogs.beyonddimensions.common.menu.interaction.ResourceContents
 import com.wintercogs.beyonddimensions.common.menu.widget.ClientNetStorage
@@ -15,11 +12,7 @@ import com.wintercogs.beyonddimensions.common.menu.widget.ClientNetStorageSearch
 import com.wintercogs.beyonddimensions.common.menu.widget.StorageSort
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot
 import com.wintercogs.beyonddimensions.config.ClientConfigRuntime
-import com.wintercogs.beyonddimensions.integration.ModPresence
-import com.wintercogs.beyonddimensions.integration.OtherModIds
 import com.wintercogs.beyonddimensions.integration.RecipeViewerSearch
-import com.wintercogs.beyonddimensions.integration.module.polymorph.ComposeRecipeChoices
-import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenPrimaryNetSwitcherPacket
 import com.wintercogs.beyonddimensions.util.UIDataHelper
 import dev.compixel.forge.item.ItemIcon
@@ -51,20 +44,6 @@ data class CategoryEditor(
  */
 data class SlotMenu(val serial: Int, val name: String, val takeable: Int, val categories: List<String>)
 
-data class RecipeChoice(val id: String, val label: String)
-
-/** 合成区的状态；只有合成终端才有 */
-data class CraftState(
-    /** 能否在存储与合成之间切换（方块终端始终带合成区） */
-    val toggleable: Boolean,
-    /** 关闭界面时合成格剩余物品优先退回存储 */
-    val returnToStorage: Boolean,
-    /** 多个配方可选时由 Polymorph 提供的候选 */
-    val recipeChoices: List<RecipeChoice>,
-    /** 方块终端在本界面隐藏了合成区 */
-    val hidden: Boolean,
-)
-
 data class StorageState(
     val networkName: String = "",
     val networkId: Int = -1,
@@ -88,9 +67,14 @@ data class StorageState(
     val syncSearch: Boolean = false,
     /** 空手右键资源时打开菜单，否则取出一半 */
     val rightClickMenu: Boolean = true,
-    /** 关闭合成菜单后保留合成格里的物品 */
+    /** 关闭界面后保留工作台里的物品 */
     val keepCrafting: Boolean = false,
-    val craft: CraftState? = null,
+    /** 工作台被清空时物品优先退回存储，否则优先退回背包 */
+    val returnToStorage: Boolean = false,
+    /** 工作区显示的工作台 */
+    val workbench: String = "",
+    /** 工作区展开着 */
+    val workbenchShown: Boolean = false,
 )
 
 sealed interface StorageAction {
@@ -149,32 +133,27 @@ sealed interface StorageAction {
 
     data class RightClickMenu(val enabled: Boolean) : StorageAction
 
-    data object ToggleCraft : StorageAction
-
-    /** 方块终端始终带合成区，只在本界面隐藏或显示它，不重开菜单 */
-    data class HideCraft(val hidden: Boolean) : StorageAction
-
     data object OpenSwitcher : StorageAction
-
-    data class ClearCraft(val toStorage: Boolean) : StorageAction
-
-    data class ReturnPreference(val toStorage: Boolean) : StorageAction
 
     data class KeepCrafting(val enabled: Boolean) : StorageAction
 
-    data class ChooseRecipe(val id: String) : StorageAction
+    /** 设定工作台被清空时物品的退回方向，所有工作台共用，会写入配置 */
+    data class ReturnToStorage(val enabled: Boolean) : StorageAction
+
+    /** 展开或收起工作区，会写入配置 */
+    data class ShowWorkbench(val shown: Boolean) : StorageAction
+
+    /** 选择工作区显示的工作台，会写入配置 */
+    data class SelectWorkbench(val id: String) : StorageAction
 }
 
 /** 分类停止改动多久后写进文件 */
 private const val SAVE_DELAY_MILLIS = 1000L
 
 /**
- * 存储终端（含合成终端）的控制器，运行在游戏线程。
+ * 存储界面的控制器，运行在游戏线程。
  */
-class StorageController(private val menu: DimensionsNetMenu) {
-    private val craftMenu = menu as? DimensionsCraftMenu
-    private val recipeChoices =
-        if (craftMenu != null && ModPresence.isLoaded(OtherModIds.POLYMORPH)) ComposeRecipeChoices() else null
+class StorageController(private val menu: DimensionsNetMenu, private val workbenches: StorageWorkbenchHost) {
     private var lastSearch = ClientConfigRuntime.storageSearch
     private val player = menu.player.uuid
     private var categories = StorageCategories.load(player)
@@ -182,7 +161,9 @@ class StorageController(private val menu: DimensionsNetMenu) {
         StorageCategories.selected[player]?.takeIf { it in categories.indices } ?: if (categories.isEmpty()) -1 else 0
     private var editing = -1
     private var inspected = -1
-    private var craftHidden = false
+
+    // 格子的行列按工作区展开与否定下；配方查看器在别处展开工作区时据此重新排
+    private var fittedShown = false
 
     // 同一条搜索式始终用同一个查询对象，分类的匹配结果才能缓存
     private val queries = HashMap<String, ClientNetStorageSearchHelper.Query>()
@@ -210,21 +191,12 @@ class StorageController(private val menu: DimensionsNetMenu) {
         // 记下的滚动行号按实际列数计算，先定好列数再恢复
         fitViewport()
         restoreTransferContext()
-        sendCraftPreference()
+        sendWorkbenchPreference(menu)
     }
 
     fun snapshot(): StorageState {
         if (ClientConfigRuntime.recipeViewerSyncSearch) followViewerSearch()
-        val craft =
-            craftMenu?.let {
-                CraftState(
-                    toggleable = menu !is DimensionsCraftMenuTerminal,
-                    returnToStorage = ClientConfigRuntime.craftingReturnToStorage,
-                    recipeChoices = recipeChoices?.snapshot(it)
-                        ?.map { choice -> RecipeChoice(choice.id(), choice.label()) }.orEmpty(),
-                    hidden = craftHidden,
-                )
-            }
+        if (workbenchShown() != fittedShown) fitViewport()
         val stored = menu.storage.storage.size
         return StorageState(
             networkName = menu.networkName().string,
@@ -248,7 +220,9 @@ class StorageController(private val menu: DimensionsNetMenu) {
             syncSearch = ClientConfigRuntime.recipeViewerSyncSearch,
             rightClickMenu = ClientConfigRuntime.storageRightClickMenu,
             keepCrafting = ClientConfigRuntime.craftingKeepGrid,
-            craft = craft,
+            returnToStorage = ClientConfigRuntime.craftingReturnToStorage,
+            workbench = workbenches.resolve(ClientConfigRuntime.storageWorkbench),
+            workbenchShown = fittedShown,
         )
     }
 
@@ -360,58 +334,52 @@ class StorageController(private val menu: DimensionsNetMenu) {
                 Config.INSTANCE.clientConfig.STORAGE_RIGHT_CLICK_MENU.save()
             }
 
-            StorageAction.ToggleCraft -> toggleCraft()
-            is StorageAction.HideCraft -> craftHidden = action.hidden
             StorageAction.OpenSwitcher -> {
                 saveTransferContext()
                 BDPackets.INSTANCE.sendToServer(OpenPrimaryNetSwitcherPacket())
-            }
-
-            is StorageAction.ClearCraft -> menu.commands().returnCrafting(action.toStorage)
-            is StorageAction.ReturnPreference -> {
-                ClientConfigRuntime.craftingReturnToStorage = action.toStorage
-                Config.INSTANCE.clientConfig.CRAFTING_RETURN_TO_STORAGE.set(action.toStorage)
-                Config.INSTANCE.clientConfig.CRAFTING_RETURN_TO_STORAGE.save()
-                sendCraftPreference()
             }
 
             is StorageAction.KeepCrafting -> {
                 ClientConfigRuntime.craftingKeepGrid = action.enabled
                 Config.INSTANCE.clientConfig.CRAFTING_KEEP_GRID.set(action.enabled)
                 Config.INSTANCE.clientConfig.CRAFTING_KEEP_GRID.save()
-                sendCraftPreference()
+                sendWorkbenchPreference(menu)
             }
 
-            is StorageAction.ChooseRecipe -> craftMenu?.let { recipeChoices?.select(it, action.id) }
+            is StorageAction.ReturnToStorage -> {
+                ClientConfigRuntime.craftingReturnToStorage = action.enabled
+                Config.INSTANCE.clientConfig.CRAFTING_RETURN_TO_STORAGE.set(action.enabled)
+                Config.INSTANCE.clientConfig.CRAFTING_RETURN_TO_STORAGE.save()
+                sendWorkbenchPreference(menu)
+            }
+
+            is StorageAction.ShowWorkbench -> StorageWorkbenchChoice.show(action.shown)
+            is StorageAction.SelectWorkbench -> StorageWorkbenchChoice.select(action.id)
         }
-        // 首选行列、编辑区与合成区都影响能放下的格数
+        // 首选行列、编辑区与工作区都影响能放下的格数
         fitViewport()
     }
 
-    /** 按屏幕尺寸定下格子的实际行列，设到菜单上 */
+    /** 按屏幕尺寸与工作区定下格子的实际行列，设到菜单上 */
     fun fitViewport() {
         val window = Minecraft.getInstance().window
         // 与界面拿到的尺寸相同：1 dp 是一个界面像素
         val scale = window.guiScale.toFloat()
+        val shown = workbenchShown()
+        fittedShown = shown
         val (columns, rows) = fittedGridSize(
             screenWidth = (window.width / scale).toInt(),
             screenHeight = (window.height / scale).toInt(),
-            craftShown = craftMenu != null && !craftHidden,
             editorOpen = editing in categories.indices,
             preferredColumns = ClientConfigRuntime.storageColumns,
             preferredRows = ClientConfigRuntime.storageRows,
+            bottomHeight = { width -> bottomHeight(width, workbenches, shown) },
         )
         menu.setViewport(columns, rows)
     }
 
-    /** 合成格的偏好由服务器保存在玩家身上；只有合成菜单接收 */
-    private fun sendCraftPreference() {
-        if (craftMenu == null) return
-        menu.commands().preference(
-            ClientConfigRuntime.craftingReturnToStorage,
-            ClientConfigRuntime.craftingKeepGrid,
-        )
-    }
+    // 没有能用的工作台时工作区无从展开
+    private fun workbenchShown() = ClientConfigRuntime.storageWorkbenchShown && !workbenches.isEmpty
 
     private fun setSearchSync(enabled: Boolean) {
         ClientConfigRuntime.recipeViewerSyncSearch = enabled
@@ -626,17 +594,6 @@ class StorageController(private val menu: DimensionsNetMenu) {
         // 编辑搜索式时每次输入都会解析一条，只留下仍在使用的
         val searches = categories.mapTo(HashSet()) { it.search }
         queries.keys.retainAll(searches)
-    }
-
-    /** 在存储与合成之间切换会重新打开菜单，先记下滚动位置 */
-    private fun toggleCraft() {
-        val toCraft = craftMenu == null
-        ClientConfigRuntime.storageOpenCrafting = toCraft
-        Config.INSTANCE.clientConfig.STORAGE_OPEN_CRAFTING.set(toCraft)
-        Config.INSTANCE.clientConfig.STORAGE_OPEN_CRAFTING.save()
-        saveTransferContext()
-        val target = if (toCraft) NetMenuType.NET_CRAFT_MENU else NetMenuType.NET_MENU
-        BDPackets.INSTANCE.sendToServer(OpenNetGuiPacket(menu.player.stringUUID, target))
     }
 
     // 服务器直接换菜单（见 SwitchMenuProvider），指针留在原处，只需记下滚动位置

@@ -393,7 +393,7 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                 BDPackets.INSTANCE.sendToServer(
                     OpenNetGuiPacket(
                         container.player.stringUUID,
-                        NetMenuType.NET_CRAFT_MENU
+                        NetMenuType.NET_MENU
                     )
                 )
             }

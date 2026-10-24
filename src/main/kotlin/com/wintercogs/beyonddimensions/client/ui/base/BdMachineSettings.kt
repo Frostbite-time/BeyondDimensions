@@ -1,6 +1,5 @@
 package com.wintercogs.beyonddimensions.client.ui.base
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
@@ -139,7 +138,7 @@ fun BdMachineSettings(rows: List<MachineSettingRow>, shown: Boolean, onPick: (Ma
         val group = rows.subList(start, end)
         key(row.setting) {
             if (opensSection) {
-                if (!first) SectionDivider()
+                if (!first) BdSectionDivider()
                 BdSectionLabel(row.section)
             }
             if (row.control is MachineSettingControl.Chip) SettingChips(group, shown, onPick) else SettingRow(
@@ -231,15 +230,5 @@ private fun SettingChips(rows: List<MachineSettingRow>, shown: Boolean, onPick: 
                 }
             }
         }
-    }
-}
-
-/** 两组设置之间的分隔：一道凹下的细线，上暗下亮 */
-@Composable
-private fun SectionDivider() {
-    val colors = Bd.colors
-    Column(Modifier.fillMaxWidth()) {
-        Box(Modifier.fillMaxWidth().height(1.dp).background(colors[BdColors.outline]))
-        Box(Modifier.fillMaxWidth().height(1.dp).background(colors[BdColors.bevelLight]))
     }
 }

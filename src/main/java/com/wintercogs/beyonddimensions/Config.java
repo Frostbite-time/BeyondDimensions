@@ -70,8 +70,9 @@ public class Config
         public final ForgeConfigSpec.IntValue STORAGE_COLUMNS;
         public final ForgeConfigSpec.BooleanValue STORAGE_KEEP_SEARCH;
         public final ForgeConfigSpec.ConfigValue<String> STORAGE_SEARCH;
-        public final ForgeConfigSpec.BooleanValue STORAGE_OPEN_CRAFTING;
         public final ForgeConfigSpec.BooleanValue STORAGE_RIGHT_CLICK_MENU;
+        public final ForgeConfigSpec.ConfigValue<String> STORAGE_WORKBENCH;
+        public final ForgeConfigSpec.BooleanValue STORAGE_WORKBENCH_SHOWN;
 
         public final ForgeConfigSpec.BooleanValue CRAFTING_RETURN_TO_STORAGE;
         public final ForgeConfigSpec.BooleanValue CRAFTING_KEEP_GRID;
@@ -112,12 +113,15 @@ public class Config
             STORAGE_SEARCH = builder
                     .comment("保留下来的搜索框内容")
                     .define("search", "");
-            STORAGE_OPEN_CRAFTING = builder
-                    .comment("快捷键是否打开带合成区的界面；在界面中切换合成区时会随之改变")
-                    .define("open_crafting", false);
             STORAGE_RIGHT_CLICK_MENU = builder
                     .comment("空手右键存储里的资源时是否打开菜单（取出指定数量、加入分类）；关闭此项则像原版一样取出一半")
                     .define("right_click_menu", true);
+            STORAGE_WORKBENCH = builder
+                    .comment("工作区显示的工作台，在界面中用工作区左上角的下拉框选择")
+                    .define("workbench", "beyonddimensions:crafting");
+            STORAGE_WORKBENCH_SHOWN = builder
+                    .comment("是否展开工作区")
+                    .define("workbench_shown", true);
             builder.pop();
 
             builder.comment("合成区").push("crafting");
@@ -153,8 +157,9 @@ public class Config
             ClientConfigRuntime.storageColumns = STORAGE_COLUMNS.get();
             ClientConfigRuntime.storageKeepSearch = STORAGE_KEEP_SEARCH.get();
             ClientConfigRuntime.storageSearch = STORAGE_SEARCH.get();
-            ClientConfigRuntime.storageOpenCrafting = STORAGE_OPEN_CRAFTING.get();
             ClientConfigRuntime.storageRightClickMenu = STORAGE_RIGHT_CLICK_MENU.get();
+            ClientConfigRuntime.storageWorkbench = STORAGE_WORKBENCH.get();
+            ClientConfigRuntime.storageWorkbenchShown = STORAGE_WORKBENCH_SHOWN.get();
 
             ClientConfigRuntime.craftingReturnToStorage = CRAFTING_RETURN_TO_STORAGE.get();
             ClientConfigRuntime.craftingKeepGrid = CRAFTING_KEEP_GRID.get();

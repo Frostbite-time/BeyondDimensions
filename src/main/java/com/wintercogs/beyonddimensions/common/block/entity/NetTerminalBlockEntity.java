@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.common.block.entity;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsNetTerminalMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -43,11 +43,11 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
         {
             if (craftItems.stream().anyMatch(stack -> !stack.isEmpty()))
             {
-                DimensionsCraftMenuTerminal.returnLegacyCraftItems(player, net.getUnifiedStorage(), craftItems);
+                DimensionsNetTerminalMenu.returnLegacyCraftItems(player, net.getUnifiedStorage(), craftItems);
                 craftItems.clear();
                 setChanged();
             }
-            return new DimensionsCraftMenuTerminal(containerId, inventory, net.getUnifiedStorage(), null, this.getBlockPos());
+            return new DimensionsNetTerminalMenu(containerId, inventory, net.getUnifiedStorage(), null, this.getBlockPos());
         }
         return null;
     }

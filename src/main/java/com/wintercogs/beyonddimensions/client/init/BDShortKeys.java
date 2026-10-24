@@ -125,8 +125,7 @@ public class BDShortKeys
                 return;
             }
 
-            NetMenuType type = ClientConfigRuntime.storageOpenCrafting ? NetMenuType.NET_CRAFT_MENU : NetMenuType.NET_MENU;
-            BDPackets.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), type));
+            BDPackets.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_MENU));
         });
         BDShortKeys.registerKey(OPEN_TERMINAL_QUICK_KEY, () -> {
             LocalPlayer player = Minecraft.getInstance().player;
@@ -136,7 +135,7 @@ public class BDShortKeys
                 return;
             }
 
-            BDPackets.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_CRAFT_TERMINAL));
+            BDPackets.INSTANCE.sendToServer(new OpenNetGuiPacket(player.getStringUUID(), NetMenuType.NET_TERMINAL));
         });
         BDShortKeys.registerKey(MAIN_HAND_ITEM_TRANSFER_KEY, () -> {
             Player player = Minecraft.getInstance().player;

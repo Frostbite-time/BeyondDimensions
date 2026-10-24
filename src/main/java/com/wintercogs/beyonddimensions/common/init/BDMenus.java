@@ -14,11 +14,10 @@ public class BDMenus
 {
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, BDConstants.MODID);
     public static final Supplier<MenuType<DimensionsNetMenu>> Dimensions_Net_Menu = MENU_TYPES.register("dimensions_net_menu", () -> IForgeMenuType.create(DimensionsNetMenu::new));
-    public static final Supplier<MenuType<DimensionsCraftMenu>> Dimensions_Craft_Menu = MENU_TYPES.register("dimensions_craft_menu", () -> IForgeMenuType.create(DimensionsCraftMenu::new));
     public static final Supplier<MenuType<NetControlMenu>> Net_Control_Menu = MENU_TYPES.register("net_control_menu", () -> IForgeMenuType.create(NetControlMenu::new));
     public static final Supplier<MenuType<NetEnergyMenu>> Net_Energy_Menu = MENU_TYPES.register("net_energy_menu", () -> IForgeMenuType.create(NetEnergyMenu::new));
     public static final Supplier<MenuType<NetInterfaceBaseMenu>> Net_Interface_Menu = MENU_TYPES.register("net_interface_menu", () -> IForgeMenuType.create(NetInterfaceBaseMenu::fromNetwork));
-    public static final Supplier<MenuType<DimensionsCraftMenuTerminal>> Dimensions_Craft_Menu_Terminal = MENU_TYPES.register("dimensions_craft_menu_terminal", () -> IForgeMenuType.create(DimensionsCraftMenuTerminal::new));
+    public static final Supplier<MenuType<DimensionsNetTerminalMenu>> Dimensions_Net_Terminal_Menu = MENU_TYPES.register("dimensions_net_terminal_menu", () -> IForgeMenuType.create(DimensionsNetTerminalMenu::new));
     public static final Supplier<MenuType<NetPumpMenu>> Net_Pump_Menu = MENU_TYPES.register("net_pump_menu", () -> IForgeMenuType.create(NetPumpMenu::new));
     public static final Supplier<MenuType<NetHopperMenu>> Net_Hopper_Menu = MENU_TYPES.register("net_hopper_menu", () -> IForgeMenuType.create(NetHopperMenu::new));
     public static final Supplier<MenuType<NetFurnaceMenu>> Net_Furnace_Menu = MENU_TYPES.register("net_furnace_menu", () -> IForgeMenuType.create(NetFurnaceMenu::new));

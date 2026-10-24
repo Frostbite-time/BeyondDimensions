@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.common.init;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
-import com.wintercogs.beyonddimensions.common.menu.PlayerCraftingGrid;
+import com.wintercogs.beyonddimensions.api.menu.workbench.PlayerWorkbenches;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -27,23 +27,23 @@ import org.jetbrains.annotations.Nullable;
 @Mod.EventBusSubscriber(modid = BDConstants.MODID)
 public class BDAttachments
 {
-    // 玩家的合成格，死亡后随玩家保留
-    public static final Capability<PlayerCraftingGrid> CRAFTING_GRID = CapabilityManager.get(new CapabilityToken<>()
+    // 玩家留在工作台里的物品与工作台的偏好，死亡后随玩家保留。早先只有合成格，存档里沿用这个 ID
+    public static final Capability<PlayerWorkbenches> WORKBENCHES = CapabilityManager.get(new CapabilityToken<>()
     {
     });
 
-    private static final ResourceLocation CRAFTING_GRID_ID = new ResourceLocation(BDConstants.MODID, "crafting_grid");
+    private static final ResourceLocation WORKBENCHES_ID = new ResourceLocation(BDConstants.MODID, "crafting_grid");
 
     public static void register(IEventBus eventBus)
     {
-        eventBus.addListener((RegisterCapabilitiesEvent event) -> event.register(PlayerCraftingGrid.class));
+        eventBus.addListener((RegisterCapabilitiesEvent event) -> event.register(PlayerWorkbenches.class));
     }
 
     @SubscribeEvent
     public static void attach(AttachCapabilitiesEvent<Entity> event)
     {
         if (event.getObject() instanceof Player)
-            event.addCapability(CRAFTING_GRID_ID, new CraftingGridProvider());
+            event.addCapability(WORKBENCHES_ID, new WorkbenchesProvider());
     }
 
     @SubscribeEvent
@@ -51,32 +51,32 @@ public class BDAttachments
     {
         Player original = event.getOriginal();
         original.reviveCaps();
-        original.getCapability(CRAFTING_GRID).ifPresent(old ->
-                event.getEntity().getCapability(CRAFTING_GRID).ifPresent(grid -> grid.deserializeNBT(old.serializeNBT())));
+        original.getCapability(WORKBENCHES).ifPresent(old ->
+                event.getEntity().getCapability(WORKBENCHES).ifPresent(workbenches -> workbenches.deserializeNBT(old.serializeNBT())));
         original.invalidateCaps();
     }
 
-    private static final class CraftingGridProvider implements ICapabilitySerializable<CompoundTag>
+    private static final class WorkbenchesProvider implements ICapabilitySerializable<CompoundTag>
     {
-        private final PlayerCraftingGrid grid = new PlayerCraftingGrid();
-        private final LazyOptional<PlayerCraftingGrid> optional = LazyOptional.of(() -> grid);
+        private final PlayerWorkbenches workbenches = new PlayerWorkbenches();
+        private final LazyOptional<PlayerWorkbenches> optional = LazyOptional.of(() -> workbenches);
 
         @Override
         public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side)
         {
-            return CRAFTING_GRID.orEmpty(cap, optional);
+            return WORKBENCHES.orEmpty(cap, optional);
         }
 
         @Override
         public CompoundTag serializeNBT()
         {
-            return grid.serializeNBT();
+            return workbenches.serializeNBT();
         }
 
         @Override
         public void deserializeNBT(CompoundTag tag)
         {
-            grid.deserializeNBT(tag);
+            workbenches.deserializeNBT(tag);
         }
     }
 }

@@ -37,22 +37,24 @@ abstract class BdInventoryScreen<M : BDBaseMenu, S, A>(menu: M, title: Component
     }
 
     // 注入页送出的动作随即处理，不等下一刻
+    protected open fun afterInput() = pages.update()
+
     override fun mouseClicked(x: Double, y: Double, button: Int) =
-        super.mouseClicked(x, y, button).also { pages.update() }
+        super.mouseClicked(x, y, button).also { afterInput() }
 
     override fun mouseReleased(x: Double, y: Double, button: Int) =
-        super.mouseReleased(x, y, button).also { pages.update() }
+        super.mouseReleased(x, y, button).also { afterInput() }
 
     override fun mouseScrolled(x: Double, y: Double, sy: Double) =
-        super.mouseScrolled(x, y, sy).also { pages.update() }
+        super.mouseScrolled(x, y, sy).also { afterInput() }
 
     override fun charTyped(character: Char, modifiers: Int) =
-        super.charTyped(character, modifiers).also { pages.update() }
+        super.charTyped(character, modifiers).also { afterInput() }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         val editing = hasTextInputFocus
         val handled = super.keyPressed(keyCode, scanCode, modifiers)
-        pages.update()
+        afterInput()
         // 编辑文字时占用可打印按键，避免配方查看器把 R、U 等当作快捷键
         return handled || (editing && keyCode in GLFW.GLFW_KEY_SPACE..GLFW.GLFW_KEY_GRAVE_ACCENT)
     }

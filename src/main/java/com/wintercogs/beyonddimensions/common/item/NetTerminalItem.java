@@ -1,7 +1,8 @@
 package com.wintercogs.beyonddimensions.common.item;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsNetTerminalMenu;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -51,7 +52,7 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
                 if (net != null)
                 {
                     contextMap.put(player, new MenuTriggerContext(usedHand, itemstack));
-                    NetworkHooks.openScreen((ServerPlayer) player, this);
+                    DimensionsNetMenu.open(player, this);
                 }
             }
             else
@@ -91,8 +92,8 @@ public class NetTerminalItem extends NetedItem implements MenuProvider
         // 旧版本的终端物品带着合成格的物品，先还给玩家
         NonNullList<ItemStack> legacy = removeLegacyCraftSlots(ctx.stack);
         if (legacy != null)
-            DimensionsCraftMenuTerminal.returnLegacyCraftItems(player, net.getUnifiedStorage(), legacy);
-        return new DimensionsCraftMenuTerminal(containerId, inventory, net.getUnifiedStorage(), ctx.stack, null);
+            DimensionsNetTerminalMenu.returnLegacyCraftItems(player, net.getUnifiedStorage(), legacy);
+        return new DimensionsNetTerminalMenu(containerId, inventory, net.getUnifiedStorage(), ctx.stack, null);
     }
 
     // 旧版本终端物品 NBT 中的合成格物品，取出后从物品上移除；没有时返回 null
