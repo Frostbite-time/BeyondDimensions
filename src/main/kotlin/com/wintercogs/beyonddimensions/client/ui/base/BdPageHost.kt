@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import com.wintercogs.beyonddimensions.api.ui.page.BdPage
 import com.wintercogs.beyonddimensions.api.ui.page.BdPageContext
 import com.wintercogs.beyonddimensions.api.ui.page.BdPageScope
+import com.wintercogs.beyonddimensions.api.ui.page.BdPageSize
 import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import com.wintercogs.beyonddimensions.client.ui.kit.BdRailTab
 import com.wintercogs.beyonddimensions.client.ui.kit.BdTabPage
@@ -54,7 +55,7 @@ class BdPageHost<M : AbstractContainerMenu>(
     private fun mount(entry: BdPages.Entry): Mounted<*, *>? {
         val page = entry.page as BdPage<M, Any?, Any?>
         if (!page.appliesTo(context)) return null
-        return Mounted(entry.id.toString(), page, page.title(context).string, UiBinding(page.snapshot(context)))
+        return Mounted(entry.id.toString(), page, page.title(context).string, page.size(context), UiBinding(page.snapshot(context)))
     }
 
     /** 游戏线程：每刻与每个输入事件之后调用，先处理各页送来的动作，再取新快照 */
@@ -85,6 +86,7 @@ class BdPageHost<M : AbstractContainerMenu>(
         val id: String,
         val page: BdPage<M, S, A>,
         val title: String,
+        val size: BdPageSize,
         val binding: UiBinding<S, A>,
     ) {
         fun update() {
@@ -96,7 +98,7 @@ class BdPageHost<M : AbstractContainerMenu>(
         fun Show(box: BoxScope, selection: BdPageSelection) {
             val shown = selection.current == id
             with(box) {
-                BdTabPage(shown) {
+                BdTabPage(shown, size = size) {
                     val scope = remember(shown) { Scope(shown, selection) }
                     with(page) { Content(binding.value, scope) }
                 }

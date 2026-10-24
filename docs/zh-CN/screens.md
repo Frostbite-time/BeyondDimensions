@@ -13,6 +13,7 @@
 | `icon` | | 页签的 10×10 像素图标，如 `BdIcons.Info`，也可以是自定义的 `BdPixelIcon` |
 | `title(context)` | 游戏线程 | 页签的悬停提示 |
 | `appliesTo(context)` | 游戏线程 | 当前界面是否显示该页面，默认显示 |
+| `size(context)` | 游戏线程 | 页面的大小，默认与主页面一样大，见[页面大小](#页面大小) |
 | `snapshot(context)` | 游戏线程 | 生成页面状态 `S`；只读，每刻可能调用多次 |
 | `handle(context, action)` | 游戏线程 | 处理页面发送的动作 `A`，处理后重新生成状态 |
 | `Content(state, scope)` | Compose 线程 | 根据状态绘制页面 |
@@ -53,6 +54,18 @@ BdPages.register<DimensionsNetMenu>(ResourceLocation("examplemod", "network_info
 ```
 
 第三个参数指定页面在其他模组页面中的位置：`BdPages.first()`、`last()`、`before(id)` 或 `after(id)`。
+
+### 页面大小
+
+`size(context)` 返回 `BdPageSize`，打开界面时取一次。切换到这一页时，窗口以动画变到它的大小：
+
+| `BdPageSize` | 页面大小 |
+| --- | --- |
+| `Main` | 与主页面一样大，为默认值 |
+| `Fixed(width, height)` | 固定宽高，单位为界面像素，包括页面四周的留白；屏幕放不下时缩到屏幕内，内容在页面中滚动 |
+| `Content(maxWidth, maxHeight)` | 随内容变化，可以设上限；内容的最外层需要有确定的大小，不能使用 `fillMaxSize` 或 `weight` |
+
+页面比左侧页签栏所需的高度矮时，窗口仍会留出放下所有页签的高度，但不会超过主页面的高度。
 
 ## 向服务器发送动作
 

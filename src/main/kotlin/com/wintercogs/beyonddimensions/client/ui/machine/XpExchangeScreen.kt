@@ -50,7 +50,8 @@ class XpExchangeScreen(menu: XpExchangeMenu, inventory: Inventory, title: Compon
         val page = rememberPageSelection()
         BdScreenFrame {
             BdTabbedWindow(
-                Modifier.width(SLOT_WINDOW_WIDTH.dp).then(slots.areaModifier()),
+                slots.areaModifier(),
+                width = SLOT_WINDOW_WIDTH.dp,
                 header = { BdHeader(icon, text.title, ::requestClose) },
                 tabs = {
                     BdRailTab(text.title, BdIcons.Main, selected = page.main) { page.open(BdPages.MAIN) }

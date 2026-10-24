@@ -54,7 +54,8 @@ class MagnetScreen(menu: NetMagnetMenu, inventory: Inventory, title: Component) 
         val settingsOpen = page.settings
         BdScreenFrame {
             BdTabbedWindow(
-                Modifier.width(SLOT_WINDOW_WIDTH.dp).then(slots.areaModifier()),
+                slots.areaModifier(),
+                width = SLOT_WINDOW_WIDTH.dp,
                 header = { BdHeader(icon, text.title, ::requestClose) },
                 tabs = {
                     BdRailTab(text.title, BdIcons.Main, selected = page.main) { page.open(BdPages.MAIN) }

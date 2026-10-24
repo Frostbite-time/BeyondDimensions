@@ -285,7 +285,7 @@ private fun StorageView(
             )
             val mainAlpha by animateFloatAsState(if (page.main) 1f else 0f, tween(150), label = "editor fade")
             BdTabbedWindow(
-                Modifier.width((CHROME_WIDTH + width + editorWidth).dp).then(slots.areaModifier())
+                slots.areaModifier()
                     .onPointerEvent(PointerEventType.Scroll) { event ->
                         // 分类标签与编辑区自己滚动时不翻动格子
                         if (event.changes.any { it.isConsumed }) return@onPointerEvent
@@ -308,6 +308,7 @@ private fun StorageView(
                         }
                     }
                     .focusGroup(),
+                width = (CHROME_WIDTH + width + editorWidth).dp,
                 header = {
                     BdHeader(
                         layout.icon,
