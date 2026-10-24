@@ -1,11 +1,11 @@
 ## English
 
-0.8.0 rebuilds every screen on CompixelUI and adds custom category tabs, side configuration for machines, the Machine Configuration Talisman and the Stock Emitter. It requires CompixelUI and Kotlin; read the breaking changes at the end before updating.
+0.8.1 rebuilds every screen on CompixelUI and adds custom category tabs, side configuration for machines, the Machine Configuration Talisman and the Stock Emitter. It requires CompixelUI and Kotlin; read the breaking changes at the end before updating.
 
 ### Interface
 
 - Every screen is rebuilt on [CompixelUI](https://www.curseforge.com/projects/1715758): a window with a tab rail on the left and main and settings pages, in the Beyond Dimensions Casing style.
-- Screens open and close with short animations, and the game behind them is blurred.
+- Screens open and close with short animations.
 - Four color schemes: Beyond Dimensions Casing (default), Glass (translucent), Vanilla and Brass. The palette button on each window opens an editor for every color, and resource packs can add schemes.
 - Text uses CompixelUI's pixel font. Fluid and chemical amounts under one bucket show as `<1` instead of a decimal.
 - The Energy Network screen shows the average flow and bar charts of the stored energy and of input and output over the last half minute. The server records them for every network, so they are complete as soon as the screen opens.
@@ -14,7 +14,7 @@
 
 - Create your own category tabs with an icon, a name, a search rule and hand-picked resources. Right-click a tab, or its row in the tab list, to edit, move or delete it, or drag it to reorder. Categories are saved per player and work in every network.
 - New search syntax: `~` matches resource types (for example `~fluid`), `%` matches durability (for example `%<50`) and `&` matches extra data (for example `&enchant`). `*` matches the ID of every resource, not only items, and `\` makes any following character literal, including `@`, `#`, `-` and `|`.
-- Right-click a stored resource with an empty hand to take one, take a chosen amount or add it to a category.
+- Right-click a stored resource with an empty hand to take one, take a chosen amount or add it to a category. Turn off "Right-click menu" on the settings page to take half instead, as in vanilla.
 - Space + left-click moves everything at once: on your inventory or hotbar, every item in that part; on a stored resource, as much of it as possible; on a machine's slots, its whole storage. Shift + double-click moves every identical item from your inventory or the machine's slots.
 - While holding a container (bucket, tank, battery, backpack and others), left-click a stored resource to fill the container and right-click to empty it into the network. Hold Shift to transfer as much as possible.
 - While Shift is held the grid doesn't rearrange; resources you empty stay in place showing 0 until you release it.
@@ -95,12 +95,12 @@ For developers:
 
 ## 中文
 
-0.8.0 将所有界面改用 CompixelUI 重做，并新增自定义分类标签、机器面配置、机器配置符和存量发信器。本版需要 CompixelUI 和 Kotlin，更新前请先阅读文末的破坏性改动。
+0.8.1 将所有界面改用 CompixelUI 重做，并新增自定义分类标签、机器面配置、机器配置符和存量发信器。本版需要 CompixelUI 和 Kotlin，更新前请先阅读文末的破坏性改动。
 
 ### 界面
 
 - 所有界面改用 [CompixelUI](https://www.curseforge.com/projects/1715758) 重做：窗口左侧为页签栏，右侧为主页面和设置页，采用超维机壳风格。
-- 界面打开和关闭时有简短的动画，背后的游戏画面会模糊。
+- 界面打开和关闭时有简短的动画。
 - 提供超维机壳（默认）、玻璃（半透明）、原版、黄铜四种配色。点击窗口上的调色板按钮可以修改任意颜色，资源包可以添加配色。
 - 文字改用 CompixelUI 的像素字体。不足一桶的流体和化学品显示为 `<1`，不再显示小数。
 - 能量网络界面以柱状图显示近半分钟的存量与收支，并显示平均收支。柱状图的数据由服务端为每个网络记录，打开界面时就是完整的。
@@ -109,7 +109,7 @@ For developers:
 
 - 支持自定义分类标签，可设置图标、名称、搜索式和手动挑选的资源。右键标签或标签列表中对应的一行可以编辑、移动或删除，也可以拖动排序。分类按玩家保存，在所有网络中通用。
 - 新增搜索写法：`~` 匹配资源类型（如 `~fluid`），`%` 匹配耐久（如 `%<50`），`&` 匹配额外数据（如 `&enchant`）。`*` 可以匹配所有资源的 ID，不再只限于物品；`\` 后的任意字符都按原样搜索，包括 `@`、`#`、`-` 和 `|`。
-- 空手右键存储中的资源，可以取出一个、取出指定数量或加入分类。
+- 空手右键存储中的资源，可以取出一个、取出指定数量或加入分类。在设置页关闭“右键打开菜单”后，改为像原版一样取出一半。
 - 空格 + 左键整批转移：点背包或快捷栏时转移该部分的全部物品，点存储中的资源时转移尽可能多的数量，点机器槽位时转移该机器存储的全部资源。Shift + 双击转移背包或机器槽位中所有完全相同的物品。
 - 手持容器（桶、储罐、电池、背包等）时，左键存储中的资源装入容器，右键将容器中的内容排入网络；按住 Shift 尽可能多地转移。
 - 按住 Shift 时存储格不重新排列，取空的资源留在原位显示为 0，松开后再整理。
