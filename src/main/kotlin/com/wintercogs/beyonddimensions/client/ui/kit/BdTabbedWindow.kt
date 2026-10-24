@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.kit
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -20,9 +21,14 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
+import com.wintercogs.beyonddimensions.api.ui.page.BdPageSize
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import kotlin.math.roundToInt
@@ -38,6 +44,23 @@ const val PAGE_PADDING_BOTTOM = 8
 private const val SWITCH_MILLIS = 150
 private const val SWITCH_RISE_DP = 6
 
+/** 窗口变到另一页大小的时长 */
+private const val RESIZE_MILLIS = 180
+
+/** 当前页的大小；主页面与各页在显示时写入，主页面据此决定自己是否撑开窗口 */
+@Stable
+private class BdPageFrame {
+    var current by mutableStateOf<BdPageSize>(BdPageSize.Main)
+
+    /** 主页面上一次排版的高度（像素），隐藏期间也照常更新 */
+    var mainHeight = 0
+}
+
+private val LocalBdPageFrame = compositionLocalOf<BdPageFrame?> { null }
+
+/** 主页面连同留白的宽度；未指定时按主页面的内容 */
+private val LocalBdMainWidth = staticCompositionLocalOf { Dp.Unspecified }
+
 private val pagePadding =
     Modifier.padding(
         start = PAGE_PADDING_X.dp,
@@ -50,11 +73,14 @@ private val pagePadding =
  * BD 的标准窗口：顶部是 [header]，内容区左侧是页签竖条，右侧是 [pages]。
  *
  * 竖条上方是 [tabs]，页签多到放不下时这一段可以用滚轮滚动；[pinned] 固定在竖条底部，始终可见。
+ * [width] 是主页面打开时窗口的宽度，不指定时由主页面的内容撑开；打开另定了大小（[BdPageSize]）的页时，
+ * 窗口以动画变到那一页的大小。
  * 通常有两页：[BdMainPage] 与设置用的 [BdTabPage]，主页面的页签在上方，设置的页签固定在底部：
  * ```
  * var settingsOpen by remember { mutableStateOf(false) }
  * BdTabbedWindow(
  *     modifier,
+ *     width = 200.dp,
  *     header = { BdHeader(icon, title, ::requestClose) },
  *     tabs = { BdRailTab(title, BdIcons.Main, selected = !settingsOpen) { settingsOpen = false } },
  *     pinned = { BdRailTab(settings, BdIcons.Settings, selected = settingsOpen) { settingsOpen = true } },
@@ -72,27 +98,33 @@ fun BdTabbedWindow(
     header: @Composable () -> Unit,
     tabs: @Composable ColumnScope.() -> Unit,
     pinned: @Composable ColumnScope.() -> Unit = {},
+    width: Dp = Dp.Unspecified,
     pages: @Composable BoxScope.() -> Unit,
 ) {
     val colors = Bd.colors
-    BdWindow(Modifier.centerContent().then(modifier)) {
-        header()
-        Box {
-            // 页面嵌在屏幕里，切换时新页面从下方浮起，裁剪到内容区
-            Box(
-                Modifier.padding(start = SIDE_RAIL_WIDTH.dp)
-                    .bdScreen(
-                        colors,
-                        start = SCREEN_INSET_X.dp,
-                        top = SCREEN_INSET_TOP.dp,
-                        end = SCREEN_INSET_X.dp,
-                        bottom = SCREEN_INSET_BOTTOM.dp,
-                    )
-                    .clipToBounds(),
-                content = pages,
-            )
-            // 竖条在屏幕左侧的机壳上，高度跟随主页面；页签靠右，选中的页签接进屏幕
-            Box(Modifier.matchParentSize()) {
+    val frame = remember { BdPageFrame() }
+    val mainWidth = if (width.isSpecified) width - SIDE_RAIL_WIDTH.dp else Dp.Unspecified
+    Layout({
+        Box { header() }
+        Layout({
+            // 页面嵌在屏幕里，切换时新页面从下方浮起，裁剪到内容区；内容区以动画变到当前页的大小
+            CompositionLocalProvider(LocalBdPageFrame provides frame, LocalBdMainWidth provides mainWidth) {
+                Box(
+                    Modifier.padding(start = SIDE_RAIL_WIDTH.dp)
+                        .bdScreen(
+                            colors,
+                            start = SCREEN_INSET_X.dp,
+                            top = SCREEN_INSET_TOP.dp,
+                            end = SCREEN_INSET_X.dp,
+                            bottom = SCREEN_INSET_BOTTOM.dp,
+                        )
+                        .clipToBounds()
+                        .animateContentSize(tween(RESIZE_MILLIS, easing = FastOutSlowInEasing)),
+                    content = pages,
+                )
+            }
+            // 竖条在屏幕左侧的机壳上，与内容区一样高；页签靠右，选中的页签接进屏幕
+            Box {
                 Column(
                     Modifier.width(SIDE_RAIL_WIDTH.dp).fillMaxHeight().padding(vertical = 6.dp),
                     horizontalAlignment = Alignment.End,
@@ -108,6 +140,30 @@ fun BdTabbedWindow(
                     pinned()
                 }
             }
+        }) { (screen, rail), constraints ->
+            // 另定了大小的页比竖条上的页签矮时，内容区仍高到放下全部页签；但不比主页面高，
+            // 页签多到主页面上也放不下时竖条照常滚动
+            val railWidth = SIDE_RAIL_WIDTH.dp.roundToPx()
+            val tabsHeight =
+                if (frame.current == BdPageSize.Main) 0 else minOf(rail.minIntrinsicHeight(railWidth), frame.mainHeight)
+            val page = screen.measure(constraints.copy(minWidth = 0, minHeight = tabsHeight.coerceAtMost(constraints.maxHeight)))
+            val side = rail.measure(Constraints.fixed(railWidth, page.height))
+            layout(page.width, page.height) {
+                page.place(0, 0)
+                side.place(0, 0)
+            }
+        }
+    }, Modifier.centerContent().then(modifier).bdRaised(colors)) { (top, body), constraints ->
+        // 窗口与页面一样宽：先量页面，再按页面的宽度排标题栏
+        val headerHeight = top.minIntrinsicHeight(constraints.maxWidth)
+        val bodyHeight =
+            if (constraints.hasBoundedHeight) (constraints.maxHeight - headerHeight).coerceAtLeast(0) else Constraints.Infinity
+        val content = body.measure(Constraints(maxWidth = constraints.maxWidth, maxHeight = bodyHeight))
+        val windowWidth = content.width.coerceIn(constraints.minWidth, constraints.maxWidth)
+        val title = top.measure(Constraints(windowWidth, windowWidth, 0, constraints.maxHeight))
+        layout(windowWidth, (title.height + content.height).coerceIn(constraints.minHeight, constraints.maxHeight)) {
+            title.place(0, 0)
+            content.place(0, title.height)
         }
     }
 }
@@ -200,30 +256,60 @@ private fun ProvidePageVisibility(shown: Boolean, progress: State<Float>, conten
     CompositionLocalProvider(LocalBdPageVisibility provides BdPageVisibility(shown, visible), content = content)
 }
 
-/** 主页面：决定内容区的大小，切到其他页时淡出 */
+/**
+ * 主页面：显示时由它决定内容区的大小，切到其他页时淡出。
+ * 打开的页有自己的大小时它不再撑开内容区，超出的部分被裁掉
+ */
 @Composable
 fun BoxScope.BdMainPage(shown: Boolean, content: @Composable ColumnScope.() -> Unit) {
     val progress = switchProgress(shown)
+    val frame = LocalBdPageFrame.current
+    val width = LocalBdMainWidth.current
+    if (shown && frame != null) SideEffect { frame.current = BdPageSize.Main }
     ProvidePageVisibility(shown, progress) {
-        Column(Modifier.graphicsLayer { alpha = progress.value }.then(pagePadding), content = content)
+        Column(
+            Modifier
+                .layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
+                    frame?.mainHeight = placeable.height
+                    val sizing = shown || frame == null || frame.current == BdPageSize.Main
+                    layout(if (sizing) placeable.width else 0, if (sizing) placeable.height else 0) { placeable.place(0, 0) }
+                }
+                // 隐藏期间也按同样的宽度排版，切回来时不会跳动
+                .then(if (width.isSpecified) Modifier.width(width) else Modifier)
+                .graphicsLayer { alpha = progress.value }
+                .then(pagePadding),
+            content = content,
+        )
     }
 }
 
 /**
- * 其他页面：与主页面一样大，打开时盖住主页面并挡住它的点击，内容放不下时在页内滚动。
+ * 其他页面：默认与主页面一样大，[size] 可以另定大小；打开时盖住主页面并挡住它的点击，内容放不下时在页内滚动。
  * 隐藏期间不组合
  */
 @Composable
 fun BoxScope.BdTabPage(
     shown: Boolean,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(6.dp),
+    size: BdPageSize = BdPageSize.Main,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val progress = switchProgress(shown)
+    val frame = LocalBdPageFrame.current
+    if (shown && frame != null) SideEffect { frame.current = size }
     if (!shown && progress.value == 0f) return
+    val sized = when (size) {
+        BdPageSize.Main -> Modifier.matchParentSize()
+        is BdPageSize.Fixed -> Modifier.size(size.width.dp, size.height.dp)
+        // 页内的滚动列会占满可用宽度，按内容的固有宽度取
+        is BdPageSize.Content -> Modifier.widthIn(max = size.maxWidth?.dp ?: Dp.Infinity)
+            .heightIn(max = size.maxHeight?.dp ?: Dp.Infinity)
+            .width(IntrinsicSize.Max)
+    }
     ProvidePageVisibility(shown, progress) {
         BdScrollColumn(
-            Modifier.matchParentSize()
+            sized
                 .offset { IntOffset(0, ((1f - progress.value) * SWITCH_RISE_DP.dp.toPx()).roundToInt()) }
                 .graphicsLayer { alpha = progress.value }
                 // 没有控件的地方也接住指针，点击不会落到下层的主页面

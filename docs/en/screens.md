@@ -16,6 +16,7 @@ menu class and appears on every screen of that menu or its subclasses:
 | `icon` | | The tab's 10×10 pixel icon, such as `BdIcons.Info`, or your own `BdPixelIcon` |
 | `title(context)` | Game thread | The tab's tooltip |
 | `appliesTo(context)` | Game thread | Whether this screen shows the page; `true` by default |
+| `size(context)` | Game thread | The page's size; the main page's size by default, see [Page size](#page-size) |
 | `snapshot(context)` | Game thread | The page's state `S`; only reads, and may run several times a tick |
 | `handle(context, action)` | Game thread | Handles an action `A` sent by the page; a new snapshot follows |
 | `Content(state, scope)` | Compose thread | Draws the page from the state |
@@ -58,6 +59,19 @@ BdPages.register<DimensionsNetMenu>(ResourceLocation.fromNamespaceAndPath("examp
 ```
 
 A third argument places the page among other mods' pages: `BdPages.first()`, `last()`, `before(id)` or `after(id)`.
+
+### Page size
+
+`size(context)` returns a `BdPageSize` and is read once when the screen opens. When the page opens, the window
+animates to its size:
+
+| `BdPageSize` | Size |
+| --- | --- |
+| `Main` | The main page's size; the default |
+| `Fixed(width, height)` | A fixed size in GUI pixels, including the page's padding. On a smaller screen it shrinks to fit and the content scrolls |
+| `Content(maxWidth, maxHeight)` | Follows the content, up to the optional limits. The outermost content needs a definite size, so no `fillMaxSize` or `weight` |
+
+A page shorter than the tab rail still leaves room for every tab, but never more than the main page's height.
 
 ## Send an action to the server
 

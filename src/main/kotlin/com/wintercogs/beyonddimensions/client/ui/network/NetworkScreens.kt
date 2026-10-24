@@ -146,7 +146,8 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                 val selected =
                     state.members.find { it.id == chosen } ?: state.members.find { it.self } ?: state.members.first()
                 BdTabbedWindow(
-                    Modifier.width((SIDE_RAIL_WIDTH + 250).dp),
+                    Modifier,
+                    width = (SIDE_RAIL_WIDTH + 250).dp,
                     header = {
                         BdHeader(
                             text.icon,
@@ -408,7 +409,8 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
         BdScreenFrame {
             val current = state.options.find { it.id == state.primary }
             BdTabbedWindow(
-                Modifier.width((SIDE_RAIL_WIDTH + 230).dp),
+                Modifier,
+                width = (SIDE_RAIL_WIDTH + 230).dp,
                 header = {
                     BdHeader(
                         text.icon,

@@ -33,6 +33,9 @@ interface BdPage<M : AbstractContainerMenu, S, A> {
     /** 这个界面是否显示这一页；打开界面时在游戏线程判断一次 */
     fun appliesTo(context: BdPageContext<M>): Boolean = true
 
+    /** 这一页的大小，默认与主页面一样大；打开界面时在游戏线程取一次 */
+    fun size(context: BdPageContext<M>): BdPageSize = BdPageSize.Main
+
     /** 在游戏线程读取页面状态；可能一刻多次调用，只读不改 */
     fun snapshot(context: BdPageContext<M>): S
 
