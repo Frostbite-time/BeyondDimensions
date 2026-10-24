@@ -486,6 +486,8 @@ class StorageController(private val menu: DimensionsNetMenu) {
 
     private fun select(index: Int) {
         val target = if (index in categories.indices) index else -1
+        // 选中已打开的分类时不重新应用，滚动位置保持不变
+        if (target == selected) return
         selected = target
         if (target >= 0) StorageCategories.selected[player] = target else StorageCategories.selected.remove(player)
         applyCategory()
