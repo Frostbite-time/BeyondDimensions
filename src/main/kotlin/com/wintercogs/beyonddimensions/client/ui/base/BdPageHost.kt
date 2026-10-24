@@ -2,11 +2,7 @@ package com.wintercogs.beyonddimensions.client.ui.base
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.*
-import com.wintercogs.beyonddimensions.api.ui.page.BdPage
-import com.wintercogs.beyonddimensions.api.ui.page.BdPageContext
-import com.wintercogs.beyonddimensions.api.ui.page.BdPageScope
-import com.wintercogs.beyonddimensions.api.ui.page.BdPageSize
-import com.wintercogs.beyonddimensions.api.ui.page.BdPages
+import com.wintercogs.beyonddimensions.api.ui.page.*
 import com.wintercogs.beyonddimensions.client.ui.kit.BdRailTab
 import com.wintercogs.beyonddimensions.client.ui.kit.BdTabPage
 import dev.compixel.forge.slots.ComposeMenuSlots
@@ -55,7 +51,13 @@ class BdPageHost<M : AbstractContainerMenu>(
     private fun mount(entry: BdPages.Entry): Mounted<*, *>? {
         val page = entry.page as BdPage<M, Any?, Any?>
         if (!page.appliesTo(context)) return null
-        return Mounted(entry.id.toString(), page, page.title(context).string, page.size(context), UiBinding(page.snapshot(context)))
+        return Mounted(
+            entry.id.toString(),
+            page,
+            page.title(context).string,
+            page.size(context),
+            UiBinding(page.snapshot(context))
+        )
     }
 
     /** 游戏线程：每刻与每个输入事件之后调用，先处理各页送来的动作，再取新快照 */

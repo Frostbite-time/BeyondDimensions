@@ -51,7 +51,8 @@ public final class TransferHelper
         var fill = pool.plan(inputs, maxTransfer ? Integer.MAX_VALUE : 1);
         if (doTransfer && fill.hasMaterials())
         {
-            if (!menu.commands().recipe(workbench, fill.keys(), fill.amounts(), compressOverflow, recipe)) return unavailable();
+            if (!menu.commands().recipe(workbench, fill.keys(), fill.amounts(), compressOverflow, recipe))
+                return unavailable();
             // 工作区收起或显示着别的工作台时换过来，让玩家看到填好的输入
             StorageWorkbenchChoice.reveal(workbench);
         }

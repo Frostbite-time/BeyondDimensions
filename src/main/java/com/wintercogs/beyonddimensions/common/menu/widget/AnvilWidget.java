@@ -89,7 +89,8 @@ public class AnvilWidget extends WorkstationWidget<AnvilWidget.Anvil>
     {
         private ItemStack input = ItemStack.EMPTY;
         private String name = "";
-        private Runnable inputsChanged = () -> {};
+        private Runnable inputsChanged = () -> {
+        };
 
         Anvil(Inventory inventory, ContainerLevelAccess access)
         {

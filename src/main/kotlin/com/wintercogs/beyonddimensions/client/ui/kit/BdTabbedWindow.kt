@@ -1,11 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.kit
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector2D
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.VectorConverter
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -25,13 +20,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.constrain
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.isSpecified
+import androidx.compose.ui.unit.*
 import com.wintercogs.beyonddimensions.api.ui.page.BdPageSize
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
@@ -153,7 +142,12 @@ fun BdTabbedWindow(
             val railWidth = SIDE_RAIL_WIDTH.dp.roundToPx()
             val tabsHeight =
                 if (frame.current == BdPageSize.Main) 0 else minOf(rail.minIntrinsicHeight(railWidth), frame.mainHeight)
-            val page = screen.measure(constraints.copy(minWidth = 0, minHeight = tabsHeight.coerceAtMost(constraints.maxHeight)))
+            val page = screen.measure(
+                constraints.copy(
+                    minWidth = 0,
+                    minHeight = tabsHeight.coerceAtMost(constraints.maxHeight)
+                )
+            )
             val side = rail.measure(Constraints.fixed(railWidth, page.height))
             layout(page.width, page.height) {
                 page.place(0, 0)
@@ -217,7 +211,10 @@ private class ScreenSize(private val scope: CoroutineScope) {
             changedAt = now
             target = content
             scope.launch {
-                if (follow) size.snapTo(content) else size.animateTo(content, tween(RESIZE_MILLIS, easing = FastOutSlowInEasing))
+                if (follow) size.snapTo(content) else size.animateTo(
+                    content,
+                    tween(RESIZE_MILLIS, easing = FastOutSlowInEasing)
+                )
             }
         }
         return if (following) content else size.value
@@ -334,7 +331,12 @@ fun BoxScope.BdMainPage(shown: Boolean, content: @Composable ColumnScope.() -> U
                     val placeable = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
                     frame?.mainHeight = placeable.height
                     val sizing = shown || frame == null || frame.current == BdPageSize.Main
-                    layout(if (sizing) placeable.width else 0, if (sizing) placeable.height else 0) { placeable.place(0, 0) }
+                    layout(if (sizing) placeable.width else 0, if (sizing) placeable.height else 0) {
+                        placeable.place(
+                            0,
+                            0
+                        )
+                    }
                 }
                 // 隐藏期间也按同样的宽度排版，切回来时不会跳动
                 .then(if (width.isSpecified) Modifier.width(width) else Modifier)

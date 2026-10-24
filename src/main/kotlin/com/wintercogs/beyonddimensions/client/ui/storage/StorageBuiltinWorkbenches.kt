@@ -1,26 +1,24 @@
 package com.wintercogs.beyonddimensions.client.ui.storage
 
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.api.ui.storage.*
-import com.wintercogs.beyonddimensions.client.ui.base.*
+import com.wintercogs.beyonddimensions.client.ui.base.BdSlot
+import com.wintercogs.beyonddimensions.client.ui.base.BdSlotGrid
+import com.wintercogs.beyonddimensions.client.ui.base.SLOT_PITCH
+import com.wintercogs.beyonddimensions.client.ui.base.tr
 import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.AnvilWidget
-import com.wintercogs.beyonddimensions.common.menu.widget.CraftingWidget
 import com.wintercogs.beyonddimensions.common.menu.widget.SmithingWidget
 import com.wintercogs.beyonddimensions.common.menu.widget.StonecutterWidget
 import com.wintercogs.beyonddimensions.config.ClientConfigRuntime
@@ -102,10 +100,12 @@ internal sealed interface CraftingAction {
 
 /** 合成台：合成格与产物，居中；清空与退回方向按钮在下拉框一行的右端，Polymorph 给出多个配方时配方选择也在那里 */
 internal object CraftingWorkbench : StorageWorkbench<CraftingState, CraftingAction> {
-    override fun title(context: StorageWorkbenchContext): Component = Component.translatable("ui.beyonddimensions.storage.workbench.crafting")
+    override fun title(context: StorageWorkbenchContext): Component =
+        Component.translatable("ui.beyonddimensions.storage.workbench.crafting")
 
     // 与 9 列存储格的内容区一样宽，工作区不随可用的工作台变窄；合成格的外框每边占半个像素
-    override fun size(context: StorageWorkbenchContext) = StorageWorkbenchSize(StorageWorkbenches.MAX_WIDTH, 3 * SLOT_PITCH + FRAME)
+    override fun size(context: StorageWorkbenchContext) =
+        StorageWorkbenchSize(StorageWorkbenches.MAX_WIDTH, 3 * SLOT_PITCH + FRAME)
 
     private fun recipeChoices(context: StorageWorkbenchContext) =
         context.remember("recipe_choices") { if (ModPresence.isLoaded(OtherModIds.POLYMORPH)) ComposeRecipeChoices() else null }
@@ -115,7 +115,8 @@ internal object CraftingWorkbench : StorageWorkbench<CraftingState, CraftingActi
         return CraftingState(
             grid = (crafting.gridStart() until crafting.gridEnd()).toList(),
             result = crafting.resultSlot(),
-            recipeChoices = recipeChoices(context)?.snapshot(context.menu)?.map { RecipeChoice(it.id(), it.label()) }.orEmpty(),
+            recipeChoices = recipeChoices(context)?.snapshot(context.menu)?.map { RecipeChoice(it.id(), it.label()) }
+                .orEmpty(),
             text = context.remember("text") { CraftingText() },
         )
     }
@@ -335,16 +336,22 @@ private fun underlayIcon(sprite: ResourceLocation) =
 
 /** 锻造台：模板、基础物品与材料，箭头后是产物槽；空格里像原版一样轮换着画该放什么。唯一的动作是清空，true 时退回存储 */
 internal object SmithingWorkbench : StorageWorkbench<SmithingState, Boolean> {
-    override fun title(context: StorageWorkbenchContext): Component = Component.translatable("block.minecraft.smithing_table")
+    override fun title(context: StorageWorkbenchContext): Component =
+        Component.translatable("block.minecraft.smithing_table")
 
-    override fun size(context: StorageWorkbenchContext) = StorageWorkbenchSize(3 * SLOT_PITCH + FRAME + ARROW + RESULT_BOX, RESULT_BOX)
+    override fun size(context: StorageWorkbenchContext) =
+        StorageWorkbenchSize(3 * SLOT_PITCH + FRAME + ARROW + RESULT_BOX, RESULT_BOX)
 
     override fun snapshot(context: StorageWorkbenchContext): SmithingState {
         val smithing = checkNotNull(context.menu.widget(SmithingWidget::class.java))
         val slots = context.menu.slots
         val inputs = (smithing.inputStart() until smithing.resultSlot()).toList()
         val template = slots[smithing.inputStart()].item.item as? SmithingTemplateItem
-        val sprites = listOf(TEMPLATE_UNDERLAYS, template?.baseSlotEmptyIcons.orEmpty(), template?.additionalSlotEmptyIcons.orEmpty())
+        val sprites = listOf(
+            TEMPLATE_UNDERLAYS,
+            template?.baseSlotEmptyIcons.orEmpty(),
+            template?.additionalSlotEmptyIcons.orEmpty()
+        )
         // 按游戏时间轮换，所有格子同时换图；同一张图沿用同一个图标
         val step = (context.player.level().gameTime / UNDERLAY_TICKS).toInt()
         val icons = context.remember("underlays") { HashMap<ResourceLocation, ItemIcon>() }
@@ -373,7 +380,15 @@ internal object SmithingWorkbench : StorageWorkbench<SmithingState, Boolean> {
     override fun Content(state: SmithingState, scope: StorageWorkbenchScope<Boolean>) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.bdSlotFrame(Bd.colors)) {
-                Row { state.inputs.forEachIndexed { index, id -> BdSlot(scope.slots, id, underlay = state.underlays[index]) } }
+                Row {
+                    state.inputs.forEachIndexed { index, id ->
+                        BdSlot(
+                            scope.slots,
+                            id,
+                            underlay = state.underlays[index]
+                        )
+                    }
+                }
             }
             Arrow()
             ResultSlot(scope, state.result)
@@ -408,7 +423,8 @@ internal object StonecutterWorkbench : StorageWorkbench<StonecutterState, Stonec
     private const val COLUMNS = 4
     private const val ROWS = 3
 
-    override fun title(context: StorageWorkbenchContext): Component = Component.translatable("block.minecraft.stonecutter")
+    override fun title(context: StorageWorkbenchContext): Component =
+        Component.translatable("block.minecraft.stonecutter")
 
     override fun size(context: StorageWorkbenchContext) =
         StorageWorkbenchSize(
@@ -469,7 +485,10 @@ internal object StonecutterWorkbench : StorageWorkbench<StonecutterState, Stonec
                     for (row in state.recipes.indices.chunked(COLUMNS)) {
                         Row {
                             for (index in row) {
-                                RecipeCell(state.recipes[index], index == state.selected) { scope.send(StonecutterAction.Select(index)) }
+                                RecipeCell(
+                                    state.recipes[index],
+                                    index == state.selected
+                                ) { scope.send(StonecutterAction.Select(index)) }
                             }
                         }
                     }
@@ -496,7 +515,9 @@ private fun RecipeCell(option: RecipeOption, selected: Boolean, onClick: () -> U
                 .bdClickable(interaction, enabled = !selected, onClick = onClick)
                 .then(
                     when {
-                        selected -> Modifier.background(colors[BdColors.accent].copy(alpha = 0.3f)).border(1.dp, colors[BdColors.accent])
+                        selected -> Modifier.background(colors[BdColors.accent].copy(alpha = 0.3f))
+                            .border(1.dp, colors[BdColors.accent])
+
                         hovered -> Modifier.background(colors[BdColors.surface])
                         else -> Modifier
                     }

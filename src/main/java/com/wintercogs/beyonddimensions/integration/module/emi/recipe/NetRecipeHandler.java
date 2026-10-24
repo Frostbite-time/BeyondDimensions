@@ -173,7 +173,8 @@ public class NetRecipeHandler<T extends DimensionsNetMenu> implements StandardRe
         int batches = (int) Math.min(Integer.MAX_VALUE, (long) context.getAmount() + existingBatches(recipe, menu));
         RecipeFillPlan fill = plan(recipe, context, batches);
         if (!fill.hasMaterials()) return false;
-        if (!menu.commands().recipe(workbench, fill.keys(), fill.amounts(), false, sendsRecipe ? recipe.getId() : null)) return false;
+        if (!menu.commands().recipe(workbench, fill.keys(), fill.amounts(), false, sendsRecipe ? recipe.getId() : null))
+            return false;
         // 工作区收起或显示着别的工作台时换过来，让玩家看到填好的输入
         StorageWorkbenchChoice.reveal(workbench);
         var mc = Minecraft.getInstance();

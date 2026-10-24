@@ -106,7 +106,8 @@ public class StonecutterWidget extends WorkstationWidget<StonecutterWidget.Stone
      */
     public static final class Stonecutter extends StonecutterMenu implements Inputs
     {
-        private Runnable inputsChanged = () -> {};
+        private Runnable inputsChanged = () -> {
+        };
 
         Stonecutter(Inventory inventory, ContainerLevelAccess access)
         {

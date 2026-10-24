@@ -126,7 +126,11 @@ fun BdPopover(onDismissRequest: () -> Unit, alignStart: Boolean = false, content
     }
     if (!LocalWindowInfo.current.isWindowFocused) return
     val gap = with(LocalDensity.current) { 2.dp.roundToPx() }
-    Popup(remember(gap, alignStart) { BelowAnchor(gap, alignStart) }, onDismissRequest, properties = PopupProperties(focusable = true)) {
+    Popup(
+        remember(gap, alignStart) { BelowAnchor(gap, alignStart) },
+        onDismissRequest,
+        properties = PopupProperties(focusable = true)
+    ) {
         // 按内容最宽的一行定宽，占满宽度的行不能把浮层撑到全屏
         OverlayCard(Modifier.width(IntrinsicSize.Max).padding(6.dp), content)
     }
