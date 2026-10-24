@@ -84,6 +84,7 @@ public class Config
         public final ModConfigSpec.BooleanValue STORAGE_KEEP_SEARCH;
         public final ModConfigSpec.ConfigValue<String> STORAGE_SEARCH;
         public final ModConfigSpec.BooleanValue STORAGE_OPEN_CRAFTING;
+        public final ModConfigSpec.BooleanValue STORAGE_RIGHT_CLICK_MENU;
 
         public final ModConfigSpec.BooleanValue CRAFTING_RETURN_TO_STORAGE;
         public final ModConfigSpec.BooleanValue CRAFTING_KEEP_GRID;
@@ -127,6 +128,9 @@ public class Config
             STORAGE_OPEN_CRAFTING = builder
                     .comment("快捷键是否打开带合成区的界面；在界面中切换合成区时会随之改变")
                     .define("open_crafting", false);
+            STORAGE_RIGHT_CLICK_MENU = builder
+                    .comment("空手右键存储里的资源时是否打开菜单（取出指定数量、加入分类）；关闭此项则像原版一样取出一半")
+                    .define("right_click_menu", true);
             builder.pop();
 
             builder.comment("合成区").push("crafting");
@@ -163,6 +167,7 @@ public class Config
             ClientConfigRuntime.storageKeepSearch = STORAGE_KEEP_SEARCH.get();
             ClientConfigRuntime.storageSearch = STORAGE_SEARCH.get();
             ClientConfigRuntime.storageOpenCrafting = STORAGE_OPEN_CRAFTING.get();
+            ClientConfigRuntime.storageRightClickMenu = STORAGE_RIGHT_CLICK_MENU.get();
 
             ClientConfigRuntime.craftingReturnToStorage = CRAFTING_RETURN_TO_STORAGE.get();
             ClientConfigRuntime.craftingKeepGrid = CRAFTING_KEEP_GRID.get();

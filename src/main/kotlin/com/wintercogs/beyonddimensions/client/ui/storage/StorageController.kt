@@ -84,6 +84,8 @@ data class StorageState(
     val reverse: Boolean = false,
     val keepSearch: Boolean = false,
     val syncSearch: Boolean = false,
+    /** 空手右键资源时打开菜单，否则取出一半 */
+    val rightClickMenu: Boolean = true,
     /** 关闭合成菜单后保留合成格里的物品 */
     val keepCrafting: Boolean = false,
     val craft: CraftState? = null,
@@ -145,6 +147,8 @@ sealed interface StorageAction {
     data class KeepSearch(val enabled: Boolean) : StorageAction
 
     data class SyncSearch(val enabled: Boolean) : StorageAction
+
+    data class RightClickMenu(val enabled: Boolean) : StorageAction
 
     data object ToggleCraft : StorageAction
 
@@ -237,6 +241,7 @@ class StorageController(private val menu: DimensionsNetMenu) {
             reverse = ClientConfigRuntime.storageReverse,
             keepSearch = ClientConfigRuntime.storageKeepSearch,
             syncSearch = ClientConfigRuntime.recipeViewerSyncSearch,
+            rightClickMenu = ClientConfigRuntime.storageRightClickMenu,
             keepCrafting = ClientConfigRuntime.craftingKeepGrid,
             craft = craft,
         )
@@ -345,6 +350,12 @@ class StorageController(private val menu: DimensionsNetMenu) {
             }
 
             is StorageAction.SyncSearch -> setSearchSync(action.enabled)
+            is StorageAction.RightClickMenu -> {
+                ClientConfigRuntime.storageRightClickMenu = action.enabled
+                Config.INSTANCE.clientConfig.STORAGE_RIGHT_CLICK_MENU.set(action.enabled)
+                Config.INSTANCE.clientConfig.STORAGE_RIGHT_CLICK_MENU.save()
+            }
+
             StorageAction.ToggleCraft -> toggleCraft()
             StorageAction.OpenSwitcher -> {
                 saveTransferContext()
@@ -409,8 +420,9 @@ class StorageController(private val menu: DimensionsNetMenu) {
         menu.buildIndexList()
     }
 
-    /** 存储格子的右键菜单：空手右键有资源的格子时打开，返回是否打开了 */
+    /** 存储格子的右键菜单：配置开启时，空手右键有资源的格子会打开它；返回是否打开了 */
     fun openSlotMenu(slotId: Int): Boolean {
+        if (!ClientConfigRuntime.storageRightClickMenu) return false
         val resource = (menu.slots.getOrNull(slotId) as? DisorderedStackTypedSlot)?.stack ?: return false
         if (resource.key().isEmpty) return false
         menuTarget = MenuTarget(slotId, resource.key(), resource.amount())

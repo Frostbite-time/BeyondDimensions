@@ -20,6 +20,7 @@ public final class ClientConfigRuntime
     public static volatile boolean storageKeepSearch = false;
     public static volatile String storageSearch = "";
     public static volatile boolean storageOpenCrafting = false;
+    public static volatile boolean storageRightClickMenu = true;
 
     // 合成区
     public static volatile boolean craftingReturnToStorage = false;
