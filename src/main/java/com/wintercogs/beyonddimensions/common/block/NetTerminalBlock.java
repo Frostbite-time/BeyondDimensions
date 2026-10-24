@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.common.block;
 
 import com.wintercogs.beyonddimensions.common.block.entity.NetTerminalBlockEntity;
 import com.wintercogs.beyonddimensions.common.block.orientation.FacingRule;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -105,7 +106,7 @@ public class NetTerminalBlock extends NetedBlock implements EntityBlock
         {
             NetTerminalBlockEntity blockEntity = (NetTerminalBlockEntity) level.getBlockEntity(pos);
             if (blockEntity.getNet() != null)
-                player.openMenu((NetTerminalBlockEntity) level.getBlockEntity(pos));
+                DimensionsNetMenu.open(player, (NetTerminalBlockEntity) level.getBlockEntity(pos));
             else
                 player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_need_bound"));
         }

@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.common.menu.widget.slot;
 
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
+import com.wintercogs.beyonddimensions.common.menu.widget.CraftingWidget;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -19,20 +19,20 @@ public class AutoRefillResultSlot extends ResultSlot
     private final CraftingContainer craftSlots;
     private final ResultContainer resultSlots;
     private final Player player;
-    private final DimensionsCraftMenu menu;
+    private final CraftingWidget crafting;
 
-    public AutoRefillResultSlot(DimensionsCraftMenu menu, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, int slot, int xPosition, int yPosition)
+    public AutoRefillResultSlot(CraftingWidget crafting, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, int slot, int xPosition, int yPosition)
     {
         super(player, craftSlots, resultSlots, slot, xPosition, yPosition);
-        this.menu = menu;
+        this.crafting = crafting;
         this.player = player;
         this.craftSlots = craftSlots;
         this.resultSlots = resultSlots;
     }
 
-    public AutoRefillResultSlot(DimensionsCraftMenu menu, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, int slot)
+    public AutoRefillResultSlot(CraftingWidget crafting, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, int slot)
     {
-        this(menu, player, craftSlots, resultSlots, slot, 0, 0);
+        this(crafting, player, craftSlots, resultSlots, slot, 0, 0);
     }
 
     @Override
@@ -49,10 +49,10 @@ public class AutoRefillResultSlot extends ResultSlot
         int gridStartY = positionedInput.top();
 
         CommonHooks.setCraftingPlayer(player);
-        NonNullList<ItemStack> remainingItems = menu.remainingItems(recipe, craftingGrid);
+        NonNullList<ItemStack> remainingItems = crafting.remainingItems(recipe, craftingGrid);
         CommonHooks.setCraftingPlayer(null);
 
-        menu.consumeIngredients(() -> consumeIngredients(player, craftingGrid, gridStartX, gridStartY, remainingItems));
+        crafting.consumeIngredients(() -> consumeIngredients(player, craftingGrid, gridStartX, gridStartY, remainingItems));
     }
 
     // 扣除一次合成的原料并放回剩余物
@@ -79,7 +79,7 @@ public class AutoRefillResultSlot extends ResultSlot
                         ItemStackKey toRemoveKey = new ItemStackKey(slotStack);
 
                         // 优先尝试存储系统
-                        int extracted = (int) menu.storage.extract(toRemoveKey, itemsToRemove, false, false).amount();
+                        int extracted = (int) crafting.storage().extract(toRemoveKey, itemsToRemove, false, false).amount();
                         itemsToRemove -= extracted;
 
                         // 存储系统不足时尝试玩家背包
@@ -123,7 +123,7 @@ public class AutoRefillResultSlot extends ResultSlot
                     // 继续填入存储
                     if (remainderCount > 0)
                     {
-                        remainderCount = (int) menu.storage.insert(remainderKey, remainderCount, false).amount();
+                        remainderCount = (int) crafting.storage().insert(remainderKey, remainderCount, false).amount();
                     }
                     // 随后填充玩家背包
                     if (remainderCount > 0)

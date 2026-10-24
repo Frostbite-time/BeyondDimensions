@@ -3,21 +3,25 @@ package com.wintercogs.beyonddimensions.common.menu;
 import com.google.common.base.Suppliers;
 import com.wintercogs.beyonddimensions.api.menu.interaction.SlotClick;
 import com.wintercogs.beyonddimensions.api.menu.interaction.SlotInteractions;
+import com.wintercogs.beyonddimensions.api.menu.widget.MenuWidget;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuCommands;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedSlotGroupSync;
 import dev.compixel.slots.SlotTransferRoutes;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import org.anti_ad.mc.ipn.api.IPNIgnore;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -86,6 +90,8 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
 
     public List<DisorderedSlotGroupSync> slotGroupSyncs = new ArrayList<>();
 
+    private final List<MenuWidget> widgets = new ArrayList<>();
+
     protected BDBaseMenu(@Nullable MenuType<?> menuType, int containerId, Inventory playerInventory)
     {
         super(menuType, containerId);
@@ -95,6 +101,69 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
     protected void addSlotGroupSync(DisorderedSlotGroupSync slotGroupSync)
     {
         slotGroupSyncs.add(slotGroupSync);
+    }
+
+    /**
+     * 菜单里的部件，按添加顺序
+     */
+    public final List<MenuWidget> widgets()
+    {
+        return Collections.unmodifiableList(widgets);
+    }
+
+    /**
+     * 这种类型的部件，菜单里没有时为 null
+     */
+    public final <W extends MenuWidget> @Nullable W widget(Class<W> type)
+    {
+        for (MenuWidget widget : widgets)
+        {
+            if (type.isInstance(widget))
+                return type.cast(widget);
+        }
+        return null;
+    }
+
+    /**
+     * 登记一个已经加好槽位的部件
+     */
+    protected final <W extends MenuWidget> W addWidget(W widget)
+    {
+        widgets.add(widget);
+        quickMoveRoutes = null;
+        return widget;
+    }
+
+    /**
+     * 只供 {@link MenuWidget} 添加自己的槽位
+     */
+    @ApiStatus.Internal
+    public final void addWidgetSlot(Slot slot)
+    {
+        addSlot(slot);
+    }
+
+    /**
+     * 只供 {@link MenuWidget} 添加要同步的整数
+     */
+    @ApiStatus.Internal
+    public final void addWidgetData(DataSlot data)
+    {
+        addDataSlot(data);
+    }
+
+    @Override
+    public void slotsChanged(@NotNull Container container)
+    {
+        for (MenuWidget widget : widgets)
+        {
+            if (widget.ownsContainer(container))
+            {
+                widget.slotsChanged(container);
+                return;
+            }
+        }
+        super.slotsChanged(container);
     }
 
     @Override
@@ -224,9 +293,14 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
     @Override
     public boolean canTakeItemForPickAll(@NotNull ItemStack stack, @NotNull Slot slot)
     {
-        if (!(slot instanceof AbstractStackTypedSlot))
-            return super.canTakeItemForPickAll(stack, slot);
-        return false;
+        if (slot instanceof AbstractStackTypedSlot)
+            return false;
+        for (MenuWidget widget : widgets)
+        {
+            if (widget.owns(slot.index) && !widget.canTakeForPickAll(slot))
+                return false;
+        }
+        return super.canTakeItemForPickAll(stack, slot);
     }
 
     @Override
@@ -235,5 +309,6 @@ public abstract class BDBaseMenu extends AbstractContainerMenu implements dev.co
         super.removed(player);
         for (var group : slotGroupSyncs) group.dispose();
         if (resources != null) resources.close();
+        for (MenuWidget widget : widgets) widget.removed(player);
     }
 }

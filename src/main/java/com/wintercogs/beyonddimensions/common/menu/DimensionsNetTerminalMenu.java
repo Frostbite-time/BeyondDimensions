@@ -1,10 +1,13 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.menu.workbench.PlayerWorkbenches;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHandlerRemoveZero;
+import com.wintercogs.beyonddimensions.common.menu.widget.CraftingWidget;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -12,24 +15,32 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static com.wintercogs.beyonddimensions.common.init.BDMenus.Dimensions_Craft_Menu_Terminal;
+import java.util.List;
+
+import static com.wintercogs.beyonddimensions.common.init.BDMenus.Dimensions_Net_Terminal_Menu;
 
 /**
- * 存储终端（方块或物品）打开的合成菜单，合成格是玩家自己的 {@link PlayerCraftingGrid}
+ * 存储终端（方块或物品）打开的存储菜单，工作台里的物品是玩家自己的 {@link PlayerWorkbenches}
  */
-public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
+public class DimensionsNetTerminalMenu extends DimensionsNetMenu
 {
     private ItemStack terminalStack = null;
     private BlockPos entityPos = null;
 
-    public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, FriendlyByteBuf data)
+    public DimensionsNetTerminalMenu(int id, Inventory playerInventory, @Nullable FriendlyByteBuf data)
     {
-        this(id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE), null, null);
+        this(id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE), null, null, readWorkbenches(data));
     }
 
-    public DimensionsCraftMenuTerminal(int id, Inventory playerInventory, AbstractUnorderedStackHandler data, @Nullable ItemStack terminalItem, @Nullable BlockPos entityPos)
+    public DimensionsNetTerminalMenu(int id, Inventory playerInventory, AbstractUnorderedStackHandler data, @Nullable ItemStack terminalItem, @Nullable BlockPos entityPos)
     {
-        super(Dimensions_Craft_Menu_Terminal.get(), id, playerInventory, data);
+        this(id, playerInventory, data, terminalItem, entityPos, null);
+    }
+
+    private DimensionsNetTerminalMenu(int id, Inventory playerInventory, AbstractUnorderedStackHandler data, @Nullable ItemStack terminalItem,
+                                      @Nullable BlockPos entityPos, @Nullable List<ResourceLocation> workbenches)
+    {
+        super(Dimensions_Net_Terminal_Menu.get(), id, playerInventory, data, workbenches);
         if (!player.level().isClientSide)
         {
             this.terminalStack = terminalItem;
@@ -45,7 +56,7 @@ public class DimensionsCraftMenuTerminal extends DimensionsCraftMenu
         for (ItemStack stack : items)
         {
             if (!stack.isEmpty())
-                returnStack(player, storage, stack.copy(), true);
+                CraftingWidget.returnStack(player, storage, stack.copy(), true);
         }
     }
 

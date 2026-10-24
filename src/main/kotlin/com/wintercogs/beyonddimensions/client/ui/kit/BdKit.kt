@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -148,6 +149,16 @@ fun BdSectionLabel(text: String, modifier: Modifier = Modifier, trailing: (@Comp
             Spacer(Modifier.width(4.dp))
             trailing()
         }
+    }
+}
+
+/** 两组设置之间的分隔：一道凹下的细线，上暗下亮，放在后一组的 [BdSectionLabel] 前 */
+@Composable
+fun BdSectionDivider() {
+    val colors = Bd.colors
+    Column(Modifier.fillMaxWidth()) {
+        Box(Modifier.fillMaxWidth().height(1.dp).background(colors[BdColors.outline]))
+        Box(Modifier.fillMaxWidth().height(1.dp).background(colors[BdColors.bevelLight]))
     }
 }
 
@@ -643,17 +654,18 @@ fun BdDropdown(options: List<String>, selected: Int, enabled: Boolean, onSelect:
     }
 }
 
-/** 纵向内容：放不下时可滚动，右侧出现滚动条 */
+/** 纵向内容：放不下时可滚动，右侧出现滚动条。给出 [wheelStep] 时滚轮每格滚动这么多，例如列表的一行 */
 @Composable
 fun BdScrollColumn(
     modifier: Modifier = Modifier,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    wheelStep: Dp? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val scroll = rememberScrollState()
     // 第一次布局前 maxValue 是表示未知的 Int.MAX_VALUE，这时按放得下处理，否则刚出现的一帧会带上滚动条与右侧留白
     val scrollable = scroll.maxValue in 1 until Int.MAX_VALUE
-    Box(modifier) {
+    Box(if (wheelStep != null) modifier.bdWheelStep(scroll, wheelStep) else modifier) {
         Column(
             Modifier.fillMaxWidth().padding(end = if (scrollable) (SCROLLBAR_WIDTH + 2).dp else 0.dp)
                 .verticalScroll(scroll),
@@ -666,6 +678,22 @@ fun BdScrollColumn(
                 BdScrollbar(scroll, Modifier.width(SCROLLBAR_WIDTH.dp).fillMaxHeight())
             }
         }
+    }
+}
+
+/**
+ * 放在可滚动内容的外层：滚轮每格把 [state] 滚动 [step]，例如一行。
+ * Compose 自己按可见高度的一小部分滚动，矮的列表要滚很多格才动一行；这里先于里面的内容处理并吞掉滚轮
+ */
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun Modifier.bdWheelStep(state: ScrollState, step: Dp): Modifier {
+    val scope = rememberCoroutineScope()
+    val pixels = with(LocalDensity.current) { step.toPx() }
+    return onPointerEvent(PointerEventType.Scroll, PointerEventPass.Initial) { event ->
+        val delta = event.changes.sumOf { it.scrollDelta.y.toDouble() }
+        if (delta != 0.0) scope.launch { state.scrollBy(if (delta > 0) pixels else -pixels) }
+        event.changes.forEach { it.consume() }
     }
 }
 

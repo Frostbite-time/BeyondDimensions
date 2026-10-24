@@ -3,7 +3,8 @@ package com.wintercogs.beyonddimensions.client.recipe;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -69,13 +70,14 @@ public record RecipeFillPlan(List<IStackKey<?>> keys, List<Long> amounts, List<I
         }
 
         /**
-         * 每个实际来源只计一次，再把各来源里相同的变体合并。
+         * 每个实际来源只计一次，再把各来源里相同的变体合并。{@code inputs} 是要填充的工作台的输入槽，
+         * 填充前里面的物品会先清出去，也算作来源
          */
-        public static Pool capture(DimensionsCraftMenu menu)
+        public static Pool capture(DimensionsNetMenu menu, List<Slot> inputs)
         {
             var pool = new Pool();
-            for (int slot = menu.craftSlotStartIndex; slot < menu.craftSlotEndIndex; slot++)
-                pool.add(menu.slots.get(slot).getItem());
+            for (Slot slot : inputs)
+                pool.add(slot.getItem());
             for (ItemStack stack : menu.player.getInventory().items) pool.add(stack);
             for (KeyAmount value : menu.storage.getStorage())
                 if (value.key() instanceof ItemStackKey key) pool.add(key, value.amount());

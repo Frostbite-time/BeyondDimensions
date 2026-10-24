@@ -1,5 +1,6 @@
 package com.wintercogs.beyonddimensions.client.ui.storage
 
+import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
@@ -31,6 +32,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.zIndex
@@ -41,7 +43,6 @@ import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.StorageSort
 import com.wintercogs.beyonddimensions.config.ClientConfigRuntime
@@ -57,15 +58,15 @@ import net.minecraft.world.item.ItemStack
 import org.lwjgl.glfw.GLFW
 import kotlin.math.roundToInt
 
-/** 界面不会变化的部分：槽位编号、图标与文字，在游戏线程构造 */
-class StorageLayout(menu: DimensionsNetMenu) {
+/** 界面不会变化的部分：槽位编号、图标、工作台与文字，在游戏线程构造 */
+class StorageLayout(menu: DimensionsNetMenu, workbenches: StorageWorkbenchHost) {
     val storageStart = menu.storageStartIndex
     val playerSlots = (menu.inventoryStartIndex until menu.inventoryEndIndex).toList()
-    val craftSlots =
-        (menu as? DimensionsCraftMenu)?.let { (it.craftSlotStartIndex until it.craftSlotEndIndex).toList() }.orEmpty()
-    val resultSlot = (menu as? DimensionsCraftMenu)?.resultSlotIndex ?: -1
     val icon = ItemIcon.snapshot(ItemStack(BDBlocks.NET_TERMINAL_BLOCK.get()))
     val showSwitcher = !ClientConfigRuntime.disableMultiNetworkSwitching
+
+    /** 下拉框里的工作台，按注册顺序 */
+    val workbenches = workbenches.info
     val text = StorageText()
 }
 
@@ -116,7 +117,7 @@ class StorageText {
     val takeUnit = tr("ui.beyonddimensions.storage.slot_menu.take.unit")
     val addTo = tr("ui.beyonddimensions.storage.slot_menu.add_to")
     val storage = tr("ui.beyonddimensions.storage.storage")
-    val crafting = tr("ui.beyonddimensions.storage.crafting")
+    val workbench = tr("ui.beyonddimensions.storage.workbench")
     val switcher = tr("ui.beyonddimensions.storage.switch_network")
     val view = tr("ui.beyonddimensions.storage.view")
     val sort = tr("ui.beyonddimensions.storage.sort")
@@ -133,23 +134,23 @@ class StorageText {
     val syncSearch = tr("ui.beyonddimensions.storage.sync_search")
     val syncSearchHint = tr("ui.beyonddimensions.storage.sync_search.hint")
     val inventory = tr("ui.beyonddimensions.inventory")
-    val clearToStorage = tr("ui.beyonddimensions.crafting.clear_to_storage")
-    val clearToInventory = tr("ui.beyonddimensions.crafting.clear_to_inventory")
-    val returnTitle = tr("ui.beyonddimensions.crafting.return")
-    val returnOnClear = tr("ui.beyonddimensions.crafting.return.clear")
     val keepCrafting = tr("ui.beyonddimensions.crafting.keep")
     val keepCraftingHint = tr("ui.beyonddimensions.crafting.keep.hint")
-    val returnStorage = tr("ui.beyonddimensions.crafting.return.storage")
-    val returnInventory = tr("ui.beyonddimensions.crafting.return.inventory")
-    val recipe = tr("ui.beyonddimensions.crafting.recipe")
-    val sortNames = StorageSort.entries.associateWith { tr("ui.beyonddimensions.storage.sort.${it.name.lowercase()}") }
+    val showWorkbench = tr("ui.beyonddimensions.storage.workbench.show")
+    val hideWorkbench = tr("ui.beyonddimensions.storage.workbench.hide")
+    val chooseWorkbench = tr("ui.beyonddimensions.storage.workbench.choose")
+    val returnStorage = tr("ui.beyonddimensions.storage.workbench.return.storage")
+    val returnInventory = tr("ui.beyonddimensions.storage.workbench.return.inventory")
+    val returnSwitch = tr("ui.beyonddimensions.storage.workbench.return.switch")
+    val sortNames =StorageSort.entries.associateWith { tr("ui.beyonddimensions.storage.sort.${it.name.lowercase()}") }
 }
 
 /** 存储终端与合成终端 */
 class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inventory, title: Component) :
     BdInventoryScreen<DimensionsNetMenu, StorageState, StorageAction>(storageMenu, title) {
-    private val controller = StorageController(storageMenu)
-    private val layout = StorageLayout(storageMenu)
+    private val workbenches = StorageWorkbenchHost(storageMenu, this, this.inventory, ::requestClose)
+    private val controller = StorageController(storageMenu, workbenches)
+    private val layout = StorageLayout(storageMenu, workbenches)
 
     init {
         adapter.resourceMenu = controller::openSlotMenu
@@ -167,15 +168,23 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
 
     @Composable
     override fun Content(state: StorageState, slots: ComposeMenuSlots<DimensionsNetMenu>) =
-        StorageView(state, ::send, ::requestClose, slots, layout, pages)
+        StorageView(state, ::send, ::requestClose, slots, layout, pages, workbenches)
 
     override fun inventoryTick() {
         super.inventoryTick()
         controller.tick()
+        workbenches.update()
+    }
+
+    // 工作台送出的动作随即处理，不等下一刻
+    override fun afterInput() {
+        super.afterInput()
+        workbenches.update()
     }
 
     override fun menuClosed() {
         super.menuClosed()
+        workbenches.close()
         controller.saveSearch()
         controller.saveNow()
     }
@@ -205,9 +214,6 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
 private const val GAP = 7
 private const val SCREEN_MARGIN = 8
 
-/** 分组标题的行高：9sp 小字的行高 */
-private const val LABEL = 11
-
 /** 格子区域（含边框）、间隔与滚动条的总宽度 */
 private fun contentWidth(columns: Int) = columns * SLOT_PITCH + 2 + 2 + SCROLLBAR_WIDTH
 
@@ -220,29 +226,65 @@ private const val EDITOR_CONTENT_WIDTH = EDITOR_COLUMNS * SLOT_PITCH + 1
 private const val EDITOR_WIDTH = GAP + 1 + GAP + EDITOR_CONTENT_WIDTH
 private const val EDITOR_MILLIS = 180
 
-/** 除格子行外的固定高度；分类标签栏始终计入 */
-private fun chromeHeight(craft: Boolean): Int {
-    var height = 25 + PAGE_PADDING_TOP + 18 + 5 + 13 + 4 + 2 + GAP + LABEL + 4 + 76 + PAGE_PADDING_BOTTOM + 2
-    if (craft) height += GAP + LABEL + 4 + 54
-    return height
+/** 除格子行与下方各区外的固定高度：标题栏、页面留白、搜索栏、分类标签栏与格子边框 */
+private const val CHROME_HEIGHT = 25 + PAGE_PADDING_TOP + 18 + 5 + 13 + 4 + 2 + PAGE_PADDING_BOTTOM + 2
+
+/** 工作区下拉框一行与背包区标题的高度：与行末 11 dp 的小按钮一样高 */
+private const val LABEL_HEIGHT = 11
+
+/** 背包区：标题、间距与背包三行、间隔与快捷栏，外框每边占半个像素 */
+private const val INVENTORY_WIDTH = 9 * SLOT_PITCH + 1
+private const val INVENTORY_HEIGHT = LABEL_HEIGHT + 4 + 3 * SLOT_PITCH + 3 + SLOT_PITCH + 1
+
+/** 工作区并排在背包区左侧时，两者之间的间距、分隔线与间距 */
+private const val SPLIT_WIDTH = GAP + 1 + GAP
+
+/** 工作区展开与收起的时长，格子的行数同时以同样的时长增减 */
+private const val WORKBENCH_MILLIS = 180
+
+/** 下拉列表的一行，最多同时列出几行，再多就在列表里滚动 */
+private const val WORKBENCH_ROW_HEIGHT = 14
+private const val WORKBENCH_LIST_ROWS = 4
+
+/** 工作区的高度：下拉框一行、间距与工作台内容 */
+private fun workbenchAreaHeight(workbenches: StorageWorkbenchHost) = LABEL_HEIGHT + 4 + workbenches.contentHeight
+
+/** 内容区有 [width] 宽时工作区与背包区并排，否则工作区在背包区上方 */
+private fun workbenchBeside(width: Int, workbenches: StorageWorkbenchHost) =
+    width >= workbenches.contentWidth + SPLIT_WIDTH + INVENTORY_WIDTH
+
+/**
+ * 存储格下方各区连同上方间距的高度：背包区，[shown] 时还有工作区。
+ * 并排时工作区不比背包区高（见 [com.wintercogs.beyonddimensions.api.ui.storage.StorageWorkbenches.MAX_HEIGHT]），不占格子的行数
+ */
+internal fun bottomHeight(width: Int, workbenches: StorageWorkbenchHost, shown: Boolean): Int {
+    val areas = when {
+        !shown -> INVENTORY_HEIGHT
+        workbenchBeside(width, workbenches) -> maxOf(workbenchAreaHeight(workbenches), INVENTORY_HEIGHT)
+        else -> workbenchAreaHeight(workbenches) + GAP + INVENTORY_HEIGHT
+    }
+    return GAP + areas
 }
 
-/** 格子的实际列数与行数：首选行列按屏幕上放得下的格数收窄。[screenWidth]、[screenHeight] 是整个屏幕的 dp 尺寸 */
+/**
+ * 格子的实际列数与行数：首选行列按屏幕上放得下的格数收窄。[screenWidth]、[screenHeight] 是整个屏幕的 dp 尺寸，
+ * [bottomHeight] 给出格子下方各区在某个内容宽度下的高度
+ */
 internal fun fittedGridSize(
     screenWidth: Int,
     screenHeight: Int,
-    craftShown: Boolean,
     editorOpen: Boolean,
     preferredColumns: Int,
     preferredRows: Int,
+    bottomHeight: (contentWidth: Int) -> Int,
 ): Pair<Int, Int> {
-    val fitRows = (screenHeight - SCREEN_MARGIN * 2 - chromeHeight(craftShown)) / SLOT_PITCH
     // 内容区居中，竖条对面也留出一条竖条宽的空位；分类编辑区打开时窗口向右扩展
     val fitColumns =
         (screenWidth - SCREEN_MARGIN * 2 - CHROME_WIDTH - SIDE_RAIL_WIDTH - contentWidth(0) -
                 if (editorOpen) EDITOR_WIDTH else 0) / SLOT_PITCH
-    return fitColumns.coerceAtMost(preferredColumns).coerceAtLeast(9) to
-            fitRows.coerceAtMost(preferredRows).coerceAtLeast(2)
+    val columns = fitColumns.coerceAtMost(preferredColumns).coerceAtLeast(9)
+    val fitRows = (screenHeight - SCREEN_MARGIN * 2 - CHROME_HEIGHT - bottomHeight(contentWidth(columns))) / SLOT_PITCH
+    return columns to fitRows.coerceAtMost(preferredRows).coerceAtLeast(2)
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -254,11 +296,10 @@ private fun StorageView(
     slots: ComposeMenuSlots<DimensionsNetMenu>,
     layout: StorageLayout,
     pages: BdPageHost<DimensionsNetMenu>,
+    workbenches: StorageWorkbenchHost,
 ) {
     val colors = Bd.colors
     val text = layout.text
-    // 方块终端可以在本地隐藏合成区；可切换的终端则重新打开对应的菜单
-    val craftShown = state.craft != null && !state.craft.hidden
     val page = rememberPageSelection()
     val settingsOpen = page.settings
     // 排序与配方选择的浮层盖在槽位上方，打开期间停用槽位
@@ -317,18 +358,19 @@ private fun StorageView(
                         tag = if (state.networkId >= 0) "#%04d".format(state.networkId) else null,
                     )
                 },
-                // 存储与合成两个工作区都在主页面上，合成区显示与否决定选中哪一个
                 tabs = {
-                    BdRailTab(text.storage, BdIcons.Main, selected = page.main && !craftShown) {
-                        page.open(BdPages.MAIN)
-                        if (craftShown) {
-                            send(if (state.craft.toggleable) StorageAction.ToggleCraft else StorageAction.HideCraft(true))
-                        }
-                    }
-                    BdRailTab(text.crafting, BdIcons.Crafting, selected = page.main && craftShown) {
-                        page.open(BdPages.MAIN)
-                        if (!craftShown) {
-                            send(if (state.craft == null) StorageAction.ToggleCraft else StorageAction.HideCraft(false))
+                    BdRailTab(text.storage, BdIcons.Main, selected = page.main) { page.open(BdPages.MAIN) }
+                    // 展开或收起主页面上的工作区；在其他页上点它时回到主页面并展开
+                    if (layout.workbenches.isNotEmpty()) {
+                        val hide = page.main && state.workbenchShown
+                        BdRailTab(
+                            if (hide) text.hideWorkbench else text.showWorkbench,
+                            BdIcons.Crafting,
+                            selected = false,
+                            active = state.workbenchShown,
+                        ) {
+                            send(StorageAction.ShowWorkbench(!hide))
+                            page.open(BdPages.MAIN)
                         }
                     }
                     InjectedTabs(pages, page)
@@ -348,12 +390,18 @@ private fun StorageView(
                     Spacer(Modifier.height(5.dp))
                     CategoryTabs(state, send, text, width)
                     Spacer(Modifier.height(4.dp))
-                    Row(Modifier.height((gridRows * SLOT_PITCH + 2).dp)) {
+                    // 工作区展开与收起时格子增减行数，高度与工作区一同以动画变化
+                    val gridHeight by animateIntAsState(
+                        gridRows * SLOT_PITCH + 2,
+                        tween(WORKBENCH_MILLIS, easing = FastOutSlowInEasing),
+                        label = "storage rows",
+                    )
+                    Row(Modifier.height(gridHeight.dp)) {
                         // 右键菜单在按下右键的位置展开
                         var pressAt by remember { mutableStateOf(IntOffset.Zero) }
                         Box(
                             Modifier.width((gridColumns * SLOT_PITCH + 2).dp).fillMaxHeight()
-                                .bdInset(colors).padding(1.dp)
+                                .bdInset(colors).padding(1.dp).clipToBounds()
                                 .onPointerEvent(PointerEventType.Press, PointerEventPass.Initial) {
                                     pressAt = it.changes.first().position.round()
                                 }
@@ -382,21 +430,7 @@ private fun StorageView(
                             )
                         }
                     }
-                    if (craftShown) {
-                        Spacer(Modifier.height(GAP.dp))
-                        CraftSection(state.craft, state.keepCrafting, send, slots, layout, width)
-                    }
-                    Spacer(Modifier.height(GAP.dp))
-                    BdSectionLabel(text.inventory, Modifier.width(width.dp))
-                    Spacer(Modifier.height(4.dp))
-                    Box(Modifier.width((gridColumns * SLOT_PITCH + 2).dp), contentAlignment = Alignment.TopCenter) {
-                        Box(Modifier.bdSlotFrame(colors)) {
-                            BdPlayerInventory(
-                                slots,
-                                layout.playerSlots
-                            )
-                        }
-                    }
+                    WorkbenchAndInventory(state, send, slots, layout, workbenches, width)
                     // 给编辑区留出位置
                     Spacer(Modifier.width((width + editorWidth).dp))
                 }
@@ -435,6 +469,203 @@ private fun StorageView(
                 BdTabPage(settingsOpen) { ViewOptions(state, send, text, settingsOpen) }
             }
         }
+    }
+}
+
+/**
+ * 存储格下方：背包区，展开时还有工作区。内容区够宽时工作区并排在背包区左侧，否则在背包区上方；
+ * 工作区展开与收起时以动画伸缩
+ */
+@Composable
+private fun WorkbenchAndInventory(
+    state: StorageState,
+    send: (StorageAction) -> Unit,
+    slots: ComposeMenuSlots<DimensionsNetMenu>,
+    layout: StorageLayout,
+    workbenches: StorageWorkbenchHost,
+    width: Int,
+) {
+    val colors = Bd.colors
+    val resize = tween<IntSize>(WORKBENCH_MILLIS, easing = FastOutSlowInEasing)
+    val fade = tween<Float>(WORKBENCH_MILLIS, easing = FastOutSlowInEasing)
+    Spacer(Modifier.height(GAP.dp))
+    if (workbenchBeside(width, workbenches)) {
+        // 两者一起居中，工作区伸出时背包区随之右移
+        val height = maxOf(workbenchAreaHeight(workbenches), INVENTORY_HEIGHT)
+        Row(Modifier.width(width.dp).height(height.dp), horizontalArrangement = Arrangement.Center) {
+            AnimatedVisibility(
+                state.workbenchShown,
+                enter = expandHorizontally(resize, Alignment.End) + fadeIn(fade),
+                exit = shrinkHorizontally(resize, Alignment.End) + fadeOut(fade),
+            ) {
+                Row {
+                    WorkbenchArea(state, send, layout, workbenches)
+                    Spacer(Modifier.width(GAP.dp))
+                    Box(Modifier.width(1.dp).fillMaxHeight().background(colors[BdColors.line]))
+                    Spacer(Modifier.width(GAP.dp))
+                }
+            }
+            InventoryArea(slots, layout)
+        }
+    } else {
+        // 工作区与背包区一样宽，一起在内容区里居中；背包的槽位在这个宽度里居中，标题靠左
+        val columnWidth = maxOf(workbenches.contentWidth, INVENTORY_WIDTH)
+        Box(Modifier.width(width.dp), contentAlignment = Alignment.TopCenter) {
+            Column(Modifier.width(columnWidth.dp)) {
+                AnimatedVisibility(
+                    state.workbenchShown,
+                    enter = expandVertically(resize, Alignment.Top) + fadeIn(fade),
+                    exit = shrinkVertically(resize, Alignment.Top) + fadeOut(fade),
+                ) {
+                    Column {
+                        WorkbenchArea(state, send, layout, workbenches)
+                        Spacer(Modifier.height(GAP.dp))
+                    }
+                }
+                InventoryArea(slots, layout, columnWidth)
+            }
+        }
+    }
+}
+
+/**
+ * 背包区，[width] 宽：标题靠左，玩家背包的槽位居中。标题与工作区的下拉框一行一样高，并排时两边的槽位对齐。
+ * 宽度与背包相差偶数个界面像素，居中后槽位的细框不会落在半个像素上
+ */
+@Composable
+private fun InventoryArea(slots: ComposeMenuSlots<DimensionsNetMenu>, layout: StorageLayout, width: Int = INVENTORY_WIDTH) {
+    Column(Modifier.width(width.dp)) {
+        BdSectionLabel(layout.text.inventory, Modifier.height(LABEL_HEIGHT.dp))
+        Spacer(Modifier.height(4.dp))
+        Box(Modifier.align(Alignment.CenterHorizontally).bdSlotFrame(Bd.colors)) { BdPlayerInventory(slots, layout.playerSlots) }
+    }
+}
+
+/**
+ * 工作区：左上角的下拉框选择工作台，同一行右端是这个工作台的按钮，放着物品的工作台最右还有退回方向按钮；
+ * 下方是居中的内容
+ */
+@Composable
+private fun WorkbenchArea(
+    state: StorageState,
+    send: (StorageAction) -> Unit,
+    layout: StorageLayout,
+    workbenches: StorageWorkbenchHost,
+) {
+    val id = state.workbench
+    Column(Modifier.width(workbenches.contentWidth.dp)) {
+        Row(Modifier.fillMaxWidth().height(LABEL_HEIGHT.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f)) {
+                WorkbenchChooser(layout.workbenches, id, layout.text) { send(StorageAction.SelectWorkbench(it)) }
+            }
+            workbenches.Actions(id)
+            if (layout.workbenches.firstOrNull { it.id == id }?.holdsItems == true) {
+                Spacer(Modifier.width(2.dp))
+                ReturnToggle(state.returnToStorage, layout.text) { send(StorageAction.ReturnToStorage(it)) }
+            }
+        }
+        Spacer(Modifier.height(4.dp))
+        // 工作台比工作区小时居中，偏移取整到界面像素，槽位的细框不会落在半个像素上
+        Layout(
+            { Box { workbenches.Content(id) } },
+            Modifier.size(workbenches.contentWidth.dp, workbenches.contentHeight.dp).clipToBounds(),
+        ) { measurables, constraints ->
+            val workbench = measurables.single().measure(constraints.copy(minWidth = 0, minHeight = 0))
+            val pixel = 1.dp.roundToPx().coerceAtLeast(1)
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                workbench.place(
+                    (constraints.maxWidth - workbench.width) / 2 / pixel * pixel,
+                    (constraints.maxHeight - workbench.height) / 2 / pixel * pixel,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 工作台被清空时（关闭界面且不保留、填入配方）物品优先退回的地方，所有工作台共用：
+ * 向上的箭头是存储，向下的是背包，点一下换成另一个
+ */
+@Composable
+private fun ReturnToggle(toStorage: Boolean, text: StorageText, onChange: (Boolean) -> Unit) {
+    val colors = Bd.colors
+    BdTooltip({
+        OreText(if (toStorage) text.returnStorage else text.returnInventory, color = colors[BdColors.text], style = Bd.caption)
+        OreText(text.returnSwitch, color = colors[BdColors.faint], style = Bd.caption)
+    }) {
+        BdGlyphButton(if (toStorage) BdIcons.ArrowUp else BdIcons.ArrowDown, null, { onChange(!toStorage) }, size = 11.dp)
+    }
+}
+
+/** 选择工作台的下拉框：当前工作台的名称，不带图标，与背包区的标题一样不显眼；点开后列出全部工作台，多到放不下时在列表里滚动 */
+@Composable
+private fun WorkbenchChooser(workbenches: List<WorkbenchInfo>, selected: String, text: StorageText, onSelect: (String) -> Unit) {
+    val colors = Bd.colors
+    val current = workbenches.firstOrNull { it.id == selected } ?: return
+    var open by remember { mutableStateOf(false) }
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    // 只有一个工作台时没有可选的，只显示它的名称
+    val enabled = workbenches.size > 1
+    val lit = enabled && (hovered || open)
+    val tint = if (lit) colors[BdColors.accentDeep] else colors[BdColors.muted]
+    Box {
+        BdTooltip(text.chooseWorkbench, enabled = enabled && !open) {
+            Row(
+                Modifier.height(LABEL_HEIGHT.dp)
+                    .hoverable(interaction, enabled)
+                    .bdClickable(interaction, enabled = enabled) { open = !open }
+                    .background(if (lit) colors[BdColors.accentSoft] else Color.Transparent)
+                    .padding(horizontal = 1.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                OreText(
+                    current.title,
+                    Modifier.weight(1f, fill = false),
+                    color = tint,
+                    style = Bd.overline,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (enabled) {
+                    Spacer(Modifier.width(3.dp))
+                    BdIcon(BdIcons.ChevronDown, color = tint)
+                }
+            }
+        }
+        if (open) {
+            BdPopover({ open = false }, alignStart = true) {
+                BdScrollColumn(Modifier.heightIn(max = (WORKBENCH_LIST_ROWS * WORKBENCH_ROW_HEIGHT).dp), wheelStep = WORKBENCH_ROW_HEIGHT.dp) {
+                    for (workbench in workbenches) {
+                        WorkbenchOption(workbench, workbench.id == selected) {
+                            onSelect(workbench.id)
+                            open = false
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** 下拉列表里的一个工作台：选中的一项前有强调色方点 */
+@Composable
+private fun WorkbenchOption(workbench: WorkbenchInfo, selected: Boolean, onClick: () -> Unit) {
+    val colors = Bd.colors
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    Row(
+        Modifier.fillMaxWidth()
+            .height(WORKBENCH_ROW_HEIGHT.dp)
+            .hoverable(interaction)
+            .bdClickable(interaction, enabled = !selected, onClick = onClick)
+            .background(if (hovered && !selected) colors[BdColors.accentSoft] else Color.Transparent)
+            .padding(horizontal = 3.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(3.dp).background(if (selected) colors[BdColors.accent] else Color.Transparent))
+        Spacer(Modifier.width(4.dp))
+        OreText(workbench.title, color = if (selected) colors[BdColors.accentDeep] else colors[BdColors.text], maxLines = 1)
     }
 }
 
@@ -1054,130 +1285,6 @@ private fun TakeAmountRow(amount: Int, onAmountChange: (Int) -> Unit, max: Int, 
     }
 }
 
-/** 合成区：3×3 合成格、产物与退回按钮 */
-@Composable
-private fun CraftSection(
-    craft: CraftState,
-    keep: Boolean,
-    send: (StorageAction) -> Unit,
-    slots: ComposeMenuSlots<DimensionsNetMenu>,
-    layout: StorageLayout,
-    width: Int
-) {
-    val colors = Bd.colors
-    val text = layout.text
-    Column(Modifier.width(width.dp)) {
-        BdSectionLabel(text.crafting) {
-            BdGlyphButton(
-                BdIcons.ToStorage,
-                text.clearToStorage,
-                { send(StorageAction.ClearCraft(true)) },
-                size = 11.dp,
-            )
-            Spacer(Modifier.width(2.dp))
-            BdGlyphButton(
-                BdIcons.ToInventory,
-                text.clearToInventory,
-                { send(StorageAction.ClearCraft(false)) },
-                size = 11.dp,
-            )
-        }
-        Spacer(Modifier.height(4.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.bdSlotFrame(colors)) { BdSlotGrid(slots, layout.craftSlots, 3) }
-            Spacer(Modifier.width(7.dp))
-            BdIcon(BdIcons.ArrowRight, color = colors[BdColors.accent])
-            Spacer(Modifier.width(7.dp))
-            // 产物槽带一圈强调色细框
-            Box(Modifier.border(1.dp, colors[BdColors.accent]).padding(2.dp)) { BdSlot(slots, layout.resultSlot) }
-            Spacer(Modifier.weight(1f))
-            Column(horizontalAlignment = Alignment.End) {
-                // 保留合成格时关闭不退回，退回方向只在换入配方清空合成格时用到
-                OreText(
-                    if (keep) text.returnOnClear else text.returnTitle,
-                    color = colors[BdColors.faint],
-                    style = Bd.caption,
-                    maxLines = 1
-                )
-                Spacer(Modifier.height(2.dp))
-                ReturnChoice(
-                    listOf(text.returnStorage, text.returnInventory),
-                    if (craft.returnToStorage) 0 else 1,
-                ) { send(StorageAction.ReturnPreference(it == 0)) }
-                if (craft.recipeChoices.size > 1) {
-                    Spacer(Modifier.height(4.dp))
-                    RecipeChooser(craft.recipeChoices, send, text)
-                }
-            }
-        }
-    }
-}
-
-/** 退回方向：分段按钮；文字较长、一行放不下时改为上下两行的选项 */
-@Composable
-private fun ReturnChoice(options: List<String>, selected: Int, onSelect: (Int) -> Unit) {
-    Layout({
-        BdSegmented(options, selected, onSelect)
-        Column {
-            options.forEachIndexed { index, option -> ChoiceRow(option, index == selected) { onSelect(index) } }
-        }
-    }) { (segmented, rows), constraints ->
-        val fits = segmented.maxIntrinsicWidth(constraints.maxHeight) <= constraints.maxWidth
-        val placeable = (if (fits) segmented else rows).measure(constraints)
-        layout(placeable.width, placeable.height) { placeable.place(0, 0) }
-    }
-}
-
-/** 上下排列的选项中的一行：选中的一项前有强调色方点 */
-@Composable
-private fun ChoiceRow(label: String, selected: Boolean, onClick: () -> Unit) {
-    val colors = Bd.colors
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    Row(
-        Modifier.height(12.dp).hoverable(interaction).bdClickable(interaction, enabled = !selected, onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(Modifier.size(3.dp).background(if (selected) colors[BdColors.accent] else Color.Transparent))
-        Spacer(Modifier.width(3.dp))
-        OreText(
-            label,
-            color =
-                when {
-                    selected -> colors[BdColors.accentDeep]
-                    hovered -> colors[BdColors.text]
-                    else -> colors[BdColors.muted]
-                },
-            maxLines = 1,
-        )
-    }
-}
-
-@Composable
-private fun RecipeChooser(choices: List<RecipeChoice>, send: (StorageAction) -> Unit, text: StorageText) {
-    val colors = Bd.colors
-    var open by remember { mutableStateOf(false) }
-    Box {
-        BdChip({ open = !open }, active = open) {
-            OreText(text.recipe, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
-            Spacer(Modifier.width(3.dp))
-            OreText(choices.size.toString(), color = colors[BdColors.accentDeep], maxLines = 1)
-            Spacer(Modifier.width(3.dp))
-            BdIcon(BdIcons.ChevronRight, color = colors[BdColors.muted])
-        }
-        if (open) {
-            BdPopover({ open = false }) {
-                for (choice in choices) {
-                    OptionRow(choice.label, selected = false) {
-                        send(StorageAction.ChooseRecipe(choice.id))
-                        open = false
-                    }
-                }
-            }
-        }
-    }
-}
-
 /** 排序方式：主要与次要排序各一列，底部是倒序开关 */
 @Composable
 private fun SortOptions(state: StorageState, send: (StorageAction) -> Unit, text: StorageText) {
@@ -1229,10 +1336,12 @@ private fun ViewOptions(state: StorageState, send: (StorageAction) -> Unit, text
             shown
         )
     }
+    BdSectionDivider()
     BdSectionLabel(text.interaction)
     BdSettingRow(text.rightClickMenu, text.rightClickMenuHint) {
         BdToggle(state.rightClickMenu, { send(StorageAction.RightClickMenu(it)) }, shown)
     }
+    BdSectionDivider()
     BdSectionLabel(text.searchTitle)
     BdSettingRow(text.keepSearch) { BdToggle(state.keepSearch, { send(StorageAction.KeepSearch(it)) }, shown) }
     BdSettingRow(text.syncSearch, text.syncSearchHint) {
@@ -1242,7 +1351,8 @@ private fun ViewOptions(state: StorageState, send: (StorageAction) -> Unit, text
             shown
         )
     }
-    BdSectionLabel(text.crafting)
+    BdSectionDivider()
+    BdSectionLabel(text.workbench)
     BdSettingRow(text.keepCrafting, text.keepCraftingHint) {
         BdToggle(state.keepCrafting, { send(StorageAction.KeepCrafting(it)) }, shown)
     }
@@ -1250,7 +1360,7 @@ private fun ViewOptions(state: StorageState, send: (StorageAction) -> Unit, text
 
 /** 浮层中的单选项 */
 @Composable
-private fun OptionRow(label: String, selected: Boolean, enabled: Boolean = true, onClick: () -> Unit) {
+internal fun OptionRow(label: String, selected: Boolean, enabled: Boolean = true, onClick: () -> Unit) {
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()

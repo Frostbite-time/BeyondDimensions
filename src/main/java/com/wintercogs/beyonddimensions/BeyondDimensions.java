@@ -68,6 +68,7 @@ public class BeyondDimensions
         BDNetDataTypes.register(modEventBus);
         BDNetTasks.register();
         BDStorageRules.register();
+        BDWorkbenchTypes.register();
 
         // 分发集成模块
         IntegrationManager.bootstrapCommon(modEventBus, NeoForge.EVENT_BUS);

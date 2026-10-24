@@ -6,6 +6,7 @@ import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.menu.interaction.SlotClick;
 import com.wintercogs.beyonddimensions.api.menu.interaction.SlotClick.Kind;
 import com.wintercogs.beyonddimensions.api.menu.interaction.SlotInteractions;
+import com.wintercogs.beyonddimensions.api.menu.widget.MenuWidget;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
@@ -15,7 +16,8 @@ import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDTags;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
-import com.wintercogs.beyonddimensions.common.menu.ability.CraftableMenu;
+import com.wintercogs.beyonddimensions.common.menu.widget.CraftingWidget;
+import com.wintercogs.beyonddimensions.common.menu.widget.WorkstationWidget;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.ItemCapInteractionBlackList;
@@ -61,8 +63,8 @@ public final class BuiltinSlotInteractions
         add("move_all_ordered", c -> c.space() && c.isLeft() && c.kind() == Kind.ORDERED, BuiltinSlotInteractions::moveAllOrdered);
         // 空格左键点合成结果：连续合成，直到背包放满或原料用完；点合成格：清空合成格，物品按玩家的偏好退回
         add("craft_all", c -> c.space() && c.isLeft() && isCraftResult(c), BuiltinSlotInteractions::craftAll);
-        add("craft_grid_clear", c -> c.space() && c.isLeft() && c.menu() instanceof CraftableMenu menu
-                && menu.isCraftGridSlot(c.slot().index), BuiltinSlotInteractions::clearCraftGrid);
+        add("craft_grid_clear", c -> c.space() && c.isLeft() && crafting(c) instanceof CraftingWidget crafting
+                && crafting.isGridSlot(c.slot().index), BuiltinSlotInteractions::clearCraftGrid);
         // 有序槽里是同一种物品时先合并，桶、经验棒与容器也一样
         add("ordered_merge", c -> click(c) && c.kind() == Kind.ORDERED && !c.clicked().isEmpty() && !c.carried().isEmpty()
                         && (c.isLeft() || c.isRight())
@@ -96,6 +98,8 @@ public final class BuiltinSlotInteractions
                 BuiltinSlotInteractions::insertCarried);
         add("quick_move", c -> c.isResource() && c.shift() && !c.clicked().isEmpty(), BuiltinSlotInteractions::quickMove);
         add("craft_stack", c -> c.shift() && isCraftResult(c), BuiltinSlotInteractions::craftStack);
+        // Shift 点切石机等工作台的产物：像原版一样连续取出
+        add("workstation_result", c -> c.shift() && isWorkstationResult(c), BuiltinSlotInteractions::takeResults);
         add("quick_move_vanilla", c -> c.kind() == Kind.VANILLA && c.shift(), BuiltinSlotInteractions::quickMoveVanilla);
     }
 
@@ -537,20 +541,26 @@ public final class BuiltinSlotInteractions
 
     // —— 合成 ——
 
+    // 菜单的合成区，没有时为 null
+    private static CraftingWidget crafting(SlotClick c)
+    {
+        return c.menu().widget(CraftingWidget.class);
+    }
+
     private static boolean isCraftResult(SlotClick c)
     {
-        return c.menu() instanceof CraftableMenu menu && menu.isCraftResultSlot(c.slot().index);
+        return crafting(c) instanceof CraftingWidget crafting && crafting.isResultSlot(c.slot().index);
     }
 
     // Shift 点产物合成一组：产物先放进背包，放不下的沿 Shift 路线送走
     private static boolean craftStack(SlotClick c)
     {
-        if (c.menu() instanceof CraftableMenu menu && sentMatches(c))
+        if (crafting(c) instanceof CraftingWidget crafting && sentMatches(c))
         {
             ItemStack product = c.slot().getItem();
             List<Integer> targets = new ArrayList<>(inventorySlots(c));
             targets.addAll(c.menu().quickMoveRoutes().targets(c.slot().index));
-            craft(c, menu, product.getMaxStackSize() / product.getCount(), targets);
+            craft(c, crafting, product.getMaxStackSize() / product.getCount(), targets);
         }
         return true;
     }
@@ -558,10 +568,10 @@ public final class BuiltinSlotInteractions
     // 空格左键点产物：连续合成，产物只放进背包，直到放满、原料用完或合成格换了配方
     private static boolean craftAll(SlotClick c)
     {
-        if (c.menu() instanceof CraftableMenu menu && sentMatches(c))
+        if (crafting(c) instanceof CraftingWidget crafting && sentMatches(c))
         {
             ItemStack product = c.slot().getItem();
-            craft(c, menu, spaceFor(c, product) / product.getCount(), inventorySlots(c));
+            craft(c, crafting, spaceFor(c, product) / product.getCount(), inventorySlots(c));
         }
         return true;
     }
@@ -577,11 +587,11 @@ public final class BuiltinSlotInteractions
     }
 
     // 从产物槽合成至多 times 次：产物整份放得进 targets 才取出，取出时合成一份；产物换了或放不下就停
-    private static void craft(SlotClick c, CraftableMenu menu, int times, List<Integer> targets)
+    private static void craft(SlotClick c, CraftingWidget crafting, int times, List<Integer> targets)
     {
         Slot result = c.slot();
         ItemStack first = result.getItem().copy();
-        menu.craftBatch(() -> {
+        crafting.craftBatch(() -> {
             for (int i = 0; i < times; i++)
             {
                 ItemStack product = result.getItem();
@@ -597,8 +607,42 @@ public final class BuiltinSlotInteractions
 
     private static boolean clearCraftGrid(SlotClick c)
     {
-        if (c.menu() instanceof CraftableMenu menu)
-            menu.clearCraftGrid();
+        if (crafting(c) instanceof CraftingWidget crafting)
+            crafting.clearGrid();
+        return true;
+    }
+
+    // —— 工作台 ——
+
+    private static boolean isWorkstationResult(SlotClick c)
+    {
+        for (MenuWidget widget : c.menu().widgets())
+        {
+            if (widget instanceof WorkstationWidget<?> station && station.isResultSlot(c.slot().index))
+                return true;
+        }
+        return false;
+    }
+
+    // 沿产物槽的 Shift 路线连续取出：每次取出都按原版消耗原料，产物换了、放不下或凑满一组就停
+    private static boolean takeResults(SlotClick c)
+    {
+        if (!sentMatches(c))
+            return true;
+        Slot result = c.slot();
+        ItemStack first = result.getItem().copy();
+        List<Integer> targets = c.menu().quickMoveRoutes().targets(result.index);
+        int times = Math.max(1, first.getMaxStackSize() / first.getCount());
+        for (int i = 0; i < times; i++)
+        {
+            ItemStack product = result.getItem();
+            if (product.isEmpty() || !ItemStack.isSameItemSameComponents(product, first) || !insertInto(c, product, targets, true).isEmpty())
+                break;
+            ItemStack taken = result.safeTake(product.getCount(), Integer.MAX_VALUE, c.player());
+            if (taken.isEmpty())
+                break;
+            putAway(c, taken, targets);
+        }
         return true;
     }
 

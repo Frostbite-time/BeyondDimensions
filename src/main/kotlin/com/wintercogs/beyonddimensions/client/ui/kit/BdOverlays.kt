@@ -113,9 +113,11 @@ class BdPopovers {
 
 val LocalBdPopovers = staticCompositionLocalOf<BdPopovers?> { null }
 
-/** 点开的浮层，例如下拉的选项：在锚点下方、与锚点右边对齐；点击外部关闭 */
+/**
+ * 点开的浮层，例如下拉的选项：在锚点下方、与锚点右边对齐，[alignStart] 时与锚点左边对齐；点击外部关闭
+ */
 @Composable
-fun BdPopover(onDismissRequest: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+fun BdPopover(onDismissRequest: () -> Unit, alignStart: Boolean = false, content: @Composable ColumnScope.() -> Unit) {
     LocalBdPopovers.current?.let { popovers ->
         DisposableEffect(popovers) {
             popovers.open++
@@ -124,13 +126,13 @@ fun BdPopover(onDismissRequest: () -> Unit, content: @Composable ColumnScope.() 
     }
     if (!LocalWindowInfo.current.isWindowFocused) return
     val gap = with(LocalDensity.current) { 2.dp.roundToPx() }
-    Popup(remember(gap) { BelowAnchor(gap) }, onDismissRequest, properties = PopupProperties(focusable = true)) {
+    Popup(remember(gap, alignStart) { BelowAnchor(gap, alignStart) }, onDismissRequest, properties = PopupProperties(focusable = true)) {
         // 按内容最宽的一行定宽，占满宽度的行不能把浮层撑到全屏
         OverlayCard(Modifier.width(IntrinsicSize.Max).padding(6.dp), content)
     }
 }
 
-private class BelowAnchor(private val gap: Int) : PopupPositionProvider {
+private class BelowAnchor(private val gap: Int, private val alignStart: Boolean) : PopupPositionProvider {
     override fun calculatePosition(
         anchorBounds: IntRect,
         windowSize: IntSize,
@@ -139,7 +141,7 @@ private class BelowAnchor(private val gap: Int) : PopupPositionProvider {
     ): IntOffset {
         val width = popupContentSize.width
         val height = popupContentSize.height
-        val x = anchorBounds.right - width
+        val x = if (alignStart) anchorBounds.left else anchorBounds.right - width
         val y =
             (anchorBounds.bottom + gap).takeIf { it + height <= windowSize.height } ?: (anchorBounds.top - gap - height)
         return IntOffset(

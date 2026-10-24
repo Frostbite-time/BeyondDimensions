@@ -1,7 +1,9 @@
 package com.wintercogs.beyonddimensions.client.ui.kit
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.hoverable
@@ -26,11 +28,16 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.constrain
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 import com.wintercogs.beyonddimensions.api.ui.page.BdPageSize
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /** 窗口左侧页签竖条的宽度 */
@@ -119,7 +126,7 @@ fun BdTabbedWindow(
                             bottom = SCREEN_INSET_BOTTOM.dp,
                         )
                         .clipToBounds()
-                        .animateContentSize(tween(RESIZE_MILLIS, easing = FastOutSlowInEasing)),
+                        .animateScreenSize(),
                     content = pages,
                 )
             }
@@ -168,6 +175,55 @@ fun BdTabbedWindow(
     }
 }
 
+/** 内容的大小一次只变了这么多，算作页面自己的动画的一步 */
+private const val FOLLOW_STEP_DP = 8
+
+/** 跟随中内容的大小在这段时间内又变了，仍算作同一段动画；比动画本身长，偶尔卡一帧也不会断开 */
+private const val FOLLOW_NANOS = 250_000_000L
+
+/**
+ * 内容区的大小：一下变到新的大小时（例如换页）以动画过去，动画中再变就改换目标；
+ * 内容小步改变大小时（例如页面自己的展开动画）直接跟随，不在后面追赶、裁掉内容
+ */
+@Composable
+private fun Modifier.animateScreenSize(): Modifier {
+    val scope = rememberCoroutineScope()
+    val size = remember { ScreenSize(scope) }
+    return layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        val content = IntSize(placeable.width, placeable.height)
+        val shown = constraints.constrain(size.sizeFor(content, FOLLOW_STEP_DP.dp.roundToPx()))
+        layout(shown.width, shown.height) { placeable.place(0, 0) }
+    }
+}
+
+private class ScreenSize(private val scope: CoroutineScope) {
+    private var animatable: Animatable<IntSize, AnimationVector2D>? = null
+    private var target = IntSize.Zero
+    private var changedAt = 0L
+    private var following = false
+
+    /** 内容是 [content] 大时内容区现在的大小；一次变化不超过 [step] 像素时跟随内容 */
+    fun sizeFor(content: IntSize, step: Int): IntSize {
+        val size = animatable ?: Animatable(content, IntSize.VectorConverter, IntSize(1, 1)).also {
+            animatable = it
+            target = content
+        }
+        if (content != target) {
+            val now = System.nanoTime()
+            val small = abs(content.width - target.width) <= step && abs(content.height - target.height) <= step
+            val follow = !size.isRunning && (small || following && now - changedAt < FOLLOW_NANOS)
+            following = follow
+            changedAt = now
+            target = content
+            scope.launch {
+                if (follow) size.snapTo(content) else size.animateTo(content, tween(RESIZE_MILLIS, easing = FastOutSlowInEasing))
+            }
+        }
+        return if (following) content else size.value
+    }
+}
+
 /** 页面内容到屏幕边的距离，四周相同 */
 private const val SCREEN_GAP = 5
 
@@ -191,10 +247,11 @@ private fun Modifier.centerContent() =
 
 /**
  * 竖条上的页签；[label] 是悬停提示。未选中的页签是机壳上凸起的按钮，
- * 选中的页签是屏幕伸出的一截：底色与发光边接进右侧的屏幕
+ * 选中的页签是屏幕伸出的一截：底色与发光边接进右侧的屏幕。
+ * 竖条上的开关按钮用 [active] 表示打开着，按钮仍可点击
  */
 @Composable
-fun BdRailTab(label: String, icon: BdPixelIcon, selected: Boolean, onClick: () -> Unit) {
+fun BdRailTab(label: String, icon: BdPixelIcon, selected: Boolean, active: Boolean = false, onClick: () -> Unit) {
     val colors = Bd.colors
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
@@ -221,8 +278,12 @@ fun BdRailTab(label: String, icon: BdPixelIcon, selected: Boolean, onClick: () -
                     }
                     else Modifier.bdRaised(
                         colors,
-                        fill = if (hovered) colors[BdColors.surface] else colors[BdColors.window],
-                        edge = if (hovered) colors[BdColors.activeEdge] else null,
+                        fill = if (hovered || active) colors[BdColors.surface] else colors[BdColors.window],
+                        edge = when {
+                            active -> colors[BdColors.accent]
+                            hovered -> colors[BdColors.activeEdge]
+                            else -> null
+                        },
                     )
                 ),
             contentAlignment = Alignment.Center,
@@ -231,7 +292,7 @@ fun BdRailTab(label: String, icon: BdPixelIcon, selected: Boolean, onClick: () -
                 icon,
                 color =
                     when {
-                        selected -> colors[BdColors.accentDeep]
+                        selected || active -> colors[BdColors.accentDeep]
                         hovered -> colors[BdColors.text]
                         else -> colors[BdColors.muted]
                     },
@@ -316,7 +377,7 @@ fun BoxScope.BdTabPage(
                 .pointerInput(Unit) { awaitPointerEventScope { while (true) awaitPointerEvent() } }
                 .then(pagePadding),
             verticalArrangement,
-            content,
+            content = content,
         )
     }
 }

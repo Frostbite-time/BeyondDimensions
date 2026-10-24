@@ -1,7 +1,7 @@
 package com.wintercogs.beyonddimensions.integration.module.polymorph;
 
 import com.illusivesoulworks.polymorph.api.PolymorphApi;
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.locale.Language;
 import net.minecraft.resources.ResourceLocation;
@@ -26,10 +26,10 @@ public final class ComposeRecipeChoices
     private List<Choice> choices = List.of();
     private Language language;
 
-    public List<Choice> snapshot(DimensionsCraftMenu menu)
+    public List<Choice> snapshot(DimensionsNetMenu menu)
     {
-        List<ItemStack> items = new ArrayList<>(menu.craftSlotEndIndex - menu.craftSlotStartIndex);
-        for (int id = menu.craftSlotStartIndex; id < menu.craftSlotEndIndex; id++)
+        List<ItemStack> items = new ArrayList<>(menu.crafting().gridEnd() - menu.crafting().gridStart());
+        for (int id = menu.crafting().gridStart(); id < menu.crafting().gridEnd(); id++)
             items.add(menu.slots.get(id).getItem());
         if (unchanged(items))
             return choices;
@@ -59,7 +59,7 @@ public final class ComposeRecipeChoices
         return true;
     }
 
-    public void select(DimensionsCraftMenu menu, String selected)
+    public void select(DimensionsNetMenu menu, String selected)
     {
         if (snapshot(menu).stream().noneMatch(choice -> choice.id().equals(selected)))
             return;

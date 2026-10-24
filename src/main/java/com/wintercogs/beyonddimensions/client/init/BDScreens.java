@@ -21,8 +21,7 @@ public class BDScreens
     {
         // 显式说明类型，防止gradle无法识别泛型；三种存储菜单共用同一个界面
         event.<DimensionsNetMenu, StorageScreen>register(BDMenus.Dimensions_Net_Menu.get(), StorageScreen::new);
-        event.<DimensionsNetMenu, StorageScreen>register(BDMenus.Dimensions_Craft_Menu.get(), StorageScreen::new);
-        event.<DimensionsNetMenu, StorageScreen>register(BDMenus.Dimensions_Craft_Menu_Terminal.get(), StorageScreen::new);
+        event.<DimensionsNetMenu, StorageScreen>register(BDMenus.Dimensions_Net_Terminal_Menu.get(), StorageScreen::new);
         event.<NetInterfaceBaseMenu, InterfaceScreen>register(BDMenus.Net_Interface_Menu.get(), InterfaceScreen::new);
         event.<NetEnergyMenu, EnergyScreen>register(BDMenus.Net_Energy_Menu.get(), EnergyScreen::new);
         event.<NetPumpMenu, PumpScreen>register(BDMenus.Net_Pump_Menu.get(), PumpScreen::new);

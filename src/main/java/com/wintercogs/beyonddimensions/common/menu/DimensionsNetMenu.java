@@ -3,11 +3,15 @@ package com.wintercogs.beyonddimensions.common.menu;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.UnifiedStorage;
 import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
+import com.wintercogs.beyonddimensions.api.menu.widget.MenuWidget;
+import com.wintercogs.beyonddimensions.api.menu.workbench.StorageWorkbenchType;
+import com.wintercogs.beyonddimensions.api.menu.workbench.StorageWorkbenchTypes;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.UnorderedStackHandlerRemoveZero;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.ClientNetStorage;
+import com.wintercogs.beyonddimensions.common.menu.widget.CraftingWidget;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedSlotGroupSync;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
@@ -19,17 +23,19 @@ import dev.compixel.sync.state.SyncCodecs;
 import dev.compixel.sync.state.SyncSchema;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import static com.wintercogs.beyonddimensions.common.init.BDMenus.Dimensions_Net_Menu;
 
@@ -54,9 +60,8 @@ public class DimensionsNetMenu extends BDBaseMenu
                 .group("storage", storageStartIndex, storageEndIndex)
                 .route("player", "storage")
                 .route("storage", "player");
-        // 合成变体在存储槽之后追加合成输入与产物槽
-        if (storageEndIndex < slots.size())
-            routes.group("crafting", storageEndIndex, slots.size()).route("crafting", "storage");
+        for (MenuWidget widget : widgets())
+            widget.addQuickMoveRoutes(routes);
         return routes.build();
     }
 
@@ -87,16 +92,24 @@ public class DimensionsNetMenu extends BDBaseMenu
     protected int storageStartIndex;
     protected int storageEndIndex;
 
+    // open 正在服务端构造菜单，构造出的菜单按玩家判断可用的工作台
+    private static final ThreadLocal<Boolean> OPENING = ThreadLocal.withInitial(() -> false);
+
+    // 这次打开时可用的工作台，以及有槽位的工作台在菜单里的部件
+    private final List<ResourceLocation> workbenches;
+    private final Map<ResourceLocation, MenuWidget> workbenchWidgets = new LinkedHashMap<>();
+
 
     /**
      * 客户端构造函数
      *
      * @param playerInventory 玩家背包
+     * @param data            打开数据：服务端判断出的可用工作台，见 {@link #open}
      */
-    public DimensionsNetMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
+    public DimensionsNetMenu(int id, Inventory playerInventory, @Nullable FriendlyByteBuf data)
     {
         // 客户端函数，故将Net设为临时Net
-        this(Dimensions_Net_Menu.get(), id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE));
+        this(Dimensions_Net_Menu.get(), id, playerInventory, new UnorderedStackHandlerRemoveZero(AbstractUnorderedStackHandler.UiTimestampPolicy.NONE), readWorkbenches(data));
     }
 
     /**
@@ -106,6 +119,15 @@ public class DimensionsNetMenu extends BDBaseMenu
      * @param data            存储信息
      */
     public DimensionsNetMenu(MenuType<?> menuType, int id, Inventory playerInventory, AbstractUnorderedStackHandler data)
+    {
+        this(menuType, id, playerInventory, data, null);
+    }
+
+    /**
+     * @param workbenches 客户端从打开数据读出的可用工作台；服务端为 null，按玩家判断
+     */
+    protected DimensionsNetMenu(MenuType<?> menuType, int id, Inventory playerInventory, AbstractUnorderedStackHandler data,
+                                @Nullable List<ResourceLocation> workbenches)
     {
         super(menuType, id, playerInventory);
 
@@ -148,6 +170,94 @@ public class DimensionsNetMenu extends BDBaseMenu
         // 添加存储槽
         addStorageSlots();
         synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, VIEW_SCHEMA)));
+        // 工作区的工作台：服务端打开时判断一次哪些可用，客户端照打开数据构造同样的部件，两边的槽位才一一对应。
+        // 不经 open 打开时客户端收不到判断结果，两边都挂上全部工作台
+        this.workbenches = workbenches != null ? workbenches
+                : player instanceof ServerPlayer serverPlayer && OPENING.get() ? StorageWorkbenchTypes.availableFor(serverPlayer)
+                : StorageWorkbenchTypes.ids();
+        for (ResourceLocation workbench : this.workbenches)
+        {
+            StorageWorkbenchType type = Objects.requireNonNull(StorageWorkbenchTypes.get(workbench),
+                    () -> "Storage workbench " + workbench + " is not registered on this side");
+            MenuWidget widget = type.createWidget(this);
+            if (widget != null)
+                workbenchWidgets.put(workbench, addWidget(widget));
+        }
+        commands().workbenches(synchronization);
+        for (MenuWidget widget : widgets())
+            widget.addActions(synchronization);
+    }
+
+    /**
+     * 打开存储菜单：服务端构造菜单时判断哪些工作台可用，随打开数据发给客户端，两边按它构造同样的部件。
+     * 存储菜单都要经过这里打开；以其他方式打开的存储菜单不判断，挂上全部工作台
+     */
+    public static void open(Player player, MenuProvider provider)
+    {
+        DimensionsNetMenu[] created = new DimensionsNetMenu[1];
+        player.openMenu(new MenuProvider()
+        {
+            @Override
+            public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player)
+            {
+                AbstractContainerMenu menu;
+                OPENING.set(true);
+                try
+                {
+                    menu = provider.createMenu(containerId, inventory, player);
+                }
+                finally
+                {
+                    OPENING.set(false);
+                }
+                created[0] = menu instanceof DimensionsNetMenu storage ? storage : null;
+                return menu;
+            }
+
+            @Override
+            public @NotNull Component getDisplayName()
+            {
+                return provider.getDisplayName();
+            }
+
+            @Override
+            public boolean shouldTriggerClientSideContainerClosingOnOpen()
+            {
+                return provider.shouldTriggerClientSideContainerClosingOnOpen();
+            }
+        }, buf -> buf.writeCollection(created[0] != null ? created[0].workbenches : List.of(), FriendlyByteBuf::writeResourceLocation));
+    }
+
+    // 打开数据里的可用工作台；没有经过 open 打开时数据为空，按全部已注册的工作台
+    protected static List<ResourceLocation> readWorkbenches(@Nullable FriendlyByteBuf data)
+    {
+        if (data == null || !data.isReadable())
+            return StorageWorkbenchTypes.ids();
+        return List.copyOf(data.readList(FriendlyByteBuf::readResourceLocation));
+    }
+
+    /**
+     * 这次打开时玩家能用的工作台，按下拉框的顺序
+     */
+    public List<ResourceLocation> workbenches()
+    {
+        return workbenches;
+    }
+
+    /**
+     * 工作台 {@code workbench} 在菜单里的部件；它不可用或没有槽位时为 null
+     */
+    public @Nullable MenuWidget workbenchWidget(ResourceLocation workbench)
+    {
+        return workbenchWidgets.get(workbench);
+    }
+
+    /**
+     * 合成台：存储菜单始终带着它，工作区收起时它仍在菜单里
+     */
+    public CraftingWidget crafting()
+    {
+        return Objects.requireNonNull(widget(CraftingWidget.class), "The storage menu has no crafting widget");
     }
 
     // 添加存储槽位

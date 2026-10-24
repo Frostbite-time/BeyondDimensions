@@ -1,11 +1,13 @@
 package com.wintercogs.beyonddimensions.common.menu.sync;
 
 import com.wintercogs.beyonddimensions.api.menu.interaction.SlotClick;
+import com.wintercogs.beyonddimensions.api.menu.widget.ClearableWidget;
+import com.wintercogs.beyonddimensions.api.menu.widget.RecipeFillWidget;
+import com.wintercogs.beyonddimensions.api.menu.workbench.PlayerWorkbenches;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu;
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
-import com.wintercogs.beyonddimensions.common.menu.PlayerCraftingGrid;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
@@ -15,7 +17,10 @@ import dev.compixel.sync.action.ActionStatus;
 import dev.compixel.sync.state.SyncCodec;
 import dev.compixel.sync.state.SyncCodecs;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.DataInput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +57,10 @@ public final class BDMenuCommands
     {
     }
 
-    public record Recipe(List<Key> keys, List<Long> amounts, boolean compress)
+    /**
+     * 按配方查看器给出的原料填充工作台 {@code workbench}；{@code recipe} 是配方的 ID，没有时为 null
+     */
+    public record Recipe(ResourceLocation workbench, List<Key> keys, List<Long> amounts, boolean compress, @Nullable ResourceLocation recipe)
     {
         public Recipe
         {
@@ -65,33 +73,47 @@ public final class BDMenuCommands
     private static final int MAX_RECIPE_KEYS = 4096;
     private static final int FEEDBACK_INTERVAL_TICKS = 20;
 
-    public static final MenuAction<BDBaseMenu, Boolean> CRAFT_RETURN = MenuAction.of("bd_craft_return", SyncCodecs.BOOLEAN,
-            (menu, player, toStorage) -> {
-                if (!(menu instanceof DimensionsCraftMenu craft))
+    /**
+     * 把工作台 {@code workbench} 里的物品还给玩家，{@code toStorage} 时先退回存储
+     */
+    public record WorkbenchClear(ResourceLocation workbench, boolean toStorage)
+    {
+    }
+
+    private static final SyncCodec<WorkbenchClear> WORKBENCH_CLEAR_CODEC = SyncCodec.of("beyonddimensions:workbench_clear/1",
+            (out, value) -> {
+                SyncCodecs.STRING.write(out, value.workbench().toString());
+                out.writeBoolean(value.toStorage());
+            },
+            in -> new WorkbenchClear(readId(in), in.readBoolean()));
+
+    public static final MenuAction<BDBaseMenu, WorkbenchClear> WORKBENCH_CLEAR = MenuAction.of("bd_workbench_clear", WORKBENCH_CLEAR_CODEC,
+            (menu, player, request) -> {
+                if (!(menu instanceof DimensionsNetMenu storage) || !(storage.workbenchWidget(request.workbench()) instanceof ClearableWidget widget))
                     return false;
-                craft.cleanCraftSlots(toStorage);
+                widget.clearItems(request.toStorage());
                 return true;
             });
 
     /**
-     * 合成格的偏好：清空时优先退回存储还是背包，关闭时是否保留。保存在玩家身上，关闭菜单时由服务器按它处理
+     * 工作台的偏好：清空时优先退回存储还是背包，关闭时是否保留。保存在玩家身上，关闭菜单时由服务器按它处理
      */
-    public record CraftPreference(boolean toStorage, boolean keep)
+    public record WorkbenchPreference(boolean toStorage, boolean keep)
     {
     }
 
-    private static final SyncCodec<CraftPreference> CRAFT_PREFERENCE_CODEC = SyncCodec.of("beyonddimensions:craft_preference/1",
+    private static final SyncCodec<WorkbenchPreference> WORKBENCH_PREFERENCE_CODEC = SyncCodec.of("beyonddimensions:workbench_preference/1",
             (out, value) -> {
                 out.writeBoolean(value.toStorage());
                 out.writeBoolean(value.keep());
             },
-            in -> new CraftPreference(in.readBoolean(), in.readBoolean()));
+            in -> new WorkbenchPreference(in.readBoolean(), in.readBoolean()));
 
-    public static final MenuAction<BDBaseMenu, CraftPreference> CRAFT_PREFERENCE = MenuAction.of("bd_craft_preference", CRAFT_PREFERENCE_CODEC,
-            (menu, player, preference) -> {
-                if (!(menu instanceof DimensionsCraftMenu))
+    public static final MenuAction<BDBaseMenu, WorkbenchPreference> WORKBENCH_PREFERENCE = MenuAction.of("bd_workbench_preference",
+            WORKBENCH_PREFERENCE_CODEC, (menu, player, preference) -> {
+                if (!(menu instanceof DimensionsNetMenu))
                     return false;
-                PlayerCraftingGrid.of(player).setPreference(preference.toStorage(), preference.keep());
+                PlayerWorkbenches.of(player).setPreference(preference.toStorage(), preference.keep());
                 return true;
             });
 
@@ -102,7 +124,7 @@ public final class BDMenuCommands
     public final MenuAction<BDBaseMenu, Recipe> RECIPE;
 
     private final BDBaseMenu menu;
-    private CraftPreference pendingPreference;
+    private WorkbenchPreference pendingPreference;
     private long lastFeedbackTick = Long.MIN_VALUE;
 
     public BDMenuCommands(BDBaseMenu menu)
@@ -177,10 +199,11 @@ public final class BDMenuCommands
             return true;
         });
 
-        var recipeCodec = SyncCodec.<Recipe>of("beyonddimensions:recipe/1:" + keyCodec.id(),
+        var recipeCodec = SyncCodec.<Recipe>of("beyonddimensions:recipe/2:" + keyCodec.id(),
                 (out, value) -> {
                     if (value.keys().size() > MAX_RECIPE_KEYS || value.keys().size() != value.amounts().size())
                         throw new IOException("Invalid recipe size");
+                    SyncCodecs.STRING.write(out, value.workbench().toString());
                     out.writeInt(value.keys().size());
                     for (int i = 0; i < value.keys().size(); i++)
                     {
@@ -188,8 +211,10 @@ public final class BDMenuCommands
                         out.writeLong(value.amounts().get(i));
                     }
                     out.writeBoolean(value.compress());
+                    SyncCodecs.STRING.write(out, value.recipe() == null ? "" : value.recipe().toString());
                 },
                 in -> {
+                    ResourceLocation workbench = readId(in);
                     int count = in.readInt();
                     if (count < 0 || count > MAX_RECIPE_KEYS)
                         throw new IOException("Invalid recipe size");
@@ -200,10 +225,12 @@ public final class BDMenuCommands
                         keys.add(keyCodec.read(in));
                         amounts.add(in.readLong());
                     }
-                    return new Recipe(keys, amounts, SyncCodecs.BOOLEAN.read(in));
+                    boolean compress = SyncCodecs.BOOLEAN.read(in);
+                    String recipe = SyncCodecs.STRING.read(in);
+                    return new Recipe(workbench, keys, amounts, compress, recipe.isEmpty() ? null : parseId(recipe));
                 });
         RECIPE = MenuAction.of("bd_recipe", recipeCodec, BDMenuResources.MAX_ACTION_BYTES, (m, player, recipe) -> {
-            if (!(m instanceof DimensionsCraftMenu craft))
+            if (!(m instanceof DimensionsNetMenu storage) || !(storage.workbenchWidget(recipe.workbench()) instanceof RecipeFillWidget widget))
                 return false;
             List<IStackKey<?>> keys = new ArrayList<>(recipe.keys().size());
             for (Key reference : recipe.keys())
@@ -213,7 +240,7 @@ public final class BDMenuCommands
                     return false;
                 keys.add(key);
             }
-            return craft.transferRecipe(keys, recipe.amounts(), recipe.compress());
+            return widget.fillRecipe(keys, recipe.amounts(), recipe.compress(), recipe.recipe());
         });
     }
 
@@ -226,11 +253,24 @@ public final class BDMenuCommands
     }
 
     /**
-     * 注册合成页面的配方填充与合成槽清理
+     * 注册工作区的配方填充、清空与偏好，由存储菜单调用
      */
-    public <M extends BDBaseMenu> MenuSync<M> crafting(MenuSync<M> sync)
+    public <M extends BDBaseMenu> MenuSync<M> workbenches(MenuSync<M> sync)
     {
-        return sync.action(RECIPE).action(CRAFT_RETURN).action(CRAFT_PREFERENCE);
+        return sync.action(RECIPE).action(WORKBENCH_CLEAR).action(WORKBENCH_PREFERENCE);
+    }
+
+    private static ResourceLocation readId(DataInput in) throws IOException
+    {
+        return parseId(SyncCodecs.STRING.read(in));
+    }
+
+    private static ResourceLocation parseId(String text) throws IOException
+    {
+        ResourceLocation id = ResourceLocation.tryParse(text);
+        if (id == null)
+            throw new IOException("Invalid id " + text);
+        return id;
     }
 
     private void reportFailure(ActionResult result)
@@ -288,32 +328,39 @@ public final class BDMenuCommands
         return menu.menuSync().request(GHOST, new Ghost(slot, value.key(), value.amount())).queued();
     }
 
-    public boolean recipe(List<IStackKey<?>> keys, List<Long> amounts, boolean compress)
+    /**
+     * 请服务器按原料填充工作台 {@code workbench}，见 {@link RecipeFillWidget}；{@code recipe} 是配方的 ID，没有时为 null
+     */
+    public boolean recipe(ResourceLocation workbench, List<IStackKey<?>> keys, List<Long> amounts, boolean compress,
+                          @Nullable ResourceLocation recipe)
     {
         if (keys.size() != amounts.size() || keys.size() > MAX_RECIPE_KEYS)
             return false;
         List<Key> references = keys.stream().map(this::reference).toList();
-        return menu.menuSync().request(RECIPE, new Recipe(references, amounts, compress)).queued();
-    }
-
-    public boolean returnCrafting(boolean toStorage)
-    {
-        return menu.menuSync().request(CRAFT_RETURN, toStorage).queued();
+        return menu.menuSync().request(RECIPE, new Recipe(workbench, references, amounts, compress, recipe)).queued();
     }
 
     /**
-     * 合成格的偏好在首个快照到达后才能发送，之前的设置会暂存
+     * 请服务器把工作台 {@code workbench} 里的物品还给玩家，{@code toStorage} 时先退回存储
+     */
+    public boolean clearWorkbench(ResourceLocation workbench, boolean toStorage)
+    {
+        return menu.menuSync().request(WORKBENCH_CLEAR, new WorkbenchClear(workbench, toStorage)).queued();
+    }
+
+    /**
+     * 工作台的偏好在首个快照到达后才能发送，之前的设置会暂存
      */
     public void preference(boolean toStorage, boolean keep)
     {
-        pendingPreference = new CraftPreference(toStorage, keep);
+        pendingPreference = new WorkbenchPreference(toStorage, keep);
         flushPreference();
     }
 
     public void flushPreference()
     {
         if (pendingPreference != null && menu.menuSync().hasSnapshot()
-                && menu.menuSync().request(CRAFT_PREFERENCE, pendingPreference).queued())
+                && menu.menuSync().request(WORKBENCH_PREFERENCE, pendingPreference).queued())
             pendingPreference = null;
     }
 }

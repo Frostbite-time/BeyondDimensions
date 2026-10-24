@@ -1,5 +1,7 @@
 package com.wintercogs.beyonddimensions.client.ui.base
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -12,6 +14,7 @@ import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
+import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.item.MinecraftItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
 import dev.compixel.forge.slots.MenuSlotState
@@ -22,30 +25,38 @@ const val SLOT_PITCH = 18
 /** 放九列槽位的标准窗口宽度 */
 const val SLOT_WINDOW_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 9 * SLOT_PITCH + 1 + 2
 
+/** 空槽底纹换图时淡入淡出的时长，与原版锻造台相同 */
+private const val UNDERLAY_FADE_MILLIS = 200
+
 /**
  * 一个原生槽位：BD 的槽底与数量标签，悬停时加角标；标记槽在槽底铺一层强调色。
+ * [underlay] 是空槽里的底纹，例如锻造台各格该放什么，换图时淡入淡出。
  * 槽位只在当前页（[LocalBdPageVisibility]）上响应点击，所在的页隐藏后只留同样大小的空位
  */
 @Composable
-fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier) {
+fun BdSlot(slots: ComposeMenuSlots<*>, id: Int, modifier: Modifier = Modifier, underlay: ItemIcon? = null) {
     val page = LocalBdPageVisibility.current
     // 最后一次显示的样子，供淡出时照画
     val last = remember(id) { arrayOfNulls<MenuSlotState>(1) }
     if (!page.current) {
-        Box(modifier.size(SLOT_PITCH.dp)) { if (page.visible) last[0]?.let { SlotLook(it.copy(hovered = false)) } }
+        Box(modifier.size(SLOT_PITCH.dp)) { if (page.visible) last[0]?.let { SlotLook(it.copy(hovered = false), underlay) } }
         return
     }
     slots.Slot(id, modifier.size(SLOT_PITCH.dp)) { slot ->
         last[0] = slot
-        SlotLook(slot)
+        SlotLook(slot, underlay)
     }
 }
 
 @Composable
-private fun BoxScope.SlotLook(slot: MenuSlotState) {
+private fun BoxScope.SlotLook(slot: MenuSlotState, underlay: ItemIcon? = null) {
     OreSlot(Modifier.matchParentSize(), contentModifier = Modifier.size(16.dp)) {
         if (slot.marked) Box(Modifier.matchParentSize().background(Bd.colors[BdColors.accentSoft]))
-        slot.icon?.let { MinecraftItemIcon(it, Modifier.fillMaxSize()) }
+        val icon = slot.icon
+        if (icon != null) MinecraftItemIcon(icon, Modifier.fillMaxSize())
+        else if (underlay != null) Crossfade(underlay, animationSpec = tween(UNDERLAY_FADE_MILLIS), label = "slot underlay") {
+            MinecraftItemIcon(it, Modifier.fillMaxSize())
+        }
     }
     if (slot.amount.isNotEmpty())
         BdAmountPill(slot.amount, Modifier.align(Alignment.BottomEnd).padding(end = 0.5.dp, bottom = 0.5.dp))

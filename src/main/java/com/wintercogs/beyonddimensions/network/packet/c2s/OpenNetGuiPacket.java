@@ -6,7 +6,6 @@ import com.wintercogs.beyonddimensions.client.gui.NetMenuType;
 import com.wintercogs.beyonddimensions.common.init.BDDataComponents;
 import com.wintercogs.beyonddimensions.common.init.BDMenus;
 import com.wintercogs.beyonddimensions.common.item.NetTerminalItem;
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
 import com.wintercogs.beyonddimensions.common.menu.SwitchMenuProvider;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
@@ -65,21 +64,14 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target) implements Custo
         if (net != null)
         {
             NetMenuType targetMenu = this.target();
-            if (targetMenu == NetMenuType.NET_CRAFT_MENU)
+            if (targetMenu == NetMenuType.NET_MENU)
             {
-                player.openMenu(new SwitchMenuProvider(
-                        (containerId, playerInventory, _player) -> new DimensionsCraftMenu(BDMenus.Dimensions_Craft_Menu.get(), containerId, playerInventory, net.getUnifiedStorage()),
-                        Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
-                ));
-            }
-            else if (targetMenu == NetMenuType.NET_MENU)
-            {
-                player.openMenu(new SwitchMenuProvider(
+                DimensionsNetMenu.open(player, new SwitchMenuProvider(
                         (containerId, playerInventory, _player) -> new DimensionsNetMenu(BDMenus.Dimensions_Net_Menu.get(), containerId, playerInventory, net.getUnifiedStorage()),
                         Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                 ));
             }
-            else if (targetMenu == NetMenuType.NET_CRAFT_TERMINAL)
+            else if (targetMenu == NetMenuType.NET_TERMINAL)
             {
                 ItemStack terminalStack = null;
                 if (player.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof NetTerminalItem)
@@ -116,7 +108,7 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target) implements Custo
                 if (terminalStack != null)
                 {
                     NetTerminalItem.contextMap.put(player, new NetTerminalItem.MenuTriggerContext(InteractionHand.MAIN_HAND, terminalStack));
-                    player.openMenu((NetTerminalItem) terminalStack.getItem());
+                    DimensionsNetMenu.open(player, (NetTerminalItem) terminalStack.getItem());
                 }
             }
         }
