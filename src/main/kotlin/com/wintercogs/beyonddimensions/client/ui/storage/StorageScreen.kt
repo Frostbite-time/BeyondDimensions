@@ -603,6 +603,8 @@ private fun CategoryTabs(state: StorageState, send: (StorageAction) -> Unit, tex
                             .pointerInput(index, count) {
                                 detectDragGestures(
                                     onDragStart = {
+                                        // 按下后稍一移动就算拖动；拖动同样打开这个分类，点击不会落空
+                                        send(StorageAction.SelectCategory(index))
                                         dragged = index
                                         dragOffset = 0f
                                     },
