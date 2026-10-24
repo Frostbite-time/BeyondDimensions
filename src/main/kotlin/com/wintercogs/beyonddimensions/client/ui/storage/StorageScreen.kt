@@ -155,6 +155,12 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
         adapter.resourceMenu = controller::openSlotMenu
     }
 
+    // 打开界面与窗口缩放时调用：先按屏幕定好格子行列，快照里就是最终尺寸
+    override fun init() {
+        controller.fitViewport()
+        super.init()
+    }
+
     override fun snapshot() = controller.snapshot()
 
     override fun handle(action: StorageAction) = controller.handle(action)
@@ -221,6 +227,24 @@ private fun chromeHeight(craft: Boolean): Int {
     return height
 }
 
+/** 格子的实际列数与行数：首选行列按屏幕上放得下的格数收窄。[screenWidth]、[screenHeight] 是整个屏幕的 dp 尺寸 */
+internal fun fittedGridSize(
+    screenWidth: Int,
+    screenHeight: Int,
+    craftShown: Boolean,
+    editorOpen: Boolean,
+    preferredColumns: Int,
+    preferredRows: Int,
+): Pair<Int, Int> {
+    val fitRows = (screenHeight - SCREEN_MARGIN * 2 - chromeHeight(craftShown)) / SLOT_PITCH
+    // 内容区居中，竖条对面也留出一条竖条宽的空位；分类编辑区打开时窗口向右扩展
+    val fitColumns =
+        (screenWidth - SCREEN_MARGIN * 2 - CHROME_WIDTH - SIDE_RAIL_WIDTH - contentWidth(0) -
+                if (editorOpen) EDITOR_WIDTH else 0) / SLOT_PITCH
+    return fitColumns.coerceAtMost(preferredColumns).coerceAtLeast(9) to
+            fitRows.coerceAtMost(preferredRows).coerceAtLeast(2)
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun StorageView(
@@ -234,8 +258,7 @@ private fun StorageView(
     val colors = Bd.colors
     val text = layout.text
     // 方块终端可以在本地隐藏合成区；可切换的终端则重新打开对应的菜单
-    var craftHidden by remember { mutableStateOf(false) }
-    val craftShown = state.craft != null && !craftHidden
+    val craftShown = state.craft != null && !state.craft.hidden
     val page = rememberPageSelection()
     val settingsOpen = page.settings
     // 排序与配方选择的浮层盖在槽位上方，打开期间停用槽位
@@ -247,19 +270,8 @@ private fun StorageView(
     val focusManager = LocalFocusManager.current
 
     CompositionLocalProvider(LocalBdPopovers provides popovers) {
-        BdScreenFrame { available ->
-            val availableHeight = available.height.value.toInt() - SCREEN_MARGIN * 2
-            val availableWidth = available.width.value.toInt() - SCREEN_MARGIN * 2
-            val fitRows = (availableHeight - chromeHeight(craftShown)) / SLOT_PITCH
-            // 内容区居中，竖条对面也留出一条竖条宽的空位；分类编辑区打开时窗口向右扩展
+        BdScreenFrame {
             val editorOpen = state.editor != null
-            val fitColumns =
-                (availableWidth - CHROME_WIDTH - SIDE_RAIL_WIDTH - contentWidth(0) -
-                        if (editorOpen) EDITOR_WIDTH else 0) / SLOT_PITCH
-            val rows = fitRows.coerceAtMost(state.preferredRows).coerceAtLeast(2)
-            val columns = fitColumns.coerceAtMost(state.preferredColumns).coerceAtLeast(9)
-            LaunchedEffect(columns, rows) { send(StorageAction.Viewport(columns, rows)) }
-
             val gridColumns = state.columns
             val gridRows = state.rows
             val width = contentWidth(gridColumns)
@@ -309,13 +321,13 @@ private fun StorageView(
                     BdRailTab(text.storage, BdIcons.Main, selected = page.main && !craftShown) {
                         page.open(BdPages.MAIN)
                         if (craftShown) {
-                            if (state.craft.toggleable) send(StorageAction.ToggleCraft) else craftHidden = true
+                            send(if (state.craft.toggleable) StorageAction.ToggleCraft else StorageAction.HideCraft(true))
                         }
                     }
                     BdRailTab(text.crafting, BdIcons.Crafting, selected = page.main && craftShown) {
                         page.open(BdPages.MAIN)
                         if (!craftShown) {
-                            if (state.craft == null) send(StorageAction.ToggleCraft) else craftHidden = false
+                            send(if (state.craft == null) StorageAction.ToggleCraft else StorageAction.HideCraft(false))
                         }
                     }
                     InjectedTabs(pages, page)
