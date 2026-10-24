@@ -126,6 +126,9 @@ class StorageText {
     val layout = tr("ui.beyonddimensions.storage.layout")
     val columns = tr("ui.beyonddimensions.storage.columns")
     val rows = tr("ui.beyonddimensions.storage.rows")
+    val interaction = tr("ui.beyonddimensions.storage.interaction")
+    val rightClickMenu = tr("ui.beyonddimensions.storage.right_click_menu")
+    val rightClickMenuHint = tr("ui.beyonddimensions.storage.right_click_menu.hint")
     val keepSearch = tr("ui.beyonddimensions.storage.keep_search")
     val syncSearch = tr("ui.beyonddimensions.storage.sync_search")
     val syncSearchHint = tr("ui.beyonddimensions.storage.sync_search.hint")
@@ -1212,6 +1215,10 @@ private fun ViewOptions(state: StorageState, send: (StorageAction) -> Unit, text
             2..99,
             shown
         )
+    }
+    BdSectionLabel(text.interaction)
+    BdSettingRow(text.rightClickMenu, text.rightClickMenuHint) {
+        BdToggle(state.rightClickMenu, { send(StorageAction.RightClickMenu(it)) }, shown)
     }
     BdSectionLabel(text.searchTitle)
     BdSettingRow(text.keepSearch) { BdToggle(state.keepSearch, { send(StorageAction.KeepSearch(it)) }, shown) }
