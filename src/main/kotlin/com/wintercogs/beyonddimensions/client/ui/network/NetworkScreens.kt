@@ -27,8 +27,8 @@ import com.wintercogs.beyonddimensions.client.ui.kit.*
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import com.wintercogs.beyonddimensions.common.init.BDBlocks
-import com.wintercogs.beyonddimensions.common.init.BDPackets
 import com.wintercogs.beyonddimensions.common.init.BDItems
+import com.wintercogs.beyonddimensions.common.init.BDPackets
 import com.wintercogs.beyonddimensions.common.menu.NetControlMenu
 import com.wintercogs.beyonddimensions.common.menu.PrimaryNetSwitcherMenu
 import com.wintercogs.beyonddimensions.network.packet.c2s.OpenNetGuiPacket
