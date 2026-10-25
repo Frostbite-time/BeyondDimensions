@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "beyonddimensions:machine_config_card"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "unlock_machine_config_card": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "beyonddimensions:space_time_bar"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "unlock_machine_config_card",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "beyonddimensions:machine_config_card"
+    ]
+  },
+  "sends_telemetry_event": false
+}

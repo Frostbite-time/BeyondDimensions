@@ -1,18 +1,14 @@
 package com.wintercogs.beyonddimensions.integration.module.create;
 
-import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
-import com.simibubi.create.api.contraption.storage.item.MountedItemStorageType;
-import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
-import com.wintercogs.beyonddimensions.integration.module.create.contraption.NetInterfaceMountedStorageType;
-import com.wintercogs.beyonddimensions.integration.module.create.contraption.NetInterfaceMovementBehaviour;
 import com.wintercogs.beyonddimensions.integration.module.create.datagen.CreateModuleBlockLootTableProvider;
 import com.wintercogs.beyonddimensions.integration.module.create.datagen.CreateModuleBlockStateProvider;
 import com.wintercogs.beyonddimensions.integration.module.create.datagen.CreateModuleRecipeProvider;
 import com.wintercogs.beyonddimensions.integration.module.create.init.CreateModuleBlockEntities;
 import com.wintercogs.beyonddimensions.integration.module.create.init.CreateModuleBlocks;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
@@ -23,13 +19,18 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * 机械动力 0.5.1 与 6 共有的联动：蓝图接口。只有 6.0 起才能做的部分在 {@link Create6Module}
+ */
 @BDIntegrationModule(modId = OtherModIds.CREATE)
 public class CreateModule implements IIntegrationModule
 {
+
     @Override
     public String modId()
     {
@@ -41,34 +42,17 @@ public class CreateModule implements IIntegrationModule
     {
         CreateModuleBlocks.register(modBus);
         CreateModuleBlockEntities.register(modBus);
-        NetInterfaceMountedStorageType.register(modBus);
     }
 
     @Override
     public void onCommonSetup(FMLCommonSetupEvent event)
     {
-        event.enqueueWork(() -> {
-            MountedItemStorageType.REGISTRY.register(
-                    BDBlocks.NET_INTERFACE.get(),
-                    NetInterfaceMountedStorageType.NET_INTERFACE.get()
-            );
-            MovementBehaviour.REGISTRY.register(
-                    BDBlocks.NET_INTERFACE.get(),
-                    new NetInterfaceMovementBehaviour()
-            );
-        });
     }
 
     @Override
     public void onBlockCreativeTabCollect(CreativeModeTab.ItemDisplayParameters displayParameters, CreativeModeTab.Output output)
     {
         output.accept(CreateModuleBlocks.SCHEMATICANNON_PATHWAY.get());
-    }
-
-    @Override
-    public void onBlockTagDatagen(net.minecraft.core.HolderLookup.Provider provider, BlockTagAppender appender)
-    {
-        appender.addOptional(BlockTags.MINEABLE_WITH_PICKAXE, CreateModuleBlocks.SCHEMATICANNON_PATHWAY.getId());
     }
 
     @Override
@@ -82,12 +66,18 @@ public class CreateModule implements IIntegrationModule
                 List.of(new LootTableProvider.SubProviderEntry(CreateModuleBlockLootTableProvider::new, LootContextParamSets.BLOCK)))
         {
             @Override
-            public String getName()
+            public @NotNull String getName()
             {
                 return "BeyondDimensions CreateModule LootTable Provider";
             }
         });
         generator.addProvider(event.includeClient(), new CreateModuleBlockStateProvider(packOutput, existingFileHelper));
         generator.addProvider(event.includeServer(), new CreateModuleRecipeProvider(packOutput));
+    }
+
+    @Override
+    public void onBlockTagDatagen(HolderLookup.Provider provider, BlockTagAppender appender)
+    {
+        appender.addOptional(BlockTags.MINEABLE_WITH_PICKAXE, CreateModuleBlocks.SCHEMATICANNON_PATHWAY.getId());
     }
 }

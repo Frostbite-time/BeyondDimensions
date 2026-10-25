@@ -12,10 +12,16 @@ public final class ServerConfigRuntime
     {
     }
 
-
-    public static long fragmentTransferTime = 3600;
-    public static int crystalGenerateTime = 600;
+    // 网络接口
+    public static volatile boolean interfaceReceive = true;
+    public static volatile boolean interfaceOutput = true;
+    public static volatile boolean interfacePushOut = true;
+    public static volatile int interfaceCapacity = 27;
     private static volatile Set<ResourceLocation> interfaceBlockedInputStackTypes = Set.of();
+
+    // 时空材料
+    public static volatile long fragmentTransferTime = 3600;
+    public static volatile int crystalGenerateTime = 600;
 
     public static void setInterfaceBlockedInputStackTypes(Collection<? extends String> configuredIds)
     {

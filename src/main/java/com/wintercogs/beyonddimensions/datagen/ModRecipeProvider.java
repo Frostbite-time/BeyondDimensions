@@ -29,7 +29,7 @@ public class ModRecipeProvider extends BDRecipeProvider
     }
 
     @Override
-    protected void buildRecipes(Consumer<FinishedRecipe> recipeOutput)
+    protected void buildRecipes(@NotNull Consumer<FinishedRecipe> recipeOutput)
     {
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.UNSTABLE_SPACE_TIME_FRAGMENT.get())
                 .pattern("ABA")
@@ -220,6 +220,17 @@ public class ModRecipeProvider extends BDRecipeProvider
                 .unlockedBy("unlock_net_smoker_block", has(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get()))
                 .save(recipeOutput);
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.NET_STOCK_EMITTER.get())
+                .pattern("AAA")
+                .pattern("BCB")
+                .pattern("ADA")
+                .define('A', Items.COBBLESTONE)
+                .define('B', Items.REDSTONE_TORCH)
+                .define('C', BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get())
+                .define('D', Items.COMPARATOR)
+                .unlockedBy("unlock_net_stock_emitter", has(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get()))
+                .save(recipeOutput);
+
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDBlocks.NET_PUMP_BLOCK.get())
                 .pattern("ABA")
                 .pattern("BCB")
@@ -279,6 +290,16 @@ public class ModRecipeProvider extends BDRecipeProvider
                 .define('B', Items.STICK)
                 .define('C', BDItems.SPACE_TIME_BAR.get())
                 .unlockedBy("unlock_xp_exchange_item", has(BDItems.SPACE_TIME_BAR.get()))
+                .save(recipeOutput);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BDItems.MACHINE_CONFIG_CARD.get())
+                .pattern(" A ")
+                .pattern("BCB")
+                .pattern(" A ")
+                .define('A', Items.REDSTONE)
+                .define('B', Items.PAPER)
+                .define('C', BDItems.SPACE_TIME_BAR.get())
+                .unlockedBy("unlock_machine_config_card", has(BDItems.SPACE_TIME_BAR.get()))
                 .save(recipeOutput);
     }
 }

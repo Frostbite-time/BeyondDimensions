@@ -1,31 +1,70 @@
 package com.wintercogs.beyonddimensions.common.menu;
 
+import com.wintercogs.beyonddimensions.api.machine.Machine;
+import com.wintercogs.beyonddimensions.api.menu.BdMenuActions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.StackHandler;
-import com.wintercogs.beyonddimensions.client.gui.CommonTextures;
 import com.wintercogs.beyonddimensions.common.block.entity.NetPumpBlockEntity;
-import com.wintercogs.beyonddimensions.common.init.BDMenus;
-import com.wintercogs.beyonddimensions.common.machine.FilterMode;
-import com.wintercogs.beyonddimensions.common.machine.RedStoneControlMode;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineMenu;
+import com.wintercogs.beyonddimensions.common.menu.machine.MachineSettingsSync;
+import com.wintercogs.beyonddimensions.common.menu.sync.BDMenuResources;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.FlagStackTypedSlot;
-import net.minecraft.nbt.CompoundTag;
+import dev.compixel.forge.sync.MenuAction;
+import dev.compixel.forge.sync.MenuSync;
+import dev.compixel.sync.state.SyncSchema;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import static com.wintercogs.beyonddimensions.common.init.BDMenus.Net_Pump_Menu;
 
-public class NetPumpMenu extends BDBaseMenu
+/**
+ * 维度网络泵：过滤槽与玩家背包
+ */
+public class NetPumpMenu extends BDBaseMenu implements MachineMenu
 {
-
-    private static final int slotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + 1;
-    private static final int invSlotStartY = CommonTextures.TOP_BASE_COMMON_HEIGHT + CommonTextures.FILTER_SLOTS_HEIGHT * 4 + CommonTextures.COMMON_CONNECTION_HEIGHT + 7;
-
     private final IStackHandler storage;
 
     public final NetPumpBlockEntity be;
+
+    private static final SyncSchema<NetPumpMenu> SCHEMA =
+            MachineSettingsSync.field(SyncSchema.<NetPumpMenu>builder("beyonddimensions:pump", 2)).build();
+
+    private static final MenuAction<NetPumpMenu, MachineSettingsSync.Change> SET_SETTING = MachineSettingsSync.action();
+
+    private final MachineSettingsSync.Mirror machineSettings = new MachineSettingsSync.Mirror();
+
+    private final MenuSync<NetPumpMenu> synchronization;
+
+    @Override
+    public MenuSync<NetPumpMenu> menuSync()
+    {
+        return synchronization;
+    }
+
+    @Override
+    public @Nullable Machine machine()
+    {
+        return be == null || be.isRemoved() ? null : be;
+    }
+
+    @Override
+    public MachineSettingsSync.Mirror machineSettings()
+    {
+        return machineSettings;
+    }
+
+    /**
+     * 客户端：按控件给出的值修改设置，见 {@link MachineSettingsSync#valueAt}
+     */
+    public boolean requestSetting(ResourceLocation setting, long pick)
+    {
+        return MachineSettingsSync.request(this, synchronization, SET_SETTING, setting, pick);
+    }
 
     public NetPumpMenu(int id, Inventory playerInventory, FriendlyByteBuf data)
     {
@@ -34,7 +73,7 @@ public class NetPumpMenu extends BDBaseMenu
 
     public NetPumpMenu(int containerId, Inventory playerInventory, @Nullable IStackHandler storage, NetPumpBlockEntity be)
     {
-        super(BDMenus.Net_Pump_Menu.get(), containerId, playerInventory);
+        super(Net_Pump_Menu.get(), containerId, playerInventory);
 
         this.be = be;
 
@@ -49,7 +88,7 @@ public class NetPumpMenu extends BDBaseMenu
 
         addPlayerInv(playerInventory);
         addFlagSlots();
-
+        synchronization = BdMenuActions.attach(this, commands().inventory(BDMenuResources.bind(this, SCHEMA)).action(SET_SETTING));
     }
 
     private void addFlagSlots()
@@ -58,7 +97,7 @@ public class NetPumpMenu extends BDBaseMenu
         {
             for (int col = 0; col < 9; col++)
             {
-                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, storage, row * 9 + col, 8 + col * 18, slotStartY + row * 18);
+                FlagStackTypedSlot flagSlot = new FlagStackTypedSlot(this, storage, row * 9 + col);
                 this.addSlot(flagSlot);
             }
         }
@@ -72,48 +111,19 @@ public class NetPumpMenu extends BDBaseMenu
         {
             for (int col = 0; col < 9; ++col)
             {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, invSlotStartY + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 0, 0));
             }
         }
         for (int col = 0; col < 9; ++col)
         {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 4 + invSlotStartY + 3 * 18));
+            this.addSlot(new Slot(playerInventory, col, 0, 0));
         }
         inventoryEndIndex = slots.size();
     }
-
 
     @Override
     public boolean stillValid(@NotNull Player player)
     {
         return be != null && !be.isRemoved();
-    }
-
-    @Override
-    protected boolean shouldSendQuickData()
-    {
-        return false;
-    }
-
-    @Override
-    protected void writeQuickDataTag(CompoundTag tag)
-    {
-        super.writeQuickDataTag(tag);
-        tag.putString("filter_type", be.filterMode.name());
-        tag.putString("control_mode", be.controlMode.name());
-    }
-
-    @Override
-    public void readQuickDataTag(CompoundTag tag)
-    {
-        super.readQuickDataTag(tag);
-        be.filterMode = FilterMode.valueOf(tag.getString("filter_type"));
-        be.controlMode = RedStoneControlMode.valueOf(tag.getString("control_mode"));
-        if (!player.level().isClientSide())
-        {
-            // 服务端接收到更新信息后立刻通知保存
-            player.level().blockEntityChanged(be.getBlockPos());
-            player.level().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 2);
-        }
     }
 }

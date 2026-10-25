@@ -2,7 +2,7 @@ package com.wintercogs.beyonddimensions.common.block.entity;
 
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenuTerminal;
+import com.wintercogs.beyonddimensions.common.menu.DimensionsNetTerminalMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -17,10 +17,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProvider
 {
-
+    // 旧版本存在终端里的合成格物品，打开或拆除终端时还给玩家
     private final NonNullList<ItemStack> craftItems = NonNullList.withSize(9, ItemStack.EMPTY);
 
     public NetTerminalBlockEntity(BlockPos pos, BlockState blockState)
@@ -35,15 +36,18 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
     }
 
     @Override
-    public AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player)
+    public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player)
     {
         DimensionsNet net = getNet();
         if (net != null)
         {
-            // 在服务端中craftItems作为直接引用传递。保证为同一个列表
-            // 而后，craftItems会在Menu被包装，并通过Menu的包装类完成网络同步
-            // 最后，利用方块实体进行持久保存
-            return new DimensionsCraftMenuTerminal(containerId, inventory, net.getUnifiedStorage(), craftItems, null, this.getBlockPos());
+            if (craftItems.stream().anyMatch(stack -> !stack.isEmpty()))
+            {
+                DimensionsNetTerminalMenu.returnLegacyCraftItems(player, net.getUnifiedStorage(), craftItems);
+                craftItems.clear();
+                setChanged();
+            }
+            return new DimensionsNetTerminalMenu(containerId, inventory, net.getUnifiedStorage(), null, this.getBlockPos());
         }
         return null;
     }
@@ -65,11 +69,12 @@ public class NetTerminalBlockEntity extends NetedBlockEntity implements MenuProv
     protected void saveAdditional(CompoundTag tag)
     {
         super.saveAdditional(tag);
+        if (craftItems.stream().allMatch(ItemStack::isEmpty))
+            return;
         ListTag itemsList = new ListTag();
         for (ItemStack stack : craftItems)
         {
-            CompoundTag itemTag = new CompoundTag();
-            stack.save(itemTag);
+            CompoundTag itemTag = stack.save(new CompoundTag());
             itemsList.add(itemTag);
         }
         tag.put("CraftItems", itemsList);

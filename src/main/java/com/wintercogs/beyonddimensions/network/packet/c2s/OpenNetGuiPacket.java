@@ -6,14 +6,13 @@ import com.wintercogs.beyonddimensions.client.gui.NetMenuType;
 import com.wintercogs.beyonddimensions.common.init.BDMenus;
 import com.wintercogs.beyonddimensions.common.item.NetTerminalItem;
 import com.wintercogs.beyonddimensions.common.item.NetedItem;
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu;
+import com.wintercogs.beyonddimensions.common.menu.SwitchMenuProvider;
 import com.wintercogs.beyonddimensions.integration.ModPresence;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
@@ -28,25 +27,18 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target)
         //获取玩家上下文
         Player player = context.getSender();
 
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
         if (net != null)
         {
             NetMenuType targetMenu = target();
-            if (targetMenu == NetMenuType.NET_CRAFT_MENU)
+            if (targetMenu == NetMenuType.NET_MENU)
             {
-                player.openMenu(new SimpleMenuProvider(
-                        (containerId, playerInventory, _player) -> new DimensionsCraftMenu(BDMenus.Dimensions_Craft_Menu.get(), containerId, playerInventory, net.getUnifiedStorage(), null, null),
-                        Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
-                ));
-            }
-            else if (targetMenu == NetMenuType.NET_MENU)
-            {
-                player.openMenu(new SimpleMenuProvider(
+                DimensionsNetMenu.open(player, new SwitchMenuProvider(
                         (containerId, playerInventory, _player) -> new DimensionsNetMenu(BDMenus.Dimensions_Net_Menu.get(), containerId, playerInventory, net.getUnifiedStorage()),
                         Component.translatable("menu.title.beyonddimensions.dimensionnetmenu")
                 ));
             }
-            else if (targetMenu == NetMenuType.NET_CRAFT_TERMINAL)
+            else if (targetMenu == NetMenuType.NET_TERMINAL)
             {
                 ItemStack terminalStack = null;
                 if (player.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof NetTerminalItem)
@@ -80,13 +72,11 @@ public record OpenNetGuiPacket(String uuid, NetMenuType target)
                 if (terminalStack != null)
                 {
                     NetTerminalItem.contextMap.put(player, new NetTerminalItem.MenuTriggerContext(InteractionHand.MAIN_HAND, terminalStack));
-                    player.openMenu((NetTerminalItem) terminalStack.getItem());
+                    DimensionsNetMenu.open(player, (NetTerminalItem) terminalStack.getItem());
                 }
             }
-
         }
     }
-
 
     public static void handle(OpenNetGuiPacket packet, Supplier<NetworkEvent.Context> cxt)
     {

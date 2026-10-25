@@ -9,16 +9,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
-
-public class NetPumpBlock extends BaseMachineBlock
+public class NetPumpBlock extends SidedMachineBlock
 {
-    public NetPumpBlock(BlockBehaviour.Properties properties)
+    public NetPumpBlock(Properties properties)
     {
         super(properties.noOcclusion());
     }
@@ -30,9 +28,9 @@ public class NetPumpBlock extends BaseMachineBlock
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
+    protected InteractionResult useWithoutWrench(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
     {
-        super.use(state, level, pos, player, hand, hitResult);
+        super.useWithoutWrench(state, level, pos, player, hand, hitResult);
         if (!level.isClientSide() && !player.isShiftKeyDown())
         {
             NetPumpBlockEntity blockEntity = (NetPumpBlockEntity) level.getBlockEntity(pos);

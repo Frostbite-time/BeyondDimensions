@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.api.storage.handler.impl;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.ErrorData;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
@@ -66,7 +67,7 @@ public class StackHandler implements IStackHandler
     private final long[] amounts;
 
     /**
-     * key -> 对应 stack 缓存（只维护类型，不维护数量；不缓存 EmptyStackKey）
+     * key -> 具体存储物的对照（只维护类型，不维护数量；不缓存 EmptyStackKey）
      */
     private final Map<IStackKey<?>, Object> key2stackMap = new HashMap<>();
 
@@ -93,7 +94,7 @@ public class StackHandler implements IStackHandler
     public static final class SlotBucket
     {
         final ArrayList<Integer> slots = new ArrayList<>();
-        final HashMap<Integer, Integer> pos = new HashMap<>(); // slot -> index in slots
+        final HashMap<Integer, Integer> pos = new HashMap<>(); // 槽位 -> 它在 slots 中的下标
 
         void add(int slot)
         {
@@ -525,6 +526,35 @@ public class StackHandler implements IStackHandler
         return new KeyAmount(k, take);
     }
 
+    /**
+     * 与 key 模糊匹配、各槽合计数量最多的变体；没有时返回 null
+     */
+    private @Nullable IStackKey<?> mostAbundantVariant(IStackKey<?> key)
+    {
+        IStackKey<?> best = null;
+        long most = 0L;
+        for (Map.Entry<IStackKey<?>, SlotBucket> entry : keyBuckets.entrySet())
+        {
+            IStackKey<?> variant = entry.getKey();
+            if (variant == EmptyStackKey.INSTANCE || !variant.isSame(key)) continue;
+            SlotBucket bucket = entry.getValue();
+            long total = 0L;
+            for (int i = 0; i < bucket.size(); i++)
+            {
+                total += amounts[bucket.get(i)];
+            }
+            if (total > most)
+            {
+                most = total;
+                best = variant;
+            }
+        }
+        return best;
+    }
+
+    /**
+     * 模糊匹配时取各槽合计数量最多的变体
+     */
     @Override
     public @NotNull KeyAmount extract(IStackKey<?> key, long amount, boolean simulate, boolean fuzzy)
     {
@@ -532,15 +562,7 @@ public class StackHandler implements IStackHandler
 
         if (fuzzy && key != null)
         {
-            // 模糊匹配：按 isSame 找到任意一个
-            for (IStackKey<?> candidate : keyBuckets.keySet())
-            {
-                if (candidate != null && candidate != EmptyStackKey.INSTANCE && candidate.isSame(key))
-                {
-                    realKey = candidate;
-                    break;
-                }
-            }
+            realKey = mostAbundantVariant(key);
         }
 
         if (realKey == null || realKey == EmptyStackKey.INSTANCE || amount <= 0L)
@@ -643,15 +665,25 @@ public class StackHandler implements IStackHandler
     }
 
     /**
-     * 读取：
-     * - 优先新格式 "stacks"
-     * - 否则回退旧格式 "Stacks"（兼容 StackTypedHandler）
+     * 读档；解析不了的资源封装成错误数据留在原槽位
      */
     public void deserializeNBT(CompoundTag tag)
     {
         clearStorage();
         if (tag == null) return;
+        try (ErrorData.Report ignored = ErrorData.report("device storage"))
+        {
+            readSlots(tag);
+        }
+    }
 
+    /**
+     * 读取：
+     * - 优先新格式 "stacks"
+     * - 否则回退旧格式 "Stacks"（兼容 StackTypedHandler）
+     */
+    private void readSlots(CompoundTag tag)
+    {
         // 1) 新格式优先
         if (tag.contains("stacks", Tag.TAG_LIST))
         {
@@ -735,8 +767,7 @@ public class StackHandler implements IStackHandler
     }
 
     /**
-     * 根据 key 获取已经缓存的对应 stack，自行判断类型；
-     * 返回值数量未设定，需要调用方自行 setCount；若要缓存请复制副本
+     * 根据key获取已经缓存的对应stack，自行判断类型；返回值数量未设定，需要调用方自行 setCount；若要缓存请复制副本
      */
     public @Nullable Object getOutStackByKey(IStackKey<?> key)
     {

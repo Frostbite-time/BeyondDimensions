@@ -33,9 +33,9 @@ public class NetCreater extends Item
     public void appendHoverText(@NotNull ItemStack stack,
                                 @Nullable Level level,
                                 @NotNull List<Component> tooltipComponents,
-                                @NotNull TooltipFlag isAdvanced)
+                                @NotNull TooltipFlag tooltipFlag)
     {
-        super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
+        super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
         tooltipComponents.add(
                 Component.translatable("tooltip.beyonddimensions.network_open_key",
                                 BDShortKeys.OPEN_GUI_KEY.getKey().getDisplayName())
@@ -54,7 +54,7 @@ public class NetCreater extends Item
 
         if (!level.isClientSide())
         {
-            DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+            DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
             if (net != null)
             {
                 return InteractionResultHolder.fail(itemstack);
@@ -62,7 +62,9 @@ public class NetCreater extends Item
 
             DimensionsNet newNet = DimensionsNet.createNewNetForPlayer(player, Long.MAX_VALUE, Integer.MAX_VALUE);
 
-            itemstack.shrink(1);
+            if (!player.getAbilities().instabuild)
+
+                itemstack.shrink(1);
 
             // 在成功创建网络后添加
             level.playSound(null,
@@ -73,7 +75,6 @@ public class NetCreater extends Item
                     SoundSource.PLAYERS,
                     0.8F,
                     1.0F);
-
             // 发送文字提示
             player.sendSystemMessage(Component.translatable("msg.beyonddimensions.network_created"));
 

@@ -21,7 +21,7 @@ public record PickBlockFromNetPacket(ItemStack targetStack)
     {
         Player player = context.getSender();
         if (!player.getMainHandItem().isEmpty()) return;
-        DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+        DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
         if (net == null) return;
         UnifiedStorage storage = net.getUnifiedStorage();
 

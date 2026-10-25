@@ -9,9 +9,24 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.SlotResult;
 
 public class InventoryHelper
 {
+    /**
+     * 按对象本身比较：同一种设备的另一份堆叠不能让旧菜单继续有效。
+     */
+    public static boolean containsExactStack(Player player, ItemStack stack)
+    {
+        if (stack == null || stack.isEmpty()) return false;
+        Inventory inventory = player.getInventory();
+        for (int i = 0; i < inventory.getContainerSize(); i++)
+            if (inventory.getItem(i) == stack) return true;
+        return ModPresence.isLoaded(OtherModIds.CURIOS) && CuriosApi.getCuriosInventory(player)
+                .resolve()
+                .flatMap(handler -> handler.findFirstCurio(candidate -> candidate == stack)).isPresent();
+    }
+
     /**
      * 尝试将传入的物品堆叠插入玩家背包，会修改传入的堆叠。
      * <p>返回的堆叠与传入堆叠为同一引用。
@@ -114,7 +129,7 @@ public class InventoryHelper
                     .flatMap(iCuriosItemHandler ->
                             iCuriosItemHandler.findFirstCurio(stack -> stack.is(item))
                     )
-                    .map(slotResult -> slotResult.stack())
+                    .map(SlotResult::stack)
                     .orElse(null);
         }
 

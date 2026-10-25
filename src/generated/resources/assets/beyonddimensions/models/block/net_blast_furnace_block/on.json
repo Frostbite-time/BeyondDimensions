@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "beyonddimensions:block/net_blast_furnace_block/on/bottom",
+    "east": "beyonddimensions:block/net_blast_furnace_block/on/left",
+    "north": "beyonddimensions:block/net_blast_furnace_block/on/front",
+    "particle": "beyonddimensions:block/net_blast_furnace_block/on/front",
+    "south": "beyonddimensions:block/net_blast_furnace_block/on/back",
+    "up": "beyonddimensions:block/net_blast_furnace_block/on/top",
+    "west": "beyonddimensions:block/net_blast_furnace_block/on/right"
+  }
+}

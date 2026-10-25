@@ -1,28 +1,37 @@
 package com.wintercogs.beyonddimensions.common.item;
 
+import com.wintercogs.beyonddimensions.api.machine.MachineItem;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
-import com.wintercogs.beyonddimensions.common.machine.*;
+import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
+import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
+import com.wintercogs.beyonddimensions.common.machine.BaseMachine;
+import com.wintercogs.beyonddimensions.common.machine.setting.RedStoneControlMode;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public abstract class BaseMachineItem extends NetedItem implements BaseMachine
+/**
+ * 物品机器：设置按机器类型保存在物品上（{@link MachineItem}），过滤槽等格子存在物品 NBT 的 filter_slots 下
+ */
+public abstract class BaseMachineItem extends NetedItem implements BaseMachine, MachineItem
 {
-    public BaseMachineItem(Item.Properties properties)
+    private static final String SLOTS = "slots";
+
+    public BaseMachineItem(Properties properties)
     {
         super(properties);
     }
 
     @Override
-    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected)
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected)
     {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
 
@@ -37,10 +46,40 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
             working(stack, level, entity, slotId, isSelected);
     }
 
+    /**
+     * 补上缺少的数据；设置不需要补，没有存过的设置取默认值
+     */
     public void checkComponents(ItemStack stack)
     {
-        if (!hasControlMode(stack))
-            setControlMode(stack, RedStoneControlMode.IGNORE);
+    }
+
+    /**
+     * 格子数为 capacity 的空格子
+     */
+    protected static void ensureSlots(ItemStack stack, int capacity)
+    {
+        if (!hasFilterSlots(stack))
+            setFilterSlots(stack, new ArrayList<>(Collections.nCopies(capacity, new KeyAmount(ItemStackKey.EMPTY, 0))));
+    }
+
+    /**
+     * 配置卡连同格子（过滤槽、模板）一起复制
+     */
+    @Override
+    public void exportConfig(ItemStack stack, CompoundTag config)
+    {
+        MachineItem.super.exportConfig(stack, config);
+        List<KeyAmount> slots = getFilterSlotsOrDefault(stack, null);
+        if (slots != null)
+            config.put(SLOTS, writeSlots(slots));
+    }
+
+    @Override
+    public void applyConfig(ItemStack stack, CompoundTag config)
+    {
+        MachineItem.super.applyConfig(stack, config);
+        if (config.contains(SLOTS, Tag.TAG_LIST))
+            setFilterSlots(stack, readSlots(config.getList(SLOTS, Tag.TAG_COMPOUND)));
     }
 
     @Override
@@ -59,7 +98,7 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
     @Override
     public RedStoneControlMode getControlMode(ItemStack stack)
     {
-        return getControlModeOrDefault(stack, RedStoneControlMode.IGNORE);
+        return settings(stack).get(BDMachineSettings.WORKING.get());
     }
 
     @Override
@@ -80,238 +119,44 @@ public abstract class BaseMachineItem extends NetedItem implements BaseMachine
 
     }
 
-    // 以下是一些通用辅助方法-作为ItemStack机器控制的快速属性获取，可以随时按模板添加
+    // 格子：物品 NBT 中 filter_slots 下的资源列表
 
-    // 基本：红石控制模式
-    public static RedStoneControlMode getControlModeOrDefault(ItemStack stack, @Nullable RedStoneControlMode defaultValue)
-    {
-        if (stack.hasTag() && stack.getTag().contains("control_mode"))
-        {
-            return RedStoneControlMode.valueOf(stack.getTag().getString("control_mode"));
-        }
-        return defaultValue; //未命中
-    }
-
-    public static void setControlMode(ItemStack stack, RedStoneControlMode newMode)
-    {
-        stack.getOrCreateTag().putString("control_mode", newMode.name());
-    }
-
-    // 检查是否有control_mode的tag
-    public static boolean hasControlMode(ItemStack stack)
-    {
-        return stack.hasTag() && stack.getTag().contains("control_mode");
-    }
-
-    // 通用：过滤模式
-    public static FilterMode getFilterModeOrDefault(ItemStack stack, @Nullable FilterMode defaultValue)
-    {
-        if (stack.hasTag() && stack.getTag().contains("filter_mode"))
-        {
-            return FilterMode.valueOf(stack.getTag().getString("filter_mode"));
-        }
-        return defaultValue; //未命中
-    }
-
-    public static void setFilterMode(ItemStack stack, FilterMode newMode)
-    {
-        stack.getOrCreateTag().putString("filter_mode", newMode.name());
-    }
-
-    public static boolean hasFilterMode(ItemStack stack)
-    {
-        return stack.hasTag() && stack.getTag().contains("filter_mode");
-    }
-
-    // 漏斗：是否收集物品
-    public static HopperItemMode getHopperItemModeOrDefault(ItemStack stack, @Nullable HopperItemMode defaultValue)
-    {
-        if (stack.hasTag() && stack.getTag().contains("hopper_item_mode"))
-        {
-            return HopperItemMode.valueOf(stack.getTag().getString("hopper_item_mode"));
-        }
-        return defaultValue; //未命中
-    }
-
-    public static void setHopperItemMode(ItemStack stack, HopperItemMode newMode)
-    {
-        stack.getOrCreateTag().putString("hopper_item_mode", newMode.name());
-    }
-
-    public static boolean hasHopperItemMode(ItemStack stack)
-    {
-        return stack.hasTag() && stack.getTag().contains("hopper_item_mode");
-    }
-
-    // 漏斗：是否收集经验球
-    public static HopperXpMode getHopperXpModeOrDefault(ItemStack stack, @Nullable HopperXpMode defaultValue)
-    {
-        if (stack.hasTag() && stack.getTag().contains("hopper_xp_mode"))
-        {
-            return HopperXpMode.valueOf(stack.getTag().getString("hopper_xp_mode"));
-        }
-        return defaultValue; //未命中
-    }
-
-    public static void setHopperXpMode(ItemStack stack, HopperXpMode newMode)
-    {
-        stack.getOrCreateTag().putString("hopper_xp_mode", newMode.name());
-    }
-
-    public static boolean hasHopperXpMode(ItemStack stack)
-    {
-        return stack.hasTag() && stack.getTag().contains("hopper_xp_mode");
-    }
-
-    // 漏斗：是否收集NBT物品
-    public static HopperNBTMode getHopperNBTModeOrDefault(ItemStack stack, @Nullable HopperNBTMode defaultValue)
-    {
-        if (stack.hasTag() && stack.getTag().contains("hopper_nbt_mode"))
-        {
-            return HopperNBTMode.valueOf(stack.getTag().getString("hopper_nbt_mode"));
-        }
-        return defaultValue; //未命中
-    }
-
-    public static void setHopperNBTMode(ItemStack stack, HopperNBTMode newMode)
-    {
-        stack.getOrCreateTag().putString("hopper_nbt_mode", newMode.name());
-    }
-
-    public static boolean hasHopperNBTMode(ItemStack stack)
-    {
-        return stack.hasTag() && stack.getTag().contains("hopper_nbt_mode");
-    }
-
-    // 漏斗：是否收集流体
-    public static HopperFluidMode getHopperFluidModeOrDefault(ItemStack stack, @Nullable HopperFluidMode defaultValue)
-    {
-        if (stack.hasTag() && stack.getTag().contains("hopper_fluid_mode"))
-        {
-            return HopperFluidMode.valueOf(stack.getTag().getString("hopper_fluid_mode"));
-        }
-        return defaultValue; //未命中
-    }
-
-    public static void setHopperFluidMode(ItemStack stack, HopperFluidMode newMode)
-    {
-        stack.getOrCreateTag().putString("hopper_fluid_mode", newMode.name());
-    }
-
-    public static boolean hasHopperFluidMode(ItemStack stack)
-    {
-        return stack.hasTag() && stack.getTag().contains("hopper_fluid_mode");
-    }
-
-    // 漏斗：收集范围
-    public static HopperRangeMode getHopperRangeModeOrDefault(ItemStack stack, @Nullable HopperRangeMode defaultValue)
-    {
-        if (stack.hasTag() && stack.getTag().contains("hopper_range_mode"))
-        {
-            return HopperRangeMode.valueOf(stack.getTag().getString("hopper_range_mode"));
-        }
-        return defaultValue; //未命中
-    }
-
-    public static void setHopperRangeMode(ItemStack stack, HopperRangeMode newMode)
-    {
-        stack.getOrCreateTag().putString("hopper_range_mode", newMode.name());
-    }
-
-    public static boolean hasHopperRangeMode(ItemStack stack)
-    {
-        return stack.hasTag() && stack.getTag().contains("hopper_range_mode");
-    }
-
-    // 喂食：喂食模式
-    public static FeederMode getFeederModeOrDefault(ItemStack stack, @Nullable FeederMode defaultValue)
-    {
-        if (stack.hasTag() && stack.getTag().contains("feeder_mode"))
-        {
-            return FeederMode.valueOf(stack.getTag().getString("feeder_mode"));
-        }
-        return defaultValue; //未命中
-    }
-
-    public static void setFeederMode(ItemStack stack, FeederMode newMode)
-    {
-        stack.getOrCreateTag().putString("feeder_mode", newMode.name());
-    }
-
-    public static boolean hasFeederMode(ItemStack stack)
-    {
-        return stack.hasTag() && stack.getTag().contains("feeder_mode");
-    }
-
-    // 补货器：模糊模式
-    public static FuzzyMode getFuzzyModeOrDefault(ItemStack stack, @Nullable FuzzyMode defaultValue)
-    {
-        if (stack.hasTag() && stack.getTag().contains("fuzzy_mode"))
-        {
-            return FuzzyMode.valueOf(stack.getTag().getString("fuzzy_mode"));
-        }
-        return defaultValue;
-    }
-
-    public static void setFuzzyMode(ItemStack stack, FuzzyMode newMode)
-    {
-        stack.getOrCreateTag().putString("fuzzy_mode", newMode.name());
-    }
-
-    public static boolean hasFuzzyMode(ItemStack stack)
-    {
-        return stack.hasTag() && stack.getTag().contains("fuzzy_mode");
-    }
-
-    // 补货器：回收模式
-    public static ReceiveMode getReceiveModeOrDefault(ItemStack stack, @Nullable ReceiveMode defaultValue)
-    {
-        if (stack.hasTag() && stack.getTag().contains("receive_mode"))
-        {
-            return ReceiveMode.valueOf(stack.getTag().getString("receive_mode"));
-        }
-        return defaultValue;
-    }
-
-    public static void setReceiveMode(ItemStack stack, ReceiveMode newMode)
-    {
-        stack.getOrCreateTag().putString("receive_mode", newMode.name());
-    }
-
-    public static boolean hasReceiveMode(ItemStack stack)
-    {
-        return stack.hasTag() && stack.getTag().contains("receive_mode");
-    }
-
-    // 标记槽位：IStackType的列表
     public static List<KeyAmount> getFilterSlotsOrDefault(ItemStack stack, @Nullable List<KeyAmount> defaultValue)
     {
         if (stack.hasTag() && stack.getTag().contains("filter_slots"))
         {
-            ListTag tags = stack.getTag().getList("filter_slots", Tag.TAG_COMPOUND);
-            List<KeyAmount> filterSlots = new ArrayList<>();
-            for (int i = 0; i < tags.size(); i++)
-            {
-                filterSlots.add(KeyAmount.deserializeNBT(tags.getCompound(i)));
-            }
-            return filterSlots;
+            return readSlots(stack.getTag().getList("filter_slots", Tag.TAG_COMPOUND));
         }
         return defaultValue;
     }
 
     public static void setFilterSlots(ItemStack stack, List<KeyAmount> filterSlots)
     {
-        ListTag tags = new ListTag();
-        for (int i = 0; i < filterSlots.size(); i++)
-        {
-            tags.add(KeyAmount.serializeNBT(filterSlots.get(i)));
-        }
-        stack.getOrCreateTag().put("filter_slots", tags);
+        stack.getOrCreateTag().put("filter_slots", writeSlots(filterSlots));
     }
 
     public static boolean hasFilterSlots(ItemStack stack)
     {
         return stack.hasTag() && stack.getTag().contains("filter_slots");
     }
-}
 
+    private static List<KeyAmount> readSlots(ListTag tags)
+    {
+        List<KeyAmount> slots = new ArrayList<>();
+        for (int i = 0; i < tags.size(); i++)
+        {
+            slots.add(KeyAmount.deserializeNBT(tags.getCompound(i)));
+        }
+        return slots;
+    }
+
+    private static ListTag writeSlots(List<KeyAmount> slots)
+    {
+        ListTag tags = new ListTag();
+        for (KeyAmount slot : slots)
+        {
+            tags.add(KeyAmount.serializeNBT(slot));
+        }
+        return tags;
+    }
+}

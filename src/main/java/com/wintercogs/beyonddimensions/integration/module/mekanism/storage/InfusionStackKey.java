@@ -5,6 +5,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackRender;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import mekanism.api.MekanismAPI;
+import mekanism.api.NBTConstants;
 import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.infuse.InfusionStack;
 import net.minecraft.nbt.CompoundTag;
@@ -52,7 +53,7 @@ public final class InfusionStackKey implements IStackKey<InfusionStack>
         this(stack == null ? MekanismAPI.EMPTY_INFUSE_TYPE : stack.getType());
     }
 
-    // ---------------- IStackKey ----------------
+    // ---------------- IStackKey 的实现 ----------------
 
     @Override
     public ResourceLocation getTypeId()
@@ -133,6 +134,13 @@ public final class InfusionStackKey implements IStackKey<InfusionStack>
     {
         var key = MekanismAPI.infuseTypeRegistry().getKey(this.infuseType);
         return key != null ? key.getNamespace() : "unknown";
+    }
+
+    @Override
+    public ResourceLocation getSourceId()
+    {
+        ResourceLocation id = MekanismAPI.infuseTypeRegistry().getKey(this.infuseType);
+        return id != null ? id : getTypeId();
     }
 
     @Override
@@ -259,35 +267,35 @@ public final class InfusionStackKey implements IStackKey<InfusionStack>
         {
             return fromLegacyTypedStack(nbt.getCompound("Stack"));
         }
-        // 新
+        // 新；未注册的灌注类型如实失败，由 IStackKey.deserializeNBTCommon 封装成错误数据
         return readNewFmt(nbt);
     }
 
     private @NotNull IStackKey<InfusionStack> readNewFmt(@NotNull CompoundTag nbt)
     {
-        ResourceLocation id = ResourceLocation.tryParse(nbt.getString("infuse_type"));
-        InfuseType t = (id == null) ? MekanismAPI.EMPTY_INFUSE_TYPE : MekanismAPI.infuseTypeRegistry().getValue(id);
-        if (t == null) t = MekanismAPI.EMPTY_INFUSE_TYPE;
-        return new InfusionStackKey(t);
+        return new InfusionStackKey(registeredInfuseType(nbt.getString("infuse_type")));
     }
 
     private @NotNull IStackKey<InfusionStack> fromLegacyTypedStack(@NotNull CompoundTag stackNbt)
     {
-        try
-        {
-            InfusionStack is = InfusionStack.readFromNBT(stackNbt);
-            if (is.isEmpty())
-            {
-                return EMPTY;
-            }
-
-            InfuseType t = is.getType();
-            return new InfusionStackKey(t);
-        }
-        catch (Throwable t)
+        registeredInfuseType(stackNbt.getString(NBTConstants.INFUSE_TYPE_NAME));
+        InfusionStack is = InfusionStack.readFromNBT(stackNbt);
+        if (is.isEmpty())
         {
             return EMPTY;
         }
+
+        InfuseType t = is.getType();
+        return new InfusionStackKey(t);
+    }
+
+    // 灌注类型 id 对应的灌注类型；未注册的灌注类型如实失败
+    private static InfuseType registeredInfuseType(String name)
+    {
+        ResourceLocation id = ResourceLocation.tryParse(name);
+        if (id == null || !MekanismAPI.infuseTypeRegistry().containsKey(id))
+            throw new IllegalArgumentException("Unknown infuse_type: " + name);
+        return MekanismAPI.infuseTypeRegistry().getValue(id);
     }
 
     @Override

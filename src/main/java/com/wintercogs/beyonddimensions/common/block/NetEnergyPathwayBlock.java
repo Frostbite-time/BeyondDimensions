@@ -11,9 +11,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.Nullable;
 
-public class NetEnergyPathwayBlock extends BaseMachineBlock
+public class NetEnergyPathwayBlock extends SidedMachineBlock
 {
 
     public NetEnergyPathwayBlock(Properties properties)
@@ -28,9 +28,9 @@ public class NetEnergyPathwayBlock extends BaseMachineBlock
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
+    protected InteractionResult useWithoutWrench(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
     {
-        super.use(state, level, pos, player, hand, hitResult);
+        super.useWithoutWrench(state, level, pos, player, hand, hitResult);
         if (!level.isClientSide() && !player.isShiftKeyDown())
         {
             NetworkHooks.openScreen((ServerPlayer) player, (NetEnergyPathwayBlockEntity) level.getBlockEntity(pos), pos);

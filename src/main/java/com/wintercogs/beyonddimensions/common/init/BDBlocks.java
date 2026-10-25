@@ -16,7 +16,8 @@ import java.util.function.Supplier;
 
 public class BDBlocks
 {
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, BDConstants.MODID);
+    public static final DeferredRegister<Block> BLOCKS =
+            DeferredRegister.create(ForgeRegistries.BLOCKS, BDConstants.MODID);
 
     public static final RegistryObject<Block> NET_CONTROL = registerBlock(BDBlockIds.NET_CONTROL,
             () -> new NetControlBlock(BlockBehaviour.Properties.of()
@@ -49,9 +50,13 @@ public class BDBlocks
     public static final RegistryObject<Block> NET_SMOKER_BLOCK = registerBlock(BDBlockIds.NET_SMOKER_BLOCK,
             () -> new NetSmokerBlock(BlockBehaviour.Properties.of().strength(2f)));
 
+    public static final RegistryObject<Block> NET_STOCK_EMITTER = registerBlock(BDBlockIds.NET_STOCK_EMITTER,
+            () -> new NetStockEmitterBlock(BlockBehaviour.Properties.of().strength(2f)));
+
     // 合成材料-维度链接框架
     public static final RegistryObject<Block> DIMENSIONAL_CONNECT_BLOCK = registerBlock(BDBlockIds.DIMENSIONAL_CONNECT_BLOCK,
             () -> new Block(BlockBehaviour.Properties.of().strength(2f)));
+
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block)
     {

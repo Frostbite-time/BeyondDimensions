@@ -1,15 +1,14 @@
 package com.wintercogs.beyonddimensions.common.menu.widget.slot;
 
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey;
-import com.wintercogs.beyonddimensions.common.menu.DimensionsCraftMenu;
+import com.wintercogs.beyonddimensions.common.menu.widget.CraftingWidget;
 import net.minecraft.core.NonNullList;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraftforge.common.ForgeHooks;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,25 +16,43 @@ public class AutoRefillResultSlot extends ResultSlot
 {
 
     private final CraftingContainer craftSlots;
+    private final ResultContainer resultSlots;
     private final Player player;
-    private final DimensionsCraftMenu menu;
+    private final CraftingWidget crafting;
 
-    public AutoRefillResultSlot(DimensionsCraftMenu menu, Player player, CraftingContainer craftSlots, Container container, int slot, int xPosition, int yPosition)
+    public AutoRefillResultSlot(CraftingWidget crafting, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, int slot, int xPosition, int yPosition)
     {
-        super(player, craftSlots, container, slot, xPosition, yPosition);
-        this.menu = menu;
+        super(player, craftSlots, resultSlots, slot, xPosition, yPosition);
+        this.crafting = crafting;
         this.player = player;
         this.craftSlots = craftSlots;
+        this.resultSlots = resultSlots;
+    }
+
+    public AutoRefillResultSlot(CraftingWidget crafting, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, int slot)
+    {
+        this(crafting, player, craftSlots, resultSlots, slot, 0, 0);
     }
 
     @Override
-    public void onTake(@NotNull Player player, @NotNull ItemStack stack)
+    public void onTake(@NotNull Player player, @NotNull ItemStack craftedStack)
     {
-        this.checkTakeAchievements(stack);
+        if (player.level().isClientSide()) return;
+
+        // 发放进度时原版会清掉产物槽记录的配方，剩余物要按这份配方算，先取出来
+        Recipe<?> recipe = resultSlots.getRecipeUsed();
+        this.checkTakeAchievements(craftedStack);
+
         ForgeHooks.setCraftingPlayer(player);
-        NonNullList<ItemStack> remainingItems = player.level().getRecipeManager().getRemainingItemsFor(RecipeType.CRAFTING, this.craftSlots, player.level());
+        NonNullList<ItemStack> remainingItems = crafting.remainingItems(recipe, craftSlots);
         ForgeHooks.setCraftingPlayer(null);
 
+        crafting.consumeIngredients(() -> consumeIngredients(player, remainingItems));
+    }
+
+    // 扣除一次合成的原料并放回剩余物
+    private void consumeIngredients(Player player, NonNullList<ItemStack> remainingItems)
+    {
         // 一般而言，此函数每次调用最多完成一次合成
         int craftTimes = 1;
 
@@ -54,7 +71,7 @@ public class AutoRefillResultSlot extends ResultSlot
                     ItemStackKey toRemoveKey = new ItemStackKey(slotStack);
 
                     // 优先尝试存储系统
-                    int extracted = (int) menu.storage.extract(toRemoveKey, itemsToRemove, false, false).amount();
+                    int extracted = (int) crafting.storage().extract(toRemoveKey, itemsToRemove, false, false).amount();
                     itemsToRemove -= extracted;
 
                     // 存储系统不足时尝试玩家背包
@@ -98,7 +115,7 @@ public class AutoRefillResultSlot extends ResultSlot
                 // 继续填入存储
                 if (remainderCount > 0)
                 {
-                    remainderCount = (int) menu.storage.insert(remainderKey, remainderCount, false).amount();
+                    remainderCount = (int) crafting.storage().insert(remainderKey, remainderCount, false).amount();
                 }
                 // 随后填充玩家背包
                 if (remainderCount > 0)
@@ -114,9 +131,5 @@ public class AutoRefillResultSlot extends ResultSlot
                 }
             }
         }
-
-        // 触发合成网格更新
-        menu.slotChangedCraftingGrid(menu, player.level(), player, craftSlots, (ResultContainer) this.container, this.index);
     }
-
 }

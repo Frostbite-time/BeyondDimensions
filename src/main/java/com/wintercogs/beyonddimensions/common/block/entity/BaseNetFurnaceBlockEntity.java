@@ -12,15 +12,19 @@ import com.wintercogs.beyonddimensions.api.util.CombinedItemHandlerWrapper;
 import com.wintercogs.beyonddimensions.common.block.BaseNetFurnaceBlock;
 import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
+import com.wintercogs.beyonddimensions.common.init.BDMachineSettings;
 import com.wintercogs.beyonddimensions.common.item.MatterCompressionBall;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
-import com.wintercogs.beyonddimensions.common.machine.AutoSortMode;
-import com.wintercogs.beyonddimensions.common.machine.PopMode;
-import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
+import com.wintercogs.beyonddimensions.common.machine.MachineSides;
+import com.wintercogs.beyonddimensions.common.machine.setting.AutoSortMode;
+import com.wintercogs.beyonddimensions.common.machine.setting.PopMode;
+import com.wintercogs.beyonddimensions.common.machine.setting.ReceiveMode;
+import com.wintercogs.beyonddimensions.common.machine.setting.SideMode;
 import com.wintercogs.beyonddimensions.common.menu.NetFurnaceMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
@@ -44,14 +48,16 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe> extends BaseMachineBlockEntity implements MenuProvider
+public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe> extends BaseMachineBlockEntity
+        implements MenuProvider
 {
-    private LazyOptional<IItemHandler> opt = LazyOptional.empty();
+    // 按面缓存的物品能力，面配置改变或方块移除时作废
+    private final Map<Direction, LazyOptional<IItemHandler>> itemCaps = new HashMap<>();
 
     /**
      * 同时处理的任务格数
@@ -83,20 +89,54 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         return fuelCapacity;
     }
 
+    private static final String INPUT_FILTERS = "input_filters";
+    private static final String FUEL_FILTERS = "fuel_filters";
+
     /**
      * 是否弹出输出物
      */
-    public PopMode popMode = PopMode.STOP;
+    public PopMode popMode()
+    {
+        return setting(BDMachineSettings.POP.get());
+    }
 
     /**
      * 是否将输出物送回网络
      */
-    public ReceiveMode receiveMode = ReceiveMode.STOP;
+    public ReceiveMode receiveMode()
+    {
+        return setting(BDMachineSettings.RECEIVE.get());
+    }
 
     /**
      * 自动整理内容物
      */
-    public AutoSortMode sortMode = AutoSortMode.STOP;
+    public AutoSortMode sortMode()
+    {
+        return setting(BDMachineSettings.SORT.get());
+    }
+
+    /**
+     * 配置卡连同原料与燃料的过滤槽一起复制
+     */
+    @Override
+    public void exportConfig(CompoundTag config)
+    {
+        super.exportConfig(config);
+        config.put(INPUT_FILTERS, inputFilterSlots.serializeNBT());
+        config.put(FUEL_FILTERS, fuelFilterSlots.serializeNBT());
+    }
+
+    @Override
+    public void applyConfig(CompoundTag config)
+    {
+        super.applyConfig(config);
+        if (config.contains(INPUT_FILTERS, Tag.TAG_COMPOUND))
+            inputFilterSlots.deserializeNBT(config.getCompound(INPUT_FILTERS));
+        if (config.contains(FUEL_FILTERS, Tag.TAG_COMPOUND))
+            fuelFilterSlots.deserializeNBT(config.getCompound(FUEL_FILTERS));
+        setChanged();
+    }
 
     private final RecipeType<R> recipeType;
     private final Component displayName;
@@ -122,11 +162,6 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         return litTime;
     }
 
-    public void setLitTime(List<Integer> litTime)
-    {
-        this.litTime = litTime;
-    }
-
     /**
      * 槽位燃料总 tick
      */
@@ -135,11 +170,6 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
     public List<Integer> getLitDuration()
     {
         return litDuration;
-    }
-
-    public void setLitDuration(List<Integer> litDuration)
-    {
-        this.litDuration = litDuration;
     }
 
     /**
@@ -152,11 +182,6 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         return cookTime;
     }
 
-    public void setCookTime(List<Integer> cookTime)
-    {
-        this.cookTime = cookTime;
-    }
-
     /**
      * 槽位配方所需 tick
      */
@@ -165,11 +190,6 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
     public List<Integer> getCookTimeTotal()
     {
         return cookTimeTotal;
-    }
-
-    public void setCookTimeTotal(List<Integer> cookTimeTotal)
-    {
-        this.cookTimeTotal = cookTimeTotal;
     }
 
     /**
@@ -196,6 +216,7 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
     {
         return inputFilterSlots;
     }
+
 
     /**
      * 燃料标记
@@ -224,6 +245,7 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
     {
         return fuelFilterSlots;
     }
+
 
     /**
      * 输入存储
@@ -334,58 +356,76 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
     {
         if (cap != ForgeCapabilities.ITEM_HANDLER)
             return super.getCapability(cap, side);
-
-        // 遍历注册的能力映射表
-        ItemStackTypedHandler inputStorage = new ItemStackTypedHandler(inputStorageSlots)
-        {
-            @Override
-            public @NotNull ItemStack extractItem(int slot, int count, boolean sim)
-            {
-                return ItemStack.EMPTY; //禁止提取
-            }
-        };
-
-        ItemStackTypedHandler fuelStorage = new ItemStackTypedHandler(fuelStorageSlots)
-        {
-            @Override
-            public @NotNull ItemStack extractItem(int slot, int count, boolean sim)
-            {
-                return ItemStack.EMPTY; //禁止提取
-            }
-        };
-
-        ItemStackTypedHandler outputStorage = new ItemStackTypedHandler(outputStorageSlots)
-        {
-            @Override
-            public @NotNull ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
-            {
-                return itemStack; //禁止插入
-            }
-        };
-
-        ItemStackTypedHandler fuelReturn = new ItemStackTypedHandler(fuelReturnSlots)
-        {
-            @Override
-            public @NotNull ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
-            {
-                return itemStack; //禁止插入
-            }
-        };
-
-        if (!opt.isPresent())
-        {
-            CombinedItemHandlerWrapper finalHandler = new CombinedItemHandlerWrapper(new ItemStackTypedHandler[]{inputStorage, fuelStorage, outputStorage, fuelReturn});
-            opt = LazyOptional.of(() -> finalHandler).cast();
-        }
-        return opt.cast();
+        return itemCaps.computeIfAbsent(side, s -> {
+            IItemHandler handler = itemHandlerFor(s);
+            return handler == null ? LazyOptional.empty() : LazyOptional.of(() -> handler);
+        }).cast();
     }
 
     @Override
     public void invalidateCaps()
     {
         super.invalidateCaps();
-        opt.invalidate();
-        opt = LazyOptional.empty();
+        clearCapCache();
+    }
+
+    // 作废各面的能力，相邻方块随之重新获取
+    private void clearCapCache()
+    {
+        itemCaps.values().forEach(cap -> {
+            if (cap.isPresent()) cap.invalidate();
+        });
+        itemCaps.clear();
+    }
+
+    // 按面限制：能放入的面露出原料与燃料，能取出的面露出产物与返还容器，禁用的面没有能力
+    protected @Nullable IItemHandler itemHandlerFor(@Nullable Direction side)
+    {
+        SideMode mode = MachineSides.mode(this, side);
+        List<IItemHandler> parts = new ArrayList<>(4);
+        if (mode.allowsInput())
+        {
+            parts.add(insertOnly(inputStorageSlots));
+            parts.add(insertOnly(fuelStorageSlots));
+        }
+        if (mode.allowsOutput())
+        {
+            parts.add(extractOnly(outputStorageSlots));
+            parts.add(extractOnly(fuelReturnSlots));
+        }
+        return parts.isEmpty() ? null : new CombinedItemHandlerWrapper(parts.toArray(IItemHandler[]::new));
+    }
+
+    private static IItemHandler insertOnly(StackHandler slots)
+    {
+        return new ItemStackTypedHandler(slots)
+        {
+            @Override
+            public @NotNull ItemStack extractItem(int slot, int count, boolean sim)
+            {
+                return ItemStack.EMPTY; //禁止提取
+            }
+        };
+    }
+
+    private static IItemHandler extractOnly(StackHandler slots)
+    {
+        return new ItemStackTypedHandler(slots)
+        {
+            @Override
+            public @NotNull ItemStack insertItem(int slot, ItemStack itemStack, boolean sim)
+            {
+                return itemStack; //禁止插入
+            }
+        };
+    }
+
+    // 面配置可能变了，相邻方块要重新取能力
+    @Override
+    protected void onSettingsChanged()
+    {
+        super.onSettingsChanged();
+        clearCapCache();
     }
 
     @Override
@@ -432,18 +472,14 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
                     if (!inputStorageSlots.getStackBySlot(inputSlot).isEmpty()) break; // 如果已经插入过则直接跳过
                     if (!(filterStack.key() instanceof ItemStackKey filterItem) || filterItem.isEmpty()) continue;
 
-                    KeyAmount extracted = storage.extract(filterItem, filterItem.getVanillaMaxStackSize(), false, false);
-                    if (extracted.isEmpty()) continue;
-
-                    KeyAmount remaining = inputStorageSlots.insert(inputSlot, extracted.key(), extracted.amount(), false);
-                    if (!remaining.isEmpty())
-                    {
-                        storage.insert(remaining.key(), remaining.amount(), false);
-                    }
+                    int slot = inputSlot;
+                    storage.extractInto(filterItem, filterItem.getVanillaMaxStackSize(), false,
+                            offer -> offer.amount() - inputStorageSlots.insert(slot, offer.key(), offer.amount(), true).amount(),
+                            taken -> inputStorageSlots.insert(slot, taken.key(), taken.amount(), false).amount());
                 }
             }
             // 2.如果开启了自动整理，则每tick进行一次快速整理
-            if (sortMode == AutoSortMode.OPEN)
+            if (sortMode() == AutoSortMode.OPEN)
             {
                 long[] amounts = new long[capacity]; //种类数量
                 Map<IStackKey<?>, List<Integer>> groupSlots = new HashMap<>(); // 所属槽位
@@ -535,14 +571,10 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
                     if (filterStack.isEmpty()) continue;
                     if (!fuelStorageSlots.getStackBySlot(fuelSlot).isEmpty()) break; // 如果已经插入过则直接跳过
 
-                    KeyAmount extracted = storage.extract(filterStack.key(), filterStack.key().getVanillaMaxStackSize(), false, false);
-                    if (extracted.isEmpty()) continue;
-
-                    KeyAmount remaining = fuelStorageSlots.insert(fuelSlot, extracted.key(), extracted.amount(), false);
-                    if (!remaining.isEmpty())
-                    {
-                        storage.insert(remaining.key(), remaining.amount(), false);
-                    }
+                    int slot = fuelSlot;
+                    storage.extractInto(filterStack.key(), filterStack.key().getVanillaMaxStackSize(), false,
+                            offer -> offer.amount() - fuelStorageSlots.insert(slot, offer.key(), offer.amount(), true).amount(),
+                            taken -> fuelStorageSlots.insert(slot, taken.key(), taken.amount(), false).amount());
                 }
             }
         }
@@ -675,10 +707,12 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         // 优先弹出，再转移
 
         ArrayList<IItemHandler> otherStorages = new ArrayList<>();
-        if (popMode == PopMode.OPEN)
+        if (popMode() == PopMode.OPEN)
         {
             for (Direction dir : Direction.values())
             {
+                // 只送往允许输出的面
+                if (!MachineSides.mode(this, dir).allowsOutput()) continue;
                 BlockPos targetPos = this.getBlockPos().relative(dir);
                 BlockEntity neighbor = level.getBlockEntity(targetPos);
                 if (neighbor == null || neighbor instanceof NetedBlockEntity) continue;
@@ -689,7 +723,7 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         }
 
         // 此处的net用于后续收入网络，如果接受模式未打开，此处net直接给null，后续跳过收入网络
-        var net = receiveMode == ReceiveMode.OPEN ? getNet() : null;
+        var net = receiveMode() == ReceiveMode.OPEN ? getNet() : null;
         UnifiedStorage storage = net == null ? null : net.getUnifiedStorage();
 
         // 输出槽处理
@@ -825,7 +859,7 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
 
     private void awardStoredExperience(Player player)
     {
-        if (level == null || level.isClientSide() || receiveMode == ReceiveMode.OPEN || storedExperience <= 0.0D)
+        if (level == null || level.isClientSide() || receiveMode() == ReceiveMode.OPEN || storedExperience <= 0.0D)
             return;
 
         // 与原版熔炉一致：总经验的小数部分按概率向上取整。
@@ -869,7 +903,7 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
 
         if (dropList.isEmpty()) return;
 
-        ItemStack ball = new ItemStack(BDItems.MATTER_COMPRESS_BALL.get(), 1);
+        ItemStack ball = new ItemStack(BDItems.MATTER_COMPRESS_BALL.get());
         MatterCompressionBall.setIStackList(ball, dropList);
         Block.popResource(level, getBlockPos(), ball);
     }
@@ -889,9 +923,6 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         this.litDuration = Arrays.stream(tag.getIntArray("lit_duration")).boxed().collect(Collectors.toList());
         this.cookTime = Arrays.stream(tag.getIntArray("cook_time")).boxed().collect(Collectors.toList());
         this.cookTimeTotal = Arrays.stream(tag.getIntArray("cook_time_total")).boxed().collect(Collectors.toList());
-        this.popMode = PopMode.valueOf(tag.getString("pop_mode"));
-        this.receiveMode = ReceiveMode.valueOf(tag.getString("receive_mode"));
-        this.sortMode = tag.contains("sort_mode") ? AutoSortMode.valueOf(tag.getString("sort_mode")) : AutoSortMode.STOP;
         double loadedExperience = tag.getDouble("stored_experience");
         this.storedExperience = Double.isFinite(loadedExperience) && loadedExperience > 0.0D ? loadedExperience : 0.0D;
     }
@@ -910,9 +941,6 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
         tag.putIntArray("lit_duration", litDuration);
         tag.putIntArray("cook_time", cookTime);
         tag.putIntArray("cook_time_total", cookTimeTotal);
-        tag.putString("pop_mode", this.popMode.name());
-        tag.putString("receive_mode", this.receiveMode.name());
-        tag.putString("sort_mode", this.sortMode.name());
         tag.putDouble("stored_experience", this.storedExperience);
     }
 
@@ -926,12 +954,12 @@ public abstract class BaseNetFurnaceBlockEntity<R extends AbstractCookingRecipe>
             level.setBlock(
                     worldPosition,
                     state.setValue(BaseNetFurnaceBlock.LIT, lit),
-                    Block.UPDATE_CLIENTS        // 仅通知客户端 + 保存到区块
+                    Block.UPDATE_CLIENTS
             );
-            // 如果方块附带其他 NBT 数据，也别忘了：
             setChanged(level, worldPosition, state);
         }
     }
+
 
     @Override
     public @NotNull Component getDisplayName()

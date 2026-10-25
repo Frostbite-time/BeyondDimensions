@@ -30,7 +30,8 @@ public class EnergyStackKey extends LongStackKey<EnergyType>
         this.stack = new EnergyType(0);
     }
 
-    // ---------------- IStackKey ----------------
+    // ---------------- IStackKey 必要实现 ----------------
+
     @Override
     public @Nullable KeyAmount fromStackObject(Object stack)
     {
@@ -100,6 +101,9 @@ public class EnergyStackKey extends LongStackKey<EnergyType>
         return Stream.empty();
     }
 
+    // ---------------- 网络序列化 ----------------
+    // 只写入 typeId；deserialize 时直接返回单例
+
     @Override
     public void serialize(FriendlyByteBuf buf)
     {
@@ -111,6 +115,9 @@ public class EnergyStackKey extends LongStackKey<EnergyType>
         return INSTANCE;
     }
 
+    // ---------------- NBT 读写 ----------------
+    // 仅写 Type；读取时直接返回单例。旧 LongType 是纯 long，可直接忽略。
+
     @Override
     public @NotNull CompoundTag serializeNBT()
     {
@@ -120,8 +127,11 @@ public class EnergyStackKey extends LongStackKey<EnergyType>
     @Override
     public @NotNull EnergyStackKey deserializeNBT(CompoundTag nbt)
     {
+        // 无论旧/新，都统一成单例 Key（旧数据里的 Amount 属于值层，不参与 Key）
         return INSTANCE;
     }
+
+    // ---------------- 渲染支持 ----------------
 
     @Override
     public @NotNull IStackRender getRender()

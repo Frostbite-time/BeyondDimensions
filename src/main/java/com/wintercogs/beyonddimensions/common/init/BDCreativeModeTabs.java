@@ -41,9 +41,11 @@ public class BDCreativeModeTabs
                         output.accept(BDItems.NET_FEEDER_ITEM.get());
                         output.accept(BDItems.NET_RESTOCKER_ITEM.get());
                         output.accept(BDItems.XP_EXCHANGE_ITEM.get());
+                        output.accept(BDItems.MACHINE_CONFIG_CARD.get());
 
                         for (BDFluids.FluidEntry e : BDFluids.ALL)
-                        { //注册所有桶
+                        {
+                            //注册所有桶
                             output.accept((Item) e.bucket().get());
                         }
 
@@ -55,7 +57,7 @@ public class BDCreativeModeTabs
             "beyond_dimensions_blocks_tab",
             () -> CreativeModeTab.builder()
                     .icon(() -> new ItemStack(BDBlocks.NET_CONTROL.get()))
-                    .withTabsBefore(ResourceLocation.tryBuild(BDConstants.MODID, "beyond_dimensions_items_tab"))
+                    .withTabsBefore(new ResourceLocation(BDConstants.MODID, "beyond_dimensions_items_tab"))
                     .title(Component.translatable("creativetab.beyonddimensions.blocks"))
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(BDBlocks.NET_CONTROL.get());
@@ -68,7 +70,9 @@ public class BDCreativeModeTabs
                         output.accept(BDBlocks.NET_FURNACE_BLOCK.get());
                         output.accept(BDBlocks.NET_BLAST_FURNACE_BLOCK.get());
                         output.accept(BDBlocks.NET_SMOKER_BLOCK.get());
+                        output.accept(BDBlocks.NET_STOCK_EMITTER.get());
                         output.accept(BDBlocks.DIMENSIONAL_CONNECT_BLOCK.get());
+
 
                         IntegrationManager.onBlockCreativeTabCollect(itemDisplayParameters, output);
                     })

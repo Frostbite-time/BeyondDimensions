@@ -4,17 +4,20 @@ import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.datagen.util.BDBlockStateProvider;
 import com.wintercogs.beyonddimensions.integration.module.create.init.CreateModuleBlocks;
 import net.minecraft.data.PackOutput;
+import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import org.jetbrains.annotations.NotNull;
 
 public class CreateModuleBlockStateProvider extends BDBlockStateProvider
 {
+
     public CreateModuleBlockStateProvider(PackOutput output, ExistingFileHelper exFileHelper)
     {
         super(output, exFileHelper);
     }
 
     @Override
-    public String getName()
+    public @NotNull String getName()
     {
         return "BeyondDimensions CreateModule BlockState Provider";
     }
@@ -22,6 +25,9 @@ public class CreateModuleBlockStateProvider extends BDBlockStateProvider
     @Override
     protected void registerStatesAndModels()
     {
-        simpleBlockItem(CreateModuleBlocks.SCHEMATICANNON_PATHWAY.get(), models().getExistingFile(BeyondDimensions.makeId("schematicannon_pathway")));
+        // 手写的模型，正面（图纸面）朝北，方块状态按朝向转动
+        ModelFile model = models().getExistingFile(BeyondDimensions.makeId("schematicannon_pathway"));
+        orientedBlock(CreateModuleBlocks.SCHEMATICANNON_PATHWAY.get(), state -> model);
+        simpleBlockItem(CreateModuleBlocks.SCHEMATICANNON_PATHWAY.get(), model);
     }
 }

@@ -66,6 +66,14 @@ public interface IStackKey<T>
     String getModId();
 
     /**
+     * 获取资源自身的 id，如物品 id、流体 id；能量这类没有注册表的资源默认返回 {@link #getTypeId()}
+     */
+    default ResourceLocation getSourceId()
+    {
+        return getTypeId();
+    }
+
+    /**
      * 判断堆叠是否为空堆叠
      */
     boolean isEmpty();
@@ -114,6 +122,14 @@ public interface IStackKey<T>
      * 检查2个实例是否能模糊匹配，即：2个物品，是否为同一种物品，不管NBT等数据
      */
     boolean isSame(IStackKey<?> other);
+
+    /**
+     * 模糊匹配的分组：{@link #isSame} 为真的两个键，类型 id 与分组必须都相等。默认为 {@link #getSource()}
+     */
+    default Object fuzzyGroup()
+    {
+        return getSource();
+    }
 
     /**
      * 检查2个实例是否能精确匹配，即：2个物品，种类、NBT等数据是否一致
@@ -172,14 +188,23 @@ public interface IStackKey<T>
     }
 
     /**
-     * 从NBT中解析key
+     * 严格地从NBT中解析key，根据StackKeyRegistry分发到对应子类；类型未注册或数据有误时解析失败（可能抛出异常）
      */
     @NotNull
-    static IStackKey<?> deserializeNBTCommon(CompoundTag nbt)
+    static IStackKey<?> deserializeNBTStrict(CompoundTag nbt)
     {
         ResourceLocation typeId = ResourceLocation.tryParse(nbt.getString("type"));
         IStackKey<?> typeStack = StackKeyRegistry.getType(typeId);
         return typeStack.deserializeNBT(nbt.getCompound("stack"));
+    }
+
+    /**
+     * 存档用的解析：解析不了的资源原样封装成错误数据而不是失败，解析到错误数据时尝试还原，见 {@link ErrorData}
+     */
+    @NotNull
+    static IStackKey<?> deserializeNBTCommon(CompoundTag nbt)
+    {
+        return ErrorData.lenient(IStackKey::deserializeNBTStrict, nbt);
     }
 
     /**

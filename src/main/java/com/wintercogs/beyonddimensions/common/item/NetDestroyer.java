@@ -58,12 +58,13 @@ public class NetDestroyer extends NetedItem
                 DimensionsNet itemNet = DimensionsNet.getNetFromId(NetedItem.getNetId(stack));
                 if (itemNet != null)
                 {
-                    DimensionsNet playerNet = DimensionsNet.getNetFromPlayer(player);
+                    DimensionsNet playerNet = DimensionsNet.getPrimaryNetFromPlayer(player);
                     // 只有网络主人能删除自己的网络
                     if (playerNet != null && playerNet.getId() == itemNet.getId() && playerNet.isOwner(player))
                     {
                         playerNet.destroySelf();
-                        stack.shrink(1);
+                        if (!player.getAbilities().instabuild)
+                            stack.shrink(1);
                         player.sendSystemMessage(Component.translatable("msg.beyonddimensions.item_net_destroyed"));
                     }
                     else

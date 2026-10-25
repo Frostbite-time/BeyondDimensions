@@ -94,7 +94,9 @@ public final class ModuleRegistry
             return null;
         }
 
-        return new ModuleSpec(modId, annotationData.clazz().getClassName());
+        // 扫描数据里只有写出来的注解值，没写 versionRange 时不限版本
+        String versionRange = annotationData.annotationData().get("versionRange") instanceof String range ? range : "";
+        return new ModuleSpec(modId, versionRange, annotationData.clazz().getClassName());
     }
 
     private static List<ModuleSpec> deduplicateByClassName(List<ModuleSpec> modules)

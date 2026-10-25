@@ -25,14 +25,15 @@ public class NetMemberInviter extends NetedItem implements IAddNetMemberHandler
         }
         if (!level.isClientSide())
         {
-            if (DimensionsNet.getNetFromPlayer(player) == null)
+            if (DimensionsNet.getPrimaryNetFromPlayer(player) == null)
             {
                 if (NetedItem.getNetId(itemstack) >= 0)
                 {
                     boolean flag = AddPlayerToNet(DimensionsNet.getNetFromId(NetedItem.getNetId(itemstack)), player);
                     if (flag)
                     {
-                        itemstack.shrink(1);
+                        if (!player.getAbilities().instabuild)
+                            itemstack.shrink(1);
                     }
                 }
             }

@@ -17,9 +17,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+
+/**
+ * 向持有者所在的网络中添加100个不重复的随机物品
+ */
 public class TestItem_ItemGenerate extends Item
 {
-    public TestItem_ItemGenerate(Item.Properties properties)
+    public TestItem_ItemGenerate(Properties properties)
     {
         super(properties);
     }
@@ -30,7 +34,7 @@ public class TestItem_ItemGenerate extends Item
     {
         if (!level.isClientSide())
         {
-            DimensionsNet net = DimensionsNet.getNetFromPlayer(player);
+            DimensionsNet net = DimensionsNet.getPrimaryNetFromPlayer(player);
             if (net != null)
             {
                 UnifiedStorage storage = net.getUnifiedStorage();

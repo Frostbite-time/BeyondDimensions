@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.common.item;
 
-import com.wintercogs.beyonddimensions.common.machine.XpTransferSpeedMode;
+import com.wintercogs.beyonddimensions.common.machine.setting.XpTransferSpeedMode;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 

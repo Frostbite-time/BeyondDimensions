@@ -1,9 +1,9 @@
 package com.wintercogs.beyonddimensions.network.packet.c2s;
 
 import com.wintercogs.beyonddimensions.common.menu.PrimaryNetSwitcherMenu;
+import com.wintercogs.beyonddimensions.common.menu.SwitchMenuProvider;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -19,10 +19,10 @@ public record OpenPrimaryNetSwitcherPacket()
             return;
         }
 
-        player.openMenu(new SimpleMenuProvider(
+        new SwitchMenuProvider(
                 (containerId, playerInventory, ignoredPlayer) -> new PrimaryNetSwitcherMenu(containerId, playerInventory),
                 Component.translatable("menu.title.beyonddimensions.primary_net_switcher")
-        ));
+        ).open(player);
     }
 
     public static void handle(OpenPrimaryNetSwitcherPacket packet, Supplier<NetworkEvent.Context> cxt)

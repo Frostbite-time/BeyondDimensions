@@ -1,12 +1,19 @@
 package com.wintercogs.beyonddimensions.datagen;
 
-import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
+import com.wintercogs.beyonddimensions.common.block.BaseNetFurnaceBlock;
+import com.wintercogs.beyonddimensions.common.block.NetStockEmitterBlock;
 import com.wintercogs.beyonddimensions.common.init.BDBlocks;
+import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.datagen.util.BDBlockStateProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class ModBlockStateProvider extends BDBlockStateProvider
 {
@@ -25,18 +32,26 @@ public class ModBlockStateProvider extends BDBlockStateProvider
     @Override
     protected void registerStatesAndModels()
     {
-        blockWithItem(BDBlocks.NET_CONTROL);
-        blockWithItem(BDBlocks.NET_INTERFACE);
-        blockWithItem(BDBlocks.NET_PATHWAY);
-        blockWithItem(BDBlocks.NET_ENERGY_PATHWAY);
-        blockWithItem(BDBlocks.DIMENSIONAL_CONNECT_BLOCK);
-        // obj方块 自编写json 仅注册物品
-        simpleBlockItem(BDBlocks.NET_TERMINAL_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BDConstants.MODID, "net_terminal_block")));
-        simpleBlockItem(BDBlocks.NET_PUMP_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BDConstants.MODID, "net_pump_block")));
-        simpleBlockItem(BDBlocks.NET_HOPPER_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BDConstants.MODID, "net_hopper_block")));
-        simpleBlockItem(BDBlocks.NET_FURNACE_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BDConstants.MODID, "net_furnace_block")));
-        simpleBlockItem(BDBlocks.NET_BLAST_FURNACE_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BDConstants.MODID, "net_blast_furnace_block")));
-        simpleBlockItem(BDBlocks.NET_SMOKER_BLOCK.get(), models().getExistingFile(ResourceLocation.tryBuild(BDConstants.MODID, "net_smoker_block")));
+        // 六面完整方块：贴图在 textures/block/<方块 id>/ 下按面分开，见 SixFacedBlock
+        sixFaced(BDBlocks.NET_CONTROL).build();
+        sixFaced(BDBlocks.NET_INTERFACE).build();
+        sixFaced(BDBlocks.NET_PATHWAY).build();
+        sixFaced(BDBlocks.NET_ENERGY_PATHWAY).build();
+        sixFaced(BDBlocks.DIMENSIONAL_CONNECT_BLOCK).build();
+        for (RegistryObject<? extends Block> furnace : List.of(BDBlocks.NET_FURNACE_BLOCK, BDBlocks.NET_BLAST_FURNACE_BLOCK, BDBlocks.NET_SMOKER_BLOCK))
+            sixFaced(furnace).appearance(state -> state.getValue(BaseNetFurnaceBlock.LIT) ? "on" : "off").build();
+        sixFaced(BDBlocks.NET_STOCK_EMITTER).appearance(state -> state.getValue(NetStockEmitterBlock.POWERED) ? "on" : "off").build();
+        // 终端是一块薄板，模型自己写，北面贴着方块
+        ModelFile terminal = models().getExistingFile(BeyondDimensions.makeId("net_terminal_block"));
+        orientedBlock(BDBlocks.NET_TERMINAL_BLOCK.get(), state -> terminal);
+        simpleBlockItem(BDBlocks.NET_TERMINAL_BLOCK.get(), terminal);
+        // 其他模型自己写的方块只注册物品
+        simpleBlockItem(BDBlocks.NET_PUMP_BLOCK.get(), models().getExistingFile(BeyondDimensions.makeId("net_pump_block")));
+        simpleBlockItem(BDBlocks.NET_HOPPER_BLOCK.get(), models().getExistingFile(BeyondDimensions.makeId("net_hopper_block")));
+        // 流体方块的模型只提供粒子贴图，与原版的水、岩浆相同
+        for (BDFluids.FluidEntry<?, ?> fluid : BDFluids.ALL)
+        {
+            simpleBlock(fluid.block().get(), models().getBuilder(fluid.name()).texture("particle", modLoc("block/" + fluid.name() + "_still")));
+        }
     }
-
 }

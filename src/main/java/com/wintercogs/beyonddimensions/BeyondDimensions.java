@@ -12,7 +12,10 @@ import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.EnergyHandl
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.FluidHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.ItemHandlerWrapper;
 import com.wintercogs.beyonddimensions.api.capability.helper.wrapper.StackHandlerWrapperHelper;
+import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
+import com.wintercogs.beyonddimensions.api.registry.BDRegistries;
+import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
@@ -24,6 +27,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -33,7 +37,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
-
 
 @Mod(BDConstants.MODID)
 public class BeyondDimensions
@@ -56,26 +59,33 @@ public class BeyondDimensions
         MOD_EVENT_BUS = modEventBus;
         MinecraftForge.EVENT_BUS.register(this);
         Config.register(ModLoadingContext.get(), modEventBus);
+
         modEventBus.addListener(this::commonSetup);
+        BDRegistries.register(modEventBus);
+        // 所有已载入网络共用一个刻处理；标签重载后各存储的标签索引按需重建
+        MinecraftForge.EVENT_BUS.addListener(DimensionsNet::tickLoaded);
+        MinecraftForge.EVENT_BUS.addListener(DimensionsNet::forgetLoaded);
+        MinecraftForge.EVENT_BUS.addListener((TagsUpdatedEvent event) -> AbstractUnorderedStackHandler.invalidateTagIndexes());
 
-        // 注册Menu
         BDMenus.register(modEventBus);
-        // 注册创造模式菜单
         BDCreativeModeTabs.register(modEventBus);
-        // 注册物品
         BDItems.register(modEventBus);
-        // 注册方块
         BDBlocks.register(modEventBus);
-        // 注册流体
         BDFluids.register(modEventBus);
-        // 注册方块实体
         BDBlockEntities.register(modEventBus);
+        BDAttachments.register(modEventBus);
+        BDMachineSettings.register(modEventBus);
+        BDMachineTypes.register(modEventBus);
+        BDNetDataTypes.register(modEventBus);
+        BDNetTasks.register();
+        BDStorageRules.register();
+        BDWorkbenchTypes.register();
 
+        // 分发集成模块
         IntegrationManager.bootstrapCommon(modEventBus, MinecraftForge.EVENT_BUS);
+        // 1.20.1 没有只在客户端加载的模组入口，客户端的初始化从这里进入
         if (FMLEnvironment.dist == Dist.CLIENT)
-        {
             BeyondDimensionsClient.clientInit(modEventBus, MinecraftForge.EVENT_BUS);
-        }
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
@@ -91,8 +101,7 @@ public class BeyondDimensions
         CapabilityHelper.BlockCapabilityMap.put(ItemStackKey.ID, ForgeCapabilities.ITEM_HANDLER);
         CapabilityHelper.BlockCapabilityMap.put(FluidStackKey.ID, ForgeCapabilities.FLUID_HANDLER);
         CapabilityHelper.BlockCapabilityMap.put(EnergyStackKey.ID, ForgeCapabilities.ENERGY);
-
-        // 注册物品能力类型
+        // 注册物品能力，用于动态操作
         CapabilityHelper.ItemCapabilityMap.put(ItemStackKey.ID, ForgeCapabilities.ITEM_HANDLER);
         CapabilityHelper.ItemCapabilityMap.put(FluidStackKey.ID, ForgeCapabilities.FLUID_HANDLER_ITEM);
         CapabilityHelper.ItemCapabilityMap.put(EnergyStackKey.ID, ForgeCapabilities.ENERGY);
@@ -111,13 +120,12 @@ public class BeyondDimensions
         StackHandlerWrapperHelper.stackWrappers.put(ItemStackKey.ID, ItemHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(FluidStackKey.ID, FluidHandlerWrapper::new);
         StackHandlerWrapperHelper.stackWrappers.put(EnergyStackKey.ID, EnergyHandlerWrapper::new);
-
     }
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event)
     {
-        LOGGER.info("维度网络初始化完成(服务端)");
+        LOGGER.info("Beyond Dimensions initialized (server)");
     }
 
     public static ResourceLocation makeId(String path)

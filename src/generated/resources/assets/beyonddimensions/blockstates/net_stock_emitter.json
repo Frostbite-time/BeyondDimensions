@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "beyonddimensions:block/net_stock_emitter/off"
+    },
+    "powered=true": {
+      "model": "beyonddimensions:block/net_stock_emitter/on"
+    }
+  }
+}

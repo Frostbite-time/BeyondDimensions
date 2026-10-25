@@ -1,5 +1,5 @@
 package com.wintercogs.beyonddimensions.integration;
 
-public record ModuleSpec(String modId, String implClassName)
+public record ModuleSpec(String modId, String versionRange, String implClassName)
 {
 }

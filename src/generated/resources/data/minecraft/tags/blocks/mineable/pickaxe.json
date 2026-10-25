@@ -10,6 +10,7 @@
     "beyonddimensions:net_furnace_block",
     "beyonddimensions:net_blast_furnace_block",
     "beyonddimensions:net_smoker_block",
+    "beyonddimensions:net_stock_emitter",
     "beyonddimensions:dimensional_connect_block",
     {
       "id": "beyonddimensions:ars_source_pathway",
