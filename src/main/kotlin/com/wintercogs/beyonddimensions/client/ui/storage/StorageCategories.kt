@@ -99,7 +99,7 @@ object StorageCategories {
     private fun encodeKey(key: IStackKey<*>, registries: HolderLookup.Provider): JsonElement? =
         IStackKey.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registries), key).result().orElse(null)
 
-    // 资源所属的模组被移除后读不出来，跳过即可
+    // 读不出的资源（如所属模组被移除）封装成错误数据，模组装回后还原
     private fun decodeKey(json: JsonElement, registries: HolderLookup.Provider): IStackKey<*>? =
         IStackKey.CODEC.parse(RegistryOps.create(JsonOps.INSTANCE, registries), json).result().orElse(null)
             ?.takeUnless { it.isEmpty }
