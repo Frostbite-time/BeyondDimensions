@@ -9,6 +9,7 @@ import dev.compixel.forge.sync.MenuAction;
 import dev.compixel.forge.sync.MenuSync;
 import dev.compixel.sync.state.SyncCodecs;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -45,7 +46,7 @@ public class StonecutterWidget extends WorkstationWidget<StonecutterWidget.Stone
     {
         super(menu, StorageWorkbenchTypes.STONECUTTER, storage, new Stonecutter(menu.player.getInventory(), access(menu.player)), "stonecutter", 1);
         // 原版菜单只有这一个数据：选中的配方
-        addData(new DataSlot()
+        DataSlot selected = addData(new DataSlot()
         {
             @Override
             public int get()
@@ -59,6 +60,12 @@ public class StonecutterWidget extends WorkstationWidget<StonecutterWidget.Stone
                 vanilla.setData(0, value);
             }
         });
+        // 服务端换了输入时原版清掉选中的配方：清掉的值立刻同步，同一刻再选中同一位置的配方（配方查看器填充）也会排在输入之后同步给客户端
+        if (menu.player instanceof ServerPlayer)
+        {
+            int index = menu.dataSlots.indexOf(selected);
+            vanilla.onSelectionReset(() -> menu.synchronizeDataSlotToRemote(index, -1));
+        }
     }
 
     /**
@@ -156,11 +163,13 @@ public class StonecutterWidget extends WorkstationWidget<StonecutterWidget.Stone
     }
 
     /**
-     * 原版切石机，输入变了就通知部件
+     * 原版切石机，输入变了、选中的配方因此清掉时通知部件
      */
     public static final class Stonecutter extends StonecutterMenu implements Inputs
     {
         private Runnable inputsChanged = () -> {
+        };
+        private Runnable selectionReset = () -> {
         };
 
         Stonecutter(Inventory inventory, ContainerLevelAccess access)
@@ -174,10 +183,21 @@ public class StonecutterWidget extends WorkstationWidget<StonecutterWidget.Stone
             inputsChanged = listener;
         }
 
+        /**
+         * 输入换了物品、原版清掉选中的配方时调用 {@code listener}
+         */
+        void onSelectionReset(Runnable listener)
+        {
+            selectionReset = listener;
+        }
+
         @Override
         public void slotsChanged(@NotNull Container container)
         {
+            boolean picked = getSelectedRecipeIndex() >= 0;
             super.slotsChanged(container);
+            if (picked && getSelectedRecipeIndex() < 0)
+                selectionReset.run();
             if (container == this.container)
                 inputsChanged.run();
         }
