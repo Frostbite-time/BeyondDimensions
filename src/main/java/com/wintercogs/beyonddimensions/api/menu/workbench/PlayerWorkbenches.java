@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 玩家留在工作台里的物品与工作台的偏好：所有存储界面共用这一份，保存在服务器的玩家数据里，死亡后保留。
@@ -27,7 +28,20 @@ public final class PlayerWorkbenches implements INBTSerializable<CompoundTag>
 
     public static PlayerWorkbenches of(Player player)
     {
-        return player.getCapability(BDAttachments.WORKBENCHES).orElseThrow(() -> new IllegalStateException("Player has no workbench data"));
+        Optional<PlayerWorkbenches> workbenches = player.getCapability(BDAttachments.WORKBENCHES).resolve();
+        if (workbenches.isPresent())
+            return workbenches.get();
+        // 玩家实体被移除时（下线、死亡、换维度），Forge 先作废能力再关闭打开的菜单，而关闭菜单时仍要读写这份数据。
+        // 像复制玩家数据时一样临时恢复能力，取到后再作废
+        player.reviveCaps();
+        try
+        {
+            return player.getCapability(BDAttachments.WORKBENCHES).orElseThrow(() -> new IllegalStateException("Player has no workbench data"));
+        }
+        finally
+        {
+            player.invalidateCaps();
+        }
     }
 
     /**
