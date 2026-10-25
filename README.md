@@ -61,7 +61,7 @@ any chunks loaded. Share it with friends and connect it to pipes, machines and o
 | Network Terminal | Opens the network with a crafting grid |
 | Network Controller | Manages a network's members and permissions |
 
-Machines have filters, per-side input and output settings and redstone control. The **Machine Configuration Card**
+Machines have filters, per-side input and output settings and redstone control. The **Machine Configuration Talisman**
 copies and pastes their settings in a few clicks.
 
 ### Tools
@@ -147,7 +147,7 @@ For add-on developers:
 - [Networks and storage](docs/en/networks.md): find networks, store and take resources, listen to events and keep
   custom data on a network
 - [Resource types](docs/en/resource-types.md): store a new kind of resource
-- [Machine settings](docs/en/machines.md): settings that save, sync and work with the Machine Configuration Card
+- [Machine settings](docs/en/machines.md): settings that save, sync and work with the Machine Configuration Talisman
 - [Screens](docs/en/screens.md): pages on Beyond Dimensions' screens, server actions and slot clicks
 
 ## For developers

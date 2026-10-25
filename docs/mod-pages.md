@@ -41,7 +41,7 @@ Beyond Dimensions adds the **Dimensional Network**: a storage system you can ope
 | Network Terminal | Opens the network with a crafting grid |
 | Network Controller | Manages a network's members and permissions |
 
-Machines have filters, per-side input and output settings and redstone control. The **Machine Configuration Card** copies and pastes their settings in a few clicks.
+Machines have filters, per-side input and output settings and redstone control. The **Machine Configuration Talisman** copies and pastes their settings in a few clicks.
 
 ### Tools
 
