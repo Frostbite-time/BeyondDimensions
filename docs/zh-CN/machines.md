@@ -2,7 +2,7 @@
 
 [English](../en/machines.md) · [全部指南](../../README.zh-CN.md#指南)
 
-机器的各项设置（如红石控制、过滤模式）只需声明一次，保存、同步和校验均依据该声明进行。实现了 `Machine` 的方块实体支持机器配置卡：复制其设置，并粘贴到所有相连的同类机器上。
+机器的各项设置（如红石控制、过滤模式）只需声明一次，保存、同步和校验均依据该声明进行。实现了 `Machine` 的方块实体支持机器配置符：复制其设置，并粘贴到所有相连的同类机器上。
 
 | 类型 | 作用 |
 | --- | --- |
@@ -83,4 +83,4 @@ public class PressBlockEntity extends BlockEntity implements Machine
 }
 ```
 
-读取设置使用 `setting(ExampleMachines.SPEED.get())`，未保存过时返回机器类型给出的默认值；修改设置使用 `setSetting`。某项设置暂时不可修改时，重写 `isSettingAvailable`，配置卡也会跳过该设置。如果机器除设置外还有其他需要复制的内容（如过滤槽），重写 `exportConfig` 和 `applyConfig`，并先调用默认实现。
+读取设置使用 `setting(ExampleMachines.SPEED.get())`，未保存过时返回机器类型给出的默认值；修改设置使用 `setSetting`。某项设置暂时不可修改时，重写 `isSettingAvailable`，配置符也会跳过该设置。如果机器除设置外还有其他需要复制的内容（如过滤槽），重写 `exportConfig` 和 `applyConfig`，并先调用默认实现。

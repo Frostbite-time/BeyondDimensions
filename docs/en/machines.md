@@ -3,7 +3,7 @@
 [简体中文](../zh-CN/machines.md) · [All guides](../../README.md#guides)
 
 A machine's settings, such as redstone control or a filter mode, are declared once and saved, synchronized and checked
-from that declaration. A block entity that implements `Machine` works with the Machine Configuration Card, which copies
+from that declaration. A block entity that implements `Machine` works with the Machine Configuration Talisman, which copies
 its settings and pastes them onto every connected machine of the same type.
 
 | Type | Role |
@@ -91,6 +91,6 @@ public class PressBlockEntity extends BlockEntity implements Machine
 ```
 
 `setting(ExampleMachines.SPEED.get())` reads a value, falling back to the type's default, and `setSetting` changes one.
-Override `isSettingAvailable` to lock a setting for now; the configuration card then skips it. A machine with more to
+Override `isSettingAvailable` to lock a setting for now; the talisman then skips it. A machine with more to
 copy than its settings, such as filter slots, overrides `exportConfig` and `applyConfig` and calls the default
 implementations first.
