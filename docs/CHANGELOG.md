@@ -1,6 +1,6 @@
 ## English
 
-0.8.1 rebuilds every screen on CompixelUI and adds custom category tabs, side configuration for machines, the Machine Configuration Talisman and the Stock Emitter. It requires CompixelUI and Kotlin; read the breaking changes at the end before updating.
+0.8.3 rebuilds every screen on CompixelUI and adds custom category tabs, a work area in the storage screen, side configuration for machines, the Machine Configuration Talisman and the Stock Emitter. It requires CompixelUI and Kotlin; read the breaking changes at the end before updating.
 
 ### Interface
 
@@ -19,10 +19,13 @@
 - While holding a container (bucket, tank, battery, backpack and others), left-click a stored resource to fill the container and right-click to empty it into the network. Hold Shift to transfer as much as possible.
 - While Shift is held the grid doesn't rearrange; resources you empty stay in place showing 0 until you release it.
 - The grid can be wider than nine columns: set its columns and maximum rows on the settings page, and it narrows to fit the screen.
-- Each player has their own crafting grid, saved on the server and shared by the network screen (O key), the Network Terminal and the Portable Network Terminal. With the new "Keep grid on close" setting its items stay for next time; otherwise they return to the storage or your inventory, as you choose.
-- Space + left-click the crafting result to keep crafting until your inventory is full, or a crafting grid slot to empty the grid into the storage or your inventory, as you choose.
+- A work area below the grid replaces the crafting screen and shows one workbench at a time: Crafting Table, Anvil, Smithing Table or Stonecutter, chosen from the dropdown at its top left. When the grid is wide enough, the work area sits beside your inventory so the grid keeps more rows. The rail button expands or collapses it, and both choices are remembered.
+- The Anvil, Smithing Table and Stonecutter follow vanilla's rules. The Smithing Table shows vanilla's outlines in its empty slots, and the Stonecutter's list has a scrollbar and scrolls one row per wheel notch.
+- Each player has their own workbenches, saved on the server and shared by the network screen (O key), the Network Terminal and the Portable Network Terminal. With "Keep items on close" on the settings page their items stay for next time; otherwise they are returned when you close the screen.
+- The buttons at the top right of the work area return a workbench's items to the storage or your inventory, and the arrow beside them chooses where items go first when a workbench is cleared.
+- Space + left-click the crafting result to keep crafting until your inventory is full, or a crafting grid slot to clear the grid.
 - Tab only moves the focus into and out of the search box.
-- Switching between storage, crafting and the Primary Network Switcher no longer moves the mouse pointer to the center.
+- Switching between the storage and the Primary Network Switcher no longer moves the mouse pointer to the center.
 
 ### Machines
 
@@ -40,6 +43,8 @@
 
 - Jade shows what Network Interfaces and Network Furnaces hold, one line per resource, instead of listing their empty slots and tanks. Dimensional Network Pathways no longer list the whole network's storage.
 - KubeJS server scripts can add storage rules with `UnifiedStorageRules`, `InsertPlan` and `ExtractPlan`.
+- JEI and EMI fill stonecutting, smithing and anvil recipes into their own workbench and switch the work area to it; the Stonecutter also selects the recipe.
+- With Polymorph installed, the Crafting Table's recipe choice is at the top right of the work area.
 
 ### Fixes
 
@@ -60,7 +65,7 @@
 
 - New guides in English and Chinese, for modpacks and servers (KubeJS, storage rules, color schemes, commands and configuration) and for add-on developers (networks and storage, resource types, machine settings, screens). See the [README](https://github.com/Frostbite-time/BeyondDimensions/blob/1.20.1/README.md#guides).
 - Published to the [wintercogs Maven repository](https://github.com/Frostbite-time/BeyondDimensions/blob/1.20.1/README.md#for-developers) together with its sources.
-- New APIs: storage rules (`UnifiedStorageRules`, `InsertPlan`, `ExtractPlan`); data attached to networks, saved with them or kept in memory (`NetDataType`, `BDRegistries.NET_DATA_TYPE_KEY`); tasks run in every network's tick (`NetTickTasks`); machine settings (`MachineSetting`, `MachineType`, `Machine`, `MachineItem`, `SettingEditor`, `BDMachineSettings`); pages and server actions on Beyond Dimensions' screens (`BdPages`, `BdPage`, `BdMenuActions`); slot interactions (`SlotInteractions`, `SlotClick`); `UnifiedStorage.extractInto`; `IStackHandler.getFuzzyMatches`; `IStackKey.getSourceId`.
+- New APIs: storage rules (`UnifiedStorageRules`, `InsertPlan`, `ExtractPlan`); data attached to networks, saved with them or kept in memory (`NetDataType`, `BDRegistries.NET_DATA_TYPE_KEY`); tasks run in every network's tick (`NetTickTasks`); machine settings (`MachineSetting`, `MachineType`, `Machine`, `MachineItem`, `SettingEditor`, `BDMachineSettings`); pages and server actions on Beyond Dimensions' screens (`BdPages`, `BdPage`, `BdMenuActions`); workbenches in the storage work area, with an availability check when the storage opens (`StorageWorkbenchTypes`, `StorageWorkbenches`, `ClearableWidget`, `RecipeFillWidget`, `PlayerWorkbenches`); slot interactions (`SlotInteractions`, `SlotClick`); `UnifiedStorage.extractInto`; `IStackHandler.getFuzzyMatches`; `IStackKey.getSourceId`.
 
 ### Breaking changes
 
@@ -74,7 +79,7 @@ For players, modpacks and servers:
   - the Network Interface options moved from the common config to the server config, under `interface`, and `interfaceBlockedInputStackTypes` became `interface.blocked_input_types`;
   - `fragmentTransferTime` and `crystalGenerateTime` became `space_time.fragment_transfer_time` and `space_time.crystal_generate_time`.
 - The Network Terminal no longer has one crafting grid shared by all players; each player has their own. Items left in an old Network Terminal or Portable Network Terminal go to the storage, then to the inventory of the player who opens it, and the rest drops at their feet. An old Network Terminal broken before being opened drops them.
-- By default the crafting grid empties when you close the screen; turn on "Keep grid on close" to keep it.
+- By default the workbenches empty when you close the screen; turn on "Keep items on close" to keep their items.
 - While holding a container, left-click now fills it and right-click empties it.
 - Middle-click no longer stores or takes resources in Beyond Dimensions' screens. The XP Rod retrieves experience with a left-click on liquid experience instead.
 - The Shift + Z key was removed; recipe viewer search sync is a setting on the storage screen.
@@ -91,11 +96,13 @@ For developers:
 - `NetedBlockEntity` syncs only client data: `getUpdateTag`, `getUpdatePacket`, `handleUpdateTag` and `onDataPacket` are final. Override `saveClientData` and `loadClientData`, and call `syncToClient` when that data changes.
 - Machines keep their settings as registered `MachineSetting`s instead of separate fields.
 - The old screens, packets and widgets were removed. Screens use CompixelUI and menus sync through its menu sync; extend them with `BdPages`, `BdMenuActions` and `SlotInteractions`.
+- The storage menus include the work area, so `DimensionsCraftMenu` and `DimensionsCraftMenuTerminal` were removed; use `DimensionsNetMenu` or `DimensionsNetTerminalMenu` and `menu.crafting()`. The menu types `dimensions_craft_menu` and `dimensions_craft_menu_terminal` were replaced by `dimensions_net_terminal_menu`, and `NetMenuType` now has `NET_MENU` and `NET_TERMINAL`.
+- Open storage menus with `DimensionsNetMenu.open(player, provider)`. A storage menu opened another way offers every workbench without checking availability.
 - `AbstractUnorderedStackHandler.unzipMatterBall` was removed; Compressed Matter Orbs unpack through the built-in storage rule `beyonddimensions:uncompress_matter_ball`.
 
 ## 中文
 
-0.8.1 将所有界面改用 CompixelUI 重做，并新增自定义分类标签、机器面配置、机器配置符和存量发信器。本版需要 CompixelUI 和 Kotlin，更新前请先阅读文末的破坏性改动。
+0.8.3 将所有界面改用 CompixelUI 重做，并新增自定义分类标签、存储界面的工作区、机器面配置、机器配置符和存量发信器。本版需要 CompixelUI 和 Kotlin，更新前请先阅读文末的破坏性改动。
 
 ### 界面
 
@@ -114,10 +121,13 @@ For developers:
 - 手持容器（桶、储罐、电池、背包等）时，左键存储中的资源装入容器，右键将容器中的内容排入网络；按住 Shift 尽可能多地转移。
 - 按住 Shift 时存储格不重新排列，取空的资源留在原位显示为 0，松开后再整理。
 - 存储格可以超过 9 列：在设置页设置列数和最多行数，屏幕较小时自动收窄。
-- 合成格改为每个玩家各一份，保存在服务器上，由 O 键打开的网络界面、网络终端和便携网络终端共用。开启新增的“关闭后保留合成格”后物品会留到下次；未开启时按设置退回存储或背包。
-- 空格 + 左键点合成结果连续合成，直到背包放满；点合成格则清空合成格，物品按设置退回存储或背包。
+- 存储格下方新增工作区，取代原来的合成界面，一次显示一个工作台：合成台、铁砧、锻造台或切石机，在工作区左上角的下拉框中选择。存储格足够宽时，工作区与背包并排，存储格能多显示几行。侧栏按钮可以展开或收起工作区，选择与展开状态都会记住。
+- 铁砧、锻造台与切石机的规则与原版相同。锻造台的空槽像原版一样显示底纹；切石机的产物列表带滚动条，滚轮一格滚动一行。
+- 工作台改为每个玩家各一份，保存在服务器上，由 O 键打开的网络界面、网络终端和便携网络终端共用。开启设置页的“关闭后保留工作台里的物品”后物品会留到下次；未开启时物品在关闭界面时退回。
+- 工作区右上角的按钮可以把工作台里的物品退回存储或背包，旁边的箭头决定工作台清空时物品优先退回哪里。
+- 空格 + 左键点合成结果连续合成，直到背包放满；点合成格则清空合成格。
 - Tab 键只用于进入和退出搜索框。
-- 在存储、合成和主网络切换器之间切换时，鼠标指针不再跳到屏幕中央。
+- 在存储和主网络切换器之间切换时，鼠标指针不再跳到屏幕中央。
 
 ### 机器
 
@@ -135,6 +145,8 @@ For developers:
 
 - Jade 显示网络接口和网络熔炉中存放的资源，同种资源合并为一项，不再列出空槽位和空储罐；维度网络通道不再列出整个网络的资源。
 - KubeJS 服务端脚本可以通过 `UnifiedStorageRules`、`InsertPlan` 和 `ExtractPlan` 添加存储规则。
+- JEI 与 EMI 会把切石、锻造与铁砧配方填进对应的工作台，并把工作区切换到该工作台；切石机同时选中该配方。
+- 装有 Polymorph 时，合成台的配方选择位于工作区右上角。
 
 ### 修复
 
@@ -155,7 +167,7 @@ For developers:
 
 - 新增中英文指南，面向整合包和服务器（KubeJS、存储规则、配色、命令与配置）和附属开发（网络与存储、资源类型、机器设置、界面），见 [README](https://github.com/Frostbite-time/BeyondDimensions/blob/1.20.1/README.zh-CN.md#%E6%8C%87%E5%8D%97)。
 - 发布到 [wintercogs Maven 仓库](https://github.com/Frostbite-time/BeyondDimensions/blob/1.20.1/README.zh-CN.md#%E5%BC%80%E5%8F%91%E8%80%85)，附带源码包。
-- 新增 API：存储规则（`UnifiedStorageRules`、`InsertPlan`、`ExtractPlan`）；网络挂接数据，可随网络保存或只在内存中（`NetDataType`、`BDRegistries.NET_DATA_TYPE_KEY`）；在每个网络每刻运行的任务（`NetTickTasks`）；机器设置（`MachineSetting`、`MachineType`、`Machine`、`MachineItem`、`SettingEditor`、`BDMachineSettings`）；超越维度界面的附属页面与服务器动作（`BdPages`、`BdPage`、`BdMenuActions`）；槽位交互（`SlotInteractions`、`SlotClick`）；`UnifiedStorage.extractInto`；`IStackHandler.getFuzzyMatches`；`IStackKey.getSourceId`。
+- 新增 API：存储规则（`UnifiedStorageRules`、`InsertPlan`、`ExtractPlan`）；网络挂接数据，可随网络保存或只在内存中（`NetDataType`、`BDRegistries.NET_DATA_TYPE_KEY`）；在每个网络每刻运行的任务（`NetTickTasks`）；机器设置（`MachineSetting`、`MachineType`、`Machine`、`MachineItem`、`SettingEditor`、`BDMachineSettings`）；超越维度界面的附属页面与服务器动作（`BdPages`、`BdPage`、`BdMenuActions`）；存储工作区的工作台，可以在打开存储界面时判断玩家能否使用（`StorageWorkbenchTypes`、`StorageWorkbenches`、`ClearableWidget`、`RecipeFillWidget`、`PlayerWorkbenches`）；槽位交互（`SlotInteractions`、`SlotClick`）；`UnifiedStorage.extractInto`；`IStackHandler.getFuzzyMatches`；`IStackKey.getSourceId`。
 
 ### 破坏性改动
 
@@ -169,7 +181,7 @@ For developers:
   - 网络接口的选项从通用配置移到服务端配置的 `interface` 下，`interfaceBlockedInputStackTypes` 改为 `interface.blocked_input_types`；
   - `fragmentTransferTime` 和 `crystalGenerateTime` 改为 `space_time.fragment_transfer_time` 和 `space_time.crystal_generate_time`。
 - 网络终端不再有所有玩家共用的合成格，改为每个玩家各一份。旧版网络终端和便携网络终端中留下的物品，在打开时依次送回存储和打开者的背包，放不下的掉落在其脚下；未打开就被拆除的旧网络终端会掉出这些物品。
-- 合成格默认在关闭界面时清空，开启“关闭后保留合成格”即可保留。
+- 工作台默认在关闭界面时清空，开启“关闭后保留工作台里的物品”即可保留。
 - 手持容器时，改为左键装入、右键排出。
 - 在超越维度的界面中，中键不再存入或取出资源；经验棒改为左键点击经验流体取出经验。
 - 移除 Shift + Z 快捷键，配方查看器搜索同步改为存储界面中的设置。
@@ -186,4 +198,6 @@ For developers:
 - `NetedBlockEntity` 只向客户端同步客户端数据：`getUpdateTag`、`getUpdatePacket`、`handleUpdateTag` 和 `onDataPacket` 改为 final。请重写 `saveClientData` 和 `loadClientData`，并在这些数据变化时调用 `syncToClient`。
 - 机器设置改为注册的 `MachineSetting`，不再使用各自的字段。
 - 移除旧的界面、数据包和控件。界面基于 CompixelUI，菜单通过它的菜单同步；扩展界面请使用 `BdPages`、`BdMenuActions` 和 `SlotInteractions`。
+- 存储菜单包含了工作区，因此移除了 `DimensionsCraftMenu` 与 `DimensionsCraftMenuTerminal`，请改用 `DimensionsNetMenu` 或 `DimensionsNetTerminalMenu` 与 `menu.crafting()`。菜单类型 `dimensions_craft_menu` 与 `dimensions_craft_menu_terminal` 由 `dimensions_net_terminal_menu` 取代，`NetMenuType` 现在只有 `NET_MENU` 与 `NET_TERMINAL`。
+- 存储菜单需要用 `DimensionsNetMenu.open(player, provider)` 打开；以其他方式打开时不判断工作台能否使用，所有工作台都会出现。
 - 移除 `AbstractUnorderedStackHandler.unzipMatterBall`；压缩物质球改由内置存储规则 `beyonddimensions:uncompress_matter_ball` 拆开。
