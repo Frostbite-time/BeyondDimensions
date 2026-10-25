@@ -33,7 +33,7 @@ public final class IntegrationManager
         ACTIVE_COMMON_MODULES.clear();
         for (ModuleSpec spec : ModuleRegistry.commonModules())
         {
-            if (!ModPresence.isLoaded(spec.modId()))
+            if (!ModPresence.isLoaded(spec.modId(), spec.versionRange()))
             {
                 continue;
             }
@@ -62,7 +62,7 @@ public final class IntegrationManager
         ACTIVE_CLIENT_MODULES.clear();
         for (ModuleSpec spec : ModuleRegistry.clientModules())
         {
-            if (!ModPresence.isLoaded(spec.modId()))
+            if (!ModPresence.isLoaded(spec.modId(), spec.versionRange()))
             {
                 continue;
             }

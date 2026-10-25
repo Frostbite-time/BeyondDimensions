@@ -1,17 +1,8 @@
 package com.wintercogs.beyonddimensions.integration.module.create;
 
-import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
-import com.simibubi.create.api.contraption.storage.item.MountedItemStorageType;
-import com.simibubi.create.api.contraption.transformable.MovedBlockTransformerRegistries;
-import com.wintercogs.beyonddimensions.api.machine.Machine;
-import com.wintercogs.beyonddimensions.common.init.BDBlockEntities;
-import com.wintercogs.beyonddimensions.common.init.BDBlocks;
-import com.wintercogs.beyonddimensions.common.machine.MachineSides;
 import com.wintercogs.beyonddimensions.integration.BDIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.IIntegrationModule;
 import com.wintercogs.beyonddimensions.integration.OtherModIds;
-import com.wintercogs.beyonddimensions.integration.module.create.contraption.NetInterfaceMountedStorageType;
-import com.wintercogs.beyonddimensions.integration.module.create.contraption.NetInterfaceMovementBehaviour;
 import com.wintercogs.beyonddimensions.integration.module.create.datagen.CreateModuleBlockLootTableProvider;
 import com.wintercogs.beyonddimensions.integration.module.create.datagen.CreateModuleBlockStateProvider;
 import com.wintercogs.beyonddimensions.integration.module.create.datagen.CreateModuleRecipeProvider;
@@ -23,8 +14,6 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
@@ -35,6 +24,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * 机械动力 0.5.1 与 6 共有的联动：蓝图接口。只有 6.0 起才能做的部分在 {@link Create6Module}
+ */
 @BDIntegrationModule(modId = OtherModIds.CREATE)
 public class CreateModule implements IIntegrationModule
 {
@@ -50,36 +42,11 @@ public class CreateModule implements IIntegrationModule
     {
         CreateModuleBlocks.register(modBus);
         CreateModuleBlockEntities.register(modBus);
-        NetInterfaceMountedStorageType.register(modBus);
     }
 
     @Override
     public void onCommonSetup(FMLCommonSetupEvent event)
     {
-        event.enqueueWork(() -> {
-            MountedItemStorageType.REGISTRY.register(
-                    BDBlocks.NET_INTERFACE.get(),
-                    NetInterfaceMountedStorageType.NET_INTERFACE.get()
-            );
-            MovementBehaviour.REGISTRY.register(
-                    BDBlocks.NET_INTERFACE.get(),
-                    new NetInterfaceMovementBehaviour()
-            );
-            // 面配置跟着方块的正面走，动态结构转动后不用改；镜像后左右两面互换，仍连着原来的相邻方块
-            for (BlockEntityType<?> sided : List.of(
-                    BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
-                    BDBlockEntities.NET_ENERGY_PATHWAY_BLOCK_ENTITY.get(),
-                    BDBlockEntities.NET_PUMP_BLOCK_ENTITY.get(),
-                    BDBlockEntities.NET_FURNACE_BLOCK_ENTITY.get(),
-                    BDBlockEntities.NET_BLAST_FURNACE_BLOCK_ENTITY.get(),
-                    BDBlockEntities.NET_SMOKER_BLOCK_ENTITY.get()))
-            {
-                MovedBlockTransformerRegistries.BLOCK_ENTITY_TRANSFORMERS.register(sided, (be, transform) -> {
-                    if (be instanceof Machine machine && transform.mirror != null && transform.mirror != Mirror.NONE)
-                        machine.setSettings(MachineSides.mirrored(machine));
-                });
-            }
-        });
     }
 
     @Override

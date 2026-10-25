@@ -45,6 +45,7 @@
 - KubeJS server scripts can add storage rules with `UnifiedStorageRules`, `InsertPlan` and `ExtractPlan`.
 - JEI and EMI fill stonecutting, smithing and anvil recipes into their own workbench and switch the work area to it; the Stonecutter also selects the recipe.
 - With Polymorph installed, the Crafting Table's recipe choice is at the top right of the work area.
+- Create 0.5.1 is supported as well as Create 6. With 0.5.1, a Network Interface on a contraption moves as an ordinary block instead of serving as the contraption's storage.
 
 ### Fixes
 
@@ -147,6 +148,7 @@ For developers:
 - KubeJS 服务端脚本可以通过 `UnifiedStorageRules`、`InsertPlan` 和 `ExtractPlan` 添加存储规则。
 - JEI 与 EMI 会把切石、锻造与铁砧配方填进对应的工作台，并把工作区切换到该工作台；切石机同时选中该配方。
 - 装有 Polymorph 时，合成台的配方选择位于工作区右上角。
+- 支持机械动力 0.5.1 与 6。使用 0.5.1 时，动态结构上的网络接口作为普通方块随结构移动，不作为动态结构的存储。
 
 ### 修复
 

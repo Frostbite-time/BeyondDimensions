@@ -5,7 +5,8 @@
   "refmap": "beyonddimensions.refmap.json",
   "plugin": "com.wintercogs.beyonddimensions.mixin.integration.create.plugin.CreateIntegrationMixinPlugin",
   "mixins": [
-    "integration.create.target.SchematicannonBlockEntityMixin"
+    "integration.create.target.SchematicannonBlockEntityMixin",
+    "integration.create.target.StructureTransformMixin"
   ],
   "client": [
   ],
