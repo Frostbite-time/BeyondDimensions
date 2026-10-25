@@ -1,6 +1,6 @@
 package com.wintercogs.beyonddimensions.common.menu.widget;
 
-import com.wintercogs.beyonddimensions.api.menu.widget.ClearableWidget;
+import com.wintercogs.beyonddimensions.api.menu.widget.BatchCraftWidget;
 import com.wintercogs.beyonddimensions.api.menu.widget.MenuWidget;
 import com.wintercogs.beyonddimensions.api.menu.widget.RecipeFillWidget;
 import com.wintercogs.beyonddimensions.api.menu.workbench.PlayerWorkbenches;
@@ -51,7 +51,7 @@ import java.util.Optional;
  * 合成区：一个产物槽与 3×3 的合成格。服务端的合成格就是玩家自己保留在 {@link PlayerWorkbenches} 里的那份，
  * 上次保留的物品随之出现；物品退回 {@code storage} 或背包
  */
-public class CraftingWidget extends MenuWidget implements ClearableWidget, RecipeFillWidget
+public class CraftingWidget extends MenuWidget implements BatchCraftWidget, RecipeFillWidget
 {
     private static final int MAX_MATTER_BALL_BYTES = 1536 * 1024;
 
@@ -112,14 +112,10 @@ public class CraftingWidget extends MenuWidget implements ClearableWidget, Recip
         return end();
     }
 
+    @Override
     public boolean isResultSlot(int index)
     {
         return index == resultSlot();
-    }
-
-    public boolean isGridSlot(int index)
-    {
-        return index >= gridStart() && index < gridEnd();
     }
 
     @Override
@@ -223,6 +219,7 @@ public class CraftingWidget extends MenuWidget implements ClearableWidget, Recip
     /**
      * 连续合成：其间每次从产物槽取出都会合成一份，先试这一批的配方，产物在结束后同步一次
      */
+    @Override
     public void craftBatch(Runnable crafts)
     {
         batchRecipe = matching(resultSlots.getRecipeUsed(), craftSlots.asCraftInput());
@@ -235,14 +232,6 @@ public class CraftingWidget extends MenuWidget implements ClearableWidget, Recip
             batchRecipe = null;
             updateResult(null, true);
         }
-    }
-
-    /**
-     * 清空合成格，物品按玩家的偏好退回
-     */
-    public void clearGrid()
-    {
-        cleanGrid(PlayerWorkbenches.of(player).returnToStorage());
     }
 
     @Override

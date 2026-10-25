@@ -6,7 +6,9 @@ import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.api.menu.interaction.SlotClick;
 import com.wintercogs.beyonddimensions.api.menu.interaction.SlotClick.Kind;
 import com.wintercogs.beyonddimensions.api.menu.interaction.SlotInteractions;
+import com.wintercogs.beyonddimensions.api.menu.widget.BatchCraftWidget;
 import com.wintercogs.beyonddimensions.api.menu.widget.MenuWidget;
+import com.wintercogs.beyonddimensions.api.menu.workbench.PlayerWorkbenches;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.StackKeyRegistry;
@@ -16,7 +18,6 @@ import com.wintercogs.beyonddimensions.common.init.BDFluids;
 import com.wintercogs.beyonddimensions.common.init.BDTags;
 import com.wintercogs.beyonddimensions.common.item.XpExchangeItem;
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu;
-import com.wintercogs.beyonddimensions.common.menu.widget.CraftingWidget;
 import com.wintercogs.beyonddimensions.common.menu.widget.WorkstationWidget;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot;
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot;
@@ -61,10 +62,10 @@ public final class BuiltinSlotInteractions
         add("move_all_stored", c -> c.space() && c.isLeft() && c.kind() == Kind.STORAGE && !c.clicked().isEmpty(),
                 BuiltinSlotInteractions::moveAll);
         add("move_all_ordered", c -> c.space() && c.isLeft() && c.kind() == Kind.ORDERED, BuiltinSlotInteractions::moveAllOrdered);
-        // 空格左键点合成结果：连续合成，直到背包放满或原料用完；点合成格：清空合成格，物品按玩家的偏好退回
+        // 空格左键点能连续制作的工作台（合成台、切石机）的产物：连续制作，直到背包放满或原料用完；
+        // 点它的原料槽：清空原料，物品按玩家的偏好退回
         add("craft_all", c -> c.space() && c.isLeft() && isCraftResult(c), BuiltinSlotInteractions::craftAll);
-        add("craft_grid_clear", c -> c.space() && c.isLeft() && crafting(c) instanceof CraftingWidget crafting
-                && crafting.isGridSlot(c.slot().index), BuiltinSlotInteractions::clearCraftGrid);
+        add("craft_grid_clear", c -> c.space() && c.isLeft() && isCraftInput(c), BuiltinSlotInteractions::clearCraftInputs);
         // 有序槽里是同一种物品时先合并，桶、经验棒与容器也一样
         add("ordered_merge", c -> click(c) && c.kind() == Kind.ORDERED && !c.clicked().isEmpty() && !c.carried().isEmpty()
                         && (c.isLeft() || c.isRight())
@@ -98,7 +99,7 @@ public final class BuiltinSlotInteractions
                 BuiltinSlotInteractions::insertCarried);
         add("quick_move", c -> c.isResource() && c.shift() && !c.clicked().isEmpty(), BuiltinSlotInteractions::quickMove);
         add("craft_stack", c -> c.shift() && isCraftResult(c), BuiltinSlotInteractions::craftStack);
-        // Shift 点切石机等工作台的产物：像原版一样连续取出
+        // Shift 点其余工作台（铁砧、锻造台）的产物：像原版一样连续取出
         add("workstation_result", c -> c.shift() && isWorkstationResult(c), BuiltinSlotInteractions::takeResults);
         add("quick_move_vanilla", c -> c.kind() == Kind.VANILLA && c.shift(), BuiltinSlotInteractions::quickMoveVanilla);
     }
@@ -539,39 +540,49 @@ public final class BuiltinSlotInteractions
         return IntStream.range(c.menu().inventoryStartIndex, c.menu().inventoryEndIndex).boxed().toList();
     }
 
-    // —— 合成 ——
+    // —— 连续制作 ——
 
-    // 菜单的合成区，没有时为 null
-    private static CraftingWidget crafting(SlotClick c)
+    // 点到的这一格所属的能连续制作的工作台，不属于任何一个时为 null
+    private static BatchCraftWidget batchCraft(SlotClick c)
     {
-        return c.menu().widget(CraftingWidget.class);
+        for (MenuWidget widget : c.menu().widgets())
+        {
+            if (widget instanceof BatchCraftWidget batch && (batch.isResultSlot(c.slot().index) || batch.inputSlots().contains(c.slot())))
+                return batch;
+        }
+        return null;
     }
 
     private static boolean isCraftResult(SlotClick c)
     {
-        return crafting(c) instanceof CraftingWidget crafting && crafting.isResultSlot(c.slot().index);
+        return batchCraft(c) instanceof BatchCraftWidget batch && batch.isResultSlot(c.slot().index);
     }
 
-    // Shift 点产物合成一组：产物先放进背包，放不下的沿 Shift 路线送走
+    private static boolean isCraftInput(SlotClick c)
+    {
+        return batchCraft(c) instanceof BatchCraftWidget batch && !batch.isResultSlot(c.slot().index);
+    }
+
+    // Shift 点产物做一组：产物先放进背包，放不下的沿 Shift 路线送走
     private static boolean craftStack(SlotClick c)
     {
-        if (crafting(c) instanceof CraftingWidget crafting && sentMatches(c))
+        if (batchCraft(c) instanceof BatchCraftWidget batch && sentMatches(c))
         {
             ItemStack product = c.slot().getItem();
             List<Integer> targets = new ArrayList<>(inventorySlots(c));
             targets.addAll(c.menu().quickMoveRoutes().targets(c.slot().index));
-            craft(c, crafting, product.getMaxStackSize() / product.getCount(), targets);
+            craft(c, batch, product.getMaxStackSize() / product.getCount(), targets);
         }
         return true;
     }
 
-    // 空格左键点产物：连续合成，产物只放进背包，直到放满、原料用完或合成格换了配方
+    // 空格左键点产物：连续制作，产物只放进背包，直到放满、原料用完或换了配方
     private static boolean craftAll(SlotClick c)
     {
-        if (crafting(c) instanceof CraftingWidget crafting && sentMatches(c))
+        if (batchCraft(c) instanceof BatchCraftWidget batch && sentMatches(c))
         {
             ItemStack product = c.slot().getItem();
-            craft(c, crafting, spaceFor(c, product) / product.getCount(), inventorySlots(c));
+            craft(c, batch, spaceFor(c, product) / product.getCount(), inventorySlots(c));
         }
         return true;
     }
@@ -586,12 +597,12 @@ public final class BuiltinSlotInteractions
         return space;
     }
 
-    // 从产物槽合成至多 times 次：产物整份放得进 targets 才取出，取出时合成一份；产物换了或放不下就停
-    private static void craft(SlotClick c, CraftingWidget crafting, int times, List<Integer> targets)
+    // 从产物槽制作至多 times 次：产物整份放得进 targets 才取出，取出时制作一份；产物换了或放不下就停
+    private static void craft(SlotClick c, BatchCraftWidget batch, int times, List<Integer> targets)
     {
         Slot result = c.slot();
         ItemStack first = result.getItem().copy();
-        crafting.craftBatch(() -> {
+        batch.craftBatch(() -> {
             for (int i = 0; i < times; i++)
             {
                 ItemStack product = result.getItem();
@@ -605,10 +616,10 @@ public final class BuiltinSlotInteractions
         });
     }
 
-    private static boolean clearCraftGrid(SlotClick c)
+    private static boolean clearCraftInputs(SlotClick c)
     {
-        if (crafting(c) instanceof CraftingWidget crafting)
-            crafting.clearGrid();
+        if (batchCraft(c) instanceof BatchCraftWidget batch)
+            batch.clearItems(PlayerWorkbenches.of(c.player()).returnToStorage());
         return true;
     }
 

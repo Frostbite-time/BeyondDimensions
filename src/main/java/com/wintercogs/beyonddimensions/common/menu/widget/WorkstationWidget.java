@@ -42,7 +42,7 @@ public abstract class WorkstationWidget<V extends AbstractContainerMenu & Workst
 
     protected final V vanilla;
     private final ResourceLocation workbench;
-    private final IStackHandler storage;
+    protected final IStackHandler storage;
     private final String group;
     private final int inputs;
 
@@ -59,8 +59,9 @@ public abstract class WorkstationWidget<V extends AbstractContainerMenu & Workst
         this.storage = storage;
         this.group = group;
         this.inputs = inputs;
-        for (int i = 0; i <= inputs; i++)
+        for (int i = 0; i < inputs; i++)
             addSlot(vanilla.slots.get(i));
+        addSlot(menuResultSlot(vanilla.slots.get(inputs)));
         // 服务端放回上次保留的物品，之后每次改动都记下来，断线或崩溃时也不会丢
         if (menu.player instanceof ServerPlayer)
         {
@@ -80,6 +81,14 @@ public abstract class WorkstationWidget<V extends AbstractContainerMenu & Workst
     protected static ContainerLevelAccess access(Player player)
     {
         return player.level().isClientSide() ? ContainerLevelAccess.NULL : ContainerLevelAccess.create(player.level(), player.blockPosition());
+    }
+
+    /**
+     * 放进菜单的产物槽，默认就是原版菜单的那一格。构造部件时调用，实现不能用到子类自己的字段
+     */
+    protected Slot menuResultSlot(Slot vanillaResult)
+    {
+        return vanillaResult;
     }
 
     /**

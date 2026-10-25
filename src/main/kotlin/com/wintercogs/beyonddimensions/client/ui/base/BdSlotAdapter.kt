@@ -2,11 +2,11 @@ package com.wintercogs.beyonddimensions.client.ui.base
 
 import com.mojang.blaze3d.platform.InputConstants
 import com.wintercogs.beyonddimensions.api.menu.interaction.SlotClick
+import com.wintercogs.beyonddimensions.api.menu.widget.BatchCraftWidget
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount
 import com.wintercogs.beyonddimensions.api.storage.key.impl.ItemStackKey
 import com.wintercogs.beyonddimensions.common.menu.BDBaseMenu
-import com.wintercogs.beyonddimensions.common.menu.widget.CraftingWidget
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.DisorderedStackTypedSlot
 import dev.compixel.forge.item.ItemIcon
@@ -126,15 +126,16 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
     }
 
     /**
-     * 空格左键点背包或快捷栏是整批转移，点合成结果是连续合成，点合成格是清空合成格；
+     * 空格左键点背包或快捷栏是整批转移，点能连续制作的工作台的产物是连续制作，点它的原料槽是清空原料；
      * 都交给服务端的 BD 命令，不执行原版的拿起
      */
     private fun isSpaceClick(slotId: Int, button: Int, type: ClickType) =
         type == ClickType.PICKUP && button == 0 && spaceHeld() &&
                 (slotId >= menu.inventoryStartIndex && slotId < menu.inventoryEndIndex || isCraftSlot(slotId))
 
-    private fun isCraftSlot(slotId: Int) =
-        menu.widget(CraftingWidget::class.java)?.let { it.isResultSlot(slotId) || it.isGridSlot(slotId) } == true
+    private fun isCraftSlot(slotId: Int) = menu.widgets().any { widget ->
+        widget is BatchCraftWidget && (widget.isResultSlot(slotId) || widget.inputSlots().any { it.index == slotId })
+    }
 
     /** 普通槽位的 Shift 点击与空格左键由服务端的 BD 命令处理，不额外发送原版的点击 */
     private fun clickVanilla(slotId: Int, slot: Slot, button: Int, type: ClickType) {
