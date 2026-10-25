@@ -97,10 +97,10 @@ object StorageCategories {
     // 资源以 SNBT 文本保存
     private fun encodeKey(key: IStackKey<*>): JsonElement? = JsonPrimitive(IStackKey.serializeNBTCommon(key).toString())
 
-    // 资源所属的模组被移除后读不出来，跳过即可
+    // 读不出的资源（如所属模组被移除）封装成错误数据，模组装回后还原
     private fun decodeKey(json: JsonElement): IStackKey<*>? =
         try {
-            IStackKey.deserializeNBTStrict(TagParser.parseTag(json.asString)).takeUnless { it.isEmpty }
+            IStackKey.deserializeNBTCommon(TagParser.parseTag(json.asString)).takeUnless { it.isEmpty }
         } catch (error: Exception) {
             null
         }
