@@ -1,11 +1,7 @@
 ## English
 
-- The Stonecutter refills its input from the storage, like the Crafting Table: taking a product while one input item is left takes another from the storage, then from your inventory, so the selected recipe stays.
-- The Crafting Table's Space and Shift clicks work on the Stonecutter too: Space + left-click the product to keep cutting until your inventory is full or the input runs out, Shift + left-click it to cut a stack, and Space + left-click the input to clear it.
-- Fixed the Stonecutter showing no recipe selected when JEI or EMI filled in a recipe at the same position in the list as the one selected before.
+- Fixed Shift + left-click on inventory and workbench slots, and Space + left-click on a workbench's product, doing nothing when another mod has changed the item's data on the client only.
 
 ## 中文
 
-- 切石机像合成台一样从存储补充原料：原料只剩最后一个时取出产物，会先从存储、再从背包补上一个，选中的配方不会丢失。
-- 合成台的空格与 Shift 点击也可用于切石机：空格 + 左键点产物连续切割，直到背包放满或原料用完；Shift + 左键点产物切一组；空格 + 左键点原料槽清空原料。
-- 修复 JEI 或 EMI 向切石机填入的配方与先前选中的配方在列表中位置相同时，切石机显示未选中配方的问题。
+- 修复其他模组仅在客户端改动了物品数据时，在背包和工作台槽位上 Shift + 左键、在工作台产物上空格 + 左键没有反应的问题。
