@@ -479,18 +479,12 @@ public final class BuiltinSlotInteractions
         return start >= 0 && start < end ? IntStream.range(start, end).boxed().toList() : List.of();
     }
 
-    // 原版槽位（背包、合成格等）的 Shift 转移
+    // 原版槽位（背包、合成格等）的 Shift 转移。原版槽位都按服务端这一格的物品处理，不看客户端发来的物品：
+    // 客户端那一份可能被其他模组改过数据，如神化显示提示框时补写的宝石孔 UUID
     private static boolean quickMoveVanilla(SlotClick c)
     {
-        if (sentMatches(c))
-            moveVanilla(c, c.slot().index);
+        moveVanilla(c, c.slot().index);
         return true;
-    }
-
-    // 客户端点到的就是槽位里此刻的物品；合成格刚换了配方等情况下两者不同，不再转移
-    private static boolean sentMatches(SlotClick c)
-    {
-        return !c.sent().isEmpty() && c.sent().key().equals(c.clicked().key());
     }
 
     // 把一格原版槽位里的物品沿它的 Shift 路线送往下一站，只取出放得下的数量
@@ -566,7 +560,7 @@ public final class BuiltinSlotInteractions
     // Shift 点产物做一组：产物先放进背包，放不下的沿 Shift 路线送走
     private static boolean craftStack(SlotClick c)
     {
-        if (batchCraft(c) instanceof BatchCraftWidget batch && sentMatches(c))
+        if (batchCraft(c) instanceof BatchCraftWidget batch && !c.clicked().isEmpty())
         {
             ItemStack product = c.slot().getItem();
             List<Integer> targets = new ArrayList<>(inventorySlots(c));
@@ -579,7 +573,7 @@ public final class BuiltinSlotInteractions
     // 空格左键点产物：连续制作，产物只放进背包，直到放满、原料用完或换了配方
     private static boolean craftAll(SlotClick c)
     {
-        if (batchCraft(c) instanceof BatchCraftWidget batch && sentMatches(c))
+        if (batchCraft(c) instanceof BatchCraftWidget batch && !c.clicked().isEmpty())
         {
             ItemStack product = c.slot().getItem();
             craft(c, batch, spaceFor(c, product) / product.getCount(), inventorySlots(c));
@@ -638,7 +632,7 @@ public final class BuiltinSlotInteractions
     // 沿产物槽的 Shift 路线连续取出：每次取出都按原版消耗原料，产物换了、放不下或凑满一组就停
     private static boolean takeResults(SlotClick c)
     {
-        if (!sentMatches(c))
+        if (c.clicked().isEmpty())
             return true;
         Slot result = c.slot();
         ItemStack first = result.getItem().copy();
@@ -680,7 +674,8 @@ public final class BuiltinSlotInteractions
         return true;
     }
 
-    // 背包与快捷栏里和第一下点到的物品完全相同的每一组
+    // 背包与快捷栏里和第一下点到的物品完全相同的每一组。第一下已把这一格搬空，只能按客户端带来的第一下的物品找；
+    // 它被其他模组改过数据时找不到完全相同的其他组，只转移第一下那一组
     private static boolean quickMoveSameVanilla(SlotClick c)
     {
         IStackKey<?> key = c.sent().key();
