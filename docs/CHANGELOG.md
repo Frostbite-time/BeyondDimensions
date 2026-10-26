@@ -1,6 +1,6 @@
 ## English
 
-0.8.4 rebuilds every screen on CompixelUI and adds custom category tabs, a work area in the storage screen, side configuration for machines, the Machine Configuration Talisman and the Stock Emitter. It requires CompixelUI and Kotlin; read the breaking changes at the end before updating.
+0.8.5 rebuilds every screen on CompixelUI and adds custom category tabs, a work area in the storage screen, side configuration for machines, the Machine Configuration Talisman and the Stock Emitter. It requires CompixelUI and Kotlin; read the breaking changes at the end before updating.
 
 ### Interface
 
@@ -104,7 +104,7 @@ For developers:
 
 ## 中文
 
-0.8.4 将所有界面改用 CompixelUI 重做，并新增自定义分类标签、存储界面的工作区、机器面配置、机器配置符和存量发信器。本版需要 CompixelUI 和 Kotlin，更新前请先阅读文末的破坏性改动。
+0.8.5 将所有界面改用 CompixelUI 重做，并新增自定义分类标签、存储界面的工作区、机器面配置、机器配置符和存量发信器。本版需要 CompixelUI 和 Kotlin，更新前请先阅读文末的破坏性改动。
 
 ### 界面
 
