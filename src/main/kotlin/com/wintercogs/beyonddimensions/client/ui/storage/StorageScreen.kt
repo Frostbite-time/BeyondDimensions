@@ -133,6 +133,7 @@ class StorageText {
     val keepSearch = tr("ui.beyonddimensions.storage.keep_search")
     val syncSearch = tr("ui.beyonddimensions.storage.sync_search")
     val syncSearchHint = tr("ui.beyonddimensions.storage.sync_search.hint")
+    val inventory = tr("ui.beyonddimensions.inventory")
     val keepCrafting = tr("ui.beyonddimensions.crafting.keep")
     val keepCraftingHint = tr("ui.beyonddimensions.crafting.keep.hint")
     val showWorkbench = tr("ui.beyonddimensions.storage.workbench.show")
@@ -231,10 +232,10 @@ private const val EDITOR_MILLIS = 180
 /** 除格子行与下方各区外的固定高度：标题栏、页面留白、搜索栏、分类标签栏与格子边框 */
 private const val CHROME_HEIGHT = HEADER_HEIGHT + PAGE_PADDING_TOP + FIELD_HEIGHT + 3 + 13 + 3 + 2 + PAGE_PADDING_BOTTOM
 
-/** 工作区下拉框一行的高度：与行末 11 dp 的小按钮一样高 */
+/** 工作区下拉框一行与背包标题的高度：与行末 11 dp 的小按钮一样高 */
 private const val LABEL_HEIGHT = 11
 
-/** 工作台内容的顶边：下拉框一行与其下的间距 */
+/** 工作台内容的顶边：下拉框一行与其下的间距。背包标题连同其下的间距也是这么高 */
 private const val WORKBENCH_CONTENT_TOP = LABEL_HEIGHT + 3
 
 /** 背包区：背包三行、间隔与快捷栏，外框每边占半个像素 */
@@ -260,14 +261,14 @@ private fun workbenchBeside(width: Int, workbenches: StorageWorkbenchHost) =
 
 /**
  * 存储格下方各区连同上方间距的高度：背包区，[shown] 时还有工作区。
- * 并排时背包区上方空出下拉框一行，槽位与工作台内容对齐，收起工作区时位置不变；工作区不比这更高
- * （见 [com.wintercogs.beyonddimensions.api.ui.storage.StorageWorkbenches.MAX_HEIGHT]），不占格子的行数
+ * 并排或收起工作区时背包区上方有标题，与下拉框一行连同间距一样高。并排时槽位与工作台内容对齐，收起工作区时位置不变；
+ * 工作区不比这更高（见 [com.wintercogs.beyonddimensions.api.ui.storage.StorageWorkbenches.MAX_HEIGHT]），不占格子的行数
  */
 internal fun bottomHeight(width: Int, workbenches: StorageWorkbenchHost, shown: Boolean): Int {
     val areas = when {
         workbenchBeside(width, workbenches) ->
             maxOf(workbenchAreaHeight(workbenches), WORKBENCH_CONTENT_TOP + INVENTORY_HEIGHT)
-        !shown -> INVENTORY_HEIGHT
+        !shown -> WORKBENCH_CONTENT_TOP + INVENTORY_HEIGHT
         else -> workbenchAreaHeight(workbenches) + SECTION_GAP + INVENTORY_HEIGHT
     }
     return SECTION_GAP + areas
@@ -512,10 +513,10 @@ private fun WorkbenchAndInventory(
                     Spacer(Modifier.width(GAP.dp))
                 }
             }
-            InventoryArea(slots, layout, top = WORKBENCH_CONTENT_TOP)
+            InventoryArea(slots, layout, titled = true)
         }
     } else {
-        // 工作区与背包区一样宽，一起在内容区里居中；背包的槽位在这个宽度里居中
+        // 工作区与背包区一样宽，一起在内容区里居中；背包的槽位在这个宽度里居中，标题靠左
         val columnWidth = maxOf(workbenches.contentWidth, INVENTORY_WIDTH)
         Box(Modifier.width(width.dp), contentAlignment = Alignment.TopCenter) {
             Column(Modifier.width(columnWidth.dp)) {
@@ -529,25 +530,37 @@ private fun WorkbenchAndInventory(
                         Spacer(Modifier.height(SECTION_GAP.dp))
                     }
                 }
-                InventoryArea(slots, layout, columnWidth)
+                InventoryArea(slots, layout, titled = !state.workbenchShown, width = columnWidth)
             }
         }
     }
 }
 
 /**
- * 背包区，[width] 宽，玩家背包的槽位居中；上方空出 [top]，并排时与工作台内容对齐。
+ * 背包区，[width] 宽，玩家背包的槽位居中。[titled] 时上方是靠左的标题，与工作区的下拉框一行连同间距一样高，
+ * 并排时两边的槽位对齐；标题随工作区的展开与收起以动画伸缩。
  * 宽度与背包相差偶数个界面像素，居中后槽位的细框不会落在半个像素上
  */
 @Composable
 private fun InventoryArea(
     slots: ComposeMenuSlots<DimensionsNetMenu>,
     layout: StorageLayout,
+    titled: Boolean,
     width: Int = INVENTORY_WIDTH,
-    top: Int = 0,
 ) {
+    val resize = tween<IntSize>(WORKBENCH_MILLIS, easing = FastOutSlowInEasing)
+    val fade = tween<Float>(WORKBENCH_MILLIS, easing = FastOutSlowInEasing)
     Column(Modifier.width(width.dp)) {
-        if (top > 0) Spacer(Modifier.height(top.dp))
+        AnimatedVisibility(
+            titled,
+            enter = expandVertically(resize, Alignment.Top) + fadeIn(fade),
+            exit = shrinkVertically(resize, Alignment.Top) + fadeOut(fade),
+        ) {
+            Column {
+                BdSectionLabel(layout.text.inventory, Modifier.height(LABEL_HEIGHT.dp))
+                Spacer(Modifier.height((WORKBENCH_CONTENT_TOP - LABEL_HEIGHT).dp))
+            }
+        }
         Box(Modifier.align(Alignment.CenterHorizontally).bdSlotFrame(Bd.colors)) {
             BdPlayerInventory(
                 slots,
