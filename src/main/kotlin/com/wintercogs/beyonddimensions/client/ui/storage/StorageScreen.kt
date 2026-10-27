@@ -268,6 +268,7 @@ internal fun bottomHeight(width: Int, workbenches: StorageWorkbenchHost, shown: 
     val areas = when {
         workbenchBeside(width, workbenches) ->
             maxOf(workbenchAreaHeight(workbenches), WORKBENCH_CONTENT_TOP + INVENTORY_HEIGHT)
+
         !shown -> WORKBENCH_CONTENT_TOP + INVENTORY_HEIGHT
         else -> workbenchAreaHeight(workbenches) + SECTION_GAP + INVENTORY_HEIGHT
     }
