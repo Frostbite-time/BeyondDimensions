@@ -51,9 +51,6 @@ private const val ARROW = 7 + 7 + 7
 /** 一行小字的高度 */
 private const val CAPTION_HEIGHT = 10
 
-/** 文本框的高度 */
-private const val FIELD_HEIGHT = 18
-
 /** 工作台的偏好由服务器保存在玩家身上，关闭界面时按它退回或保留工作台里的物品 */
 internal fun sendWorkbenchPreference(menu: DimensionsNetMenu) =
     menu.commands().preference(ClientConfigRuntime.craftingReturnToStorage, ClientConfigRuntime.craftingKeepGrid)
