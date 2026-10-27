@@ -738,13 +738,14 @@ fun BdScrollbar(state: ScrollState, modifier: Modifier = Modifier) {
 
 /**
  * 两种滚动条共用的外观与操作：凹槽里一块凸起的机壳滑块，中间三道防滑纹，像原版的滚动条。
- * 点击或拖动轨道时滑块中心跳到指针处，[onScrollTo] 收到 0 到 1 之间的位置。
+ * 点击或拖动轨道时滑块中心跳到指针处，[onScrollTo] 收到 0 到 1 之间的位置；不能滚动时滑块停在顶端，不响应点击与拖动。
  * 滑块在绘制时按轨道的实际高度算出：浮层里的子组合布局不支持固有尺寸的测量，不能用 BoxWithConstraints
  */
 @Composable
 private fun BdScrollbarTrack(position: Float, canScroll: Boolean, onScrollTo: (Float) -> Unit, modifier: Modifier) {
     val colors = Bd.colors
     val latest by rememberUpdatedState(onScrollTo)
+    val scrollable by rememberUpdatedState(canScroll)
     val knob = with(LocalDensity.current) { SCROLLBAR_KNOB.dp.toPx() }
     fun knobOf(track: Float) = minOf(knob, track)
     fun positionAt(y: Float, track: Float): Float {
@@ -753,12 +754,15 @@ private fun BdScrollbarTrack(position: Float, canScroll: Boolean, onScrollTo: (F
     }
     Box(
         modifier.bdInset(colors).padding(1.dp)
-            .pointerInput(Unit) { detectTapGestures { latest(positionAt(it.y, size.height.toFloat())) } }
             .pointerInput(Unit) {
-                detectVerticalDragGestures { change, _ -> latest(positionAt(change.position.y, size.height.toFloat())) }
+                detectTapGestures { if (scrollable) latest(positionAt(it.y, size.height.toFloat())) }
+            }
+            .pointerInput(Unit) {
+                detectVerticalDragGestures { change, _ ->
+                    if (scrollable) latest(positionAt(change.position.y, size.height.toFloat()))
+                }
             }
             .drawBehind {
-                if (!canScroll) return@drawBehind
                 val p = 1.dp.toPx()
                 val w = size.width
                 val length = knobOf(size.height)

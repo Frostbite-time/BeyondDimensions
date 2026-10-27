@@ -427,16 +427,15 @@ private fun StorageView(
                                 }
                             }
                         }
-                        if (state.totalRows > gridRows) {
-                            Spacer(Modifier.width(2.dp))
-                            BdScrollbar(
-                                state.firstRow,
-                                gridRows,
-                                state.totalRows,
-                                { send(StorageAction.ScrollTo(it)) },
-                                Modifier.width(SCROLLBAR_WIDTH.dp).fillMaxHeight(),
-                            )
-                        }
+                        // 滚动条始终显示，放得下全部资源时滑块停在顶端
+                        Spacer(Modifier.width(2.dp))
+                        BdScrollbar(
+                            state.firstRow,
+                            gridRows,
+                            state.totalRows,
+                            { send(StorageAction.ScrollTo(it)) },
+                            Modifier.width(SCROLLBAR_WIDTH.dp).fillMaxHeight(),
+                        )
                     }
                     WorkbenchAndInventory(state, send, slots, layout, workbenches, width)
                     // 给编辑区留出位置
