@@ -146,7 +146,7 @@ internal fun BdPreview(content: BdPreviewContent) {
                         Spacer(Modifier.width(4.dp))
                         Row(
                             Modifier.weight(1f)
-                                .height(18.dp)
+                                .height(FIELD_HEIGHT.dp)
                                 .bdInset(colors, edge = colors[BdColors.lineStrong])
                                 .padding(horizontal = 5.dp),
                             verticalAlignment = Alignment.CenterVertically,

@@ -63,13 +63,16 @@ fun BdWindow(modifier: Modifier = Modifier, content: @Composable ColumnScope.() 
     Column(modifier.bdRaised(Bd.colors), content = content)
 }
 
+/** 标题栏的高度：物品图标上方连亮边、下方到屏幕各空 4 */
+const val HEADER_HEIGHT = 23
+
 /** 窗口标题栏：机壳上的图标与标题，右侧是调色板与关闭按钮 */
 @Composable
 fun BdHeader(icon: ItemIcon?, title: String, onClose: () -> Unit, tag: String? = null) {
     val openColorEditor = LocalColorEditor.current
     val colors = Bd.colors
     Row(
-        Modifier.fillMaxWidth().height(25.dp).padding(start = 7.dp, end = 6.dp, top = 2.dp),
+        Modifier.fillMaxWidth().height(HEADER_HEIGHT.dp).padding(start = 7.dp, end = 6.dp, top = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) {
@@ -229,6 +232,9 @@ private fun narrowDots(text: String) = buildAnnotatedString {
     }
 }
 
+/** 单行文本框与带边框小按钮的高度，两者常并排 */
+const val FIELD_HEIGHT = 18
+
 /** 单行搜索框，右键清空。[help] 是悬停时的说明，开始输入后收起 */
 @Composable
 fun BdSearchField(
@@ -258,7 +264,7 @@ fun BdTextField(
         BasicTextField(
             value,
             onValueChange,
-            Modifier.fillMaxWidth().height(18.dp).hoverable(interaction).onPointerEvent(
+            Modifier.fillMaxWidth().height(FIELD_HEIGHT.dp).hoverable(interaction).onPointerEvent(
                 PointerEventType.Press,
                 PointerEventPass.Initial,
             ) {
@@ -368,7 +374,7 @@ fun BdChip(
     val hovered by interaction.collectIsHoveredAsState()
     Row(
         modifier
-            .height(18.dp)
+            .height(FIELD_HEIGHT.dp)
             .hoverable(interaction, enabled)
             .bdClickable(interaction, enabled = enabled, onClick = onClick)
             .bdRaised(

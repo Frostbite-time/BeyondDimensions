@@ -133,7 +133,6 @@ class StorageText {
     val keepSearch = tr("ui.beyonddimensions.storage.keep_search")
     val syncSearch = tr("ui.beyonddimensions.storage.sync_search")
     val syncSearchHint = tr("ui.beyonddimensions.storage.sync_search.hint")
-    val inventory = tr("ui.beyonddimensions.inventory")
     val keepCrafting = tr("ui.beyonddimensions.crafting.keep")
     val keepCraftingHint = tr("ui.beyonddimensions.crafting.keep.hint")
     val showWorkbench = tr("ui.beyonddimensions.storage.workbench.show")
@@ -210,8 +209,11 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
     }
 }
 
-/** 分区之间的间距 */
+/** 左右相邻的分区之间的间距 */
 private const val GAP = 7
+
+/** 存储格、工作区与背包区上下相邻时的间距 */
+private const val SECTION_GAP = 3
 private const val SCREEN_MARGIN = 8
 
 /** 格子区域（含边框）、间隔与滚动条的总宽度 */
@@ -227,14 +229,17 @@ private const val EDITOR_WIDTH = GAP + 1 + GAP + EDITOR_CONTENT_WIDTH
 private const val EDITOR_MILLIS = 180
 
 /** 除格子行与下方各区外的固定高度：标题栏、页面留白、搜索栏、分类标签栏与格子边框 */
-private const val CHROME_HEIGHT = 25 + PAGE_PADDING_TOP + 18 + 5 + 13 + 4 + 2 + PAGE_PADDING_BOTTOM + 2
+private const val CHROME_HEIGHT = HEADER_HEIGHT + PAGE_PADDING_TOP + FIELD_HEIGHT + 3 + 13 + 3 + 2 + PAGE_PADDING_BOTTOM
 
-/** 工作区下拉框一行与背包区标题的高度：与行末 11 dp 的小按钮一样高 */
+/** 工作区下拉框一行的高度：与行末 11 dp 的小按钮一样高 */
 private const val LABEL_HEIGHT = 11
 
-/** 背包区：标题、间距与背包三行、间隔与快捷栏，外框每边占半个像素 */
+/** 工作台内容的顶边：下拉框一行与其下的间距 */
+private const val WORKBENCH_CONTENT_TOP = LABEL_HEIGHT + 3
+
+/** 背包区：背包三行、间隔与快捷栏，外框每边占半个像素 */
 private const val INVENTORY_WIDTH = 9 * SLOT_PITCH + 1
-private const val INVENTORY_HEIGHT = LABEL_HEIGHT + 4 + 3 * SLOT_PITCH + 3 + SLOT_PITCH + 1
+private const val INVENTORY_HEIGHT = 3 * SLOT_PITCH + 3 + SLOT_PITCH + 1
 
 /** 工作区并排在背包区左侧时，两者之间的间距、分隔线与间距 */
 private const val SPLIT_WIDTH = GAP + 1 + GAP
@@ -247,23 +252,25 @@ private const val WORKBENCH_ROW_HEIGHT = 14
 private const val WORKBENCH_LIST_ROWS = 4
 
 /** 工作区的高度：下拉框一行、间距与工作台内容 */
-private fun workbenchAreaHeight(workbenches: StorageWorkbenchHost) = LABEL_HEIGHT + 4 + workbenches.contentHeight
+private fun workbenchAreaHeight(workbenches: StorageWorkbenchHost) = WORKBENCH_CONTENT_TOP + workbenches.contentHeight
 
-/** 内容区有 [width] 宽时工作区与背包区并排，否则工作区在背包区上方 */
+/** 有工作台且内容区有 [width] 宽时工作区与背包区并排，否则工作区在背包区上方 */
 private fun workbenchBeside(width: Int, workbenches: StorageWorkbenchHost) =
-    width >= workbenches.contentWidth + SPLIT_WIDTH + INVENTORY_WIDTH
+    !workbenches.isEmpty && width >= workbenches.contentWidth + SPLIT_WIDTH + INVENTORY_WIDTH
 
 /**
  * 存储格下方各区连同上方间距的高度：背包区，[shown] 时还有工作区。
- * 并排时工作区不比背包区高（见 [com.wintercogs.beyonddimensions.api.ui.storage.StorageWorkbenches.MAX_HEIGHT]），不占格子的行数
+ * 并排时背包区上方空出下拉框一行，槽位与工作台内容对齐，收起工作区时位置不变；工作区不比这更高
+ * （见 [com.wintercogs.beyonddimensions.api.ui.storage.StorageWorkbenches.MAX_HEIGHT]），不占格子的行数
  */
 internal fun bottomHeight(width: Int, workbenches: StorageWorkbenchHost, shown: Boolean): Int {
     val areas = when {
+        workbenchBeside(width, workbenches) ->
+            maxOf(workbenchAreaHeight(workbenches), WORKBENCH_CONTENT_TOP + INVENTORY_HEIGHT)
         !shown -> INVENTORY_HEIGHT
-        workbenchBeside(width, workbenches) -> maxOf(workbenchAreaHeight(workbenches), INVENTORY_HEIGHT)
-        else -> workbenchAreaHeight(workbenches) + GAP + INVENTORY_HEIGHT
+        else -> workbenchAreaHeight(workbenches) + SECTION_GAP + INVENTORY_HEIGHT
     }
-    return GAP + areas
+    return SECTION_GAP + areas
 }
 
 /**
@@ -387,9 +394,9 @@ private fun StorageView(
             ) {
                 BdMainPage(page.main) {
                     Toolbar(state, send, text, width, searchFocus) { searchFocused = it }
-                    Spacer(Modifier.height(5.dp))
+                    Spacer(Modifier.height(3.dp))
                     CategoryTabs(state, send, text, width)
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(3.dp))
                     // 工作区展开与收起时格子增减行数，高度与工作区一同以动画变化
                     val gridHeight by animateIntAsState(
                         gridRows * SLOT_PITCH + 2,
@@ -488,10 +495,10 @@ private fun WorkbenchAndInventory(
     val colors = Bd.colors
     val resize = tween<IntSize>(WORKBENCH_MILLIS, easing = FastOutSlowInEasing)
     val fade = tween<Float>(WORKBENCH_MILLIS, easing = FastOutSlowInEasing)
-    Spacer(Modifier.height(GAP.dp))
+    Spacer(Modifier.height(SECTION_GAP.dp))
     if (workbenchBeside(width, workbenches)) {
         // 两者一起居中，工作区伸出时背包区随之右移
-        val height = maxOf(workbenchAreaHeight(workbenches), INVENTORY_HEIGHT)
+        val height = maxOf(workbenchAreaHeight(workbenches), WORKBENCH_CONTENT_TOP + INVENTORY_HEIGHT)
         Row(Modifier.width(width.dp).height(height.dp), horizontalArrangement = Arrangement.Center) {
             AnimatedVisibility(
                 state.workbenchShown,
@@ -505,10 +512,10 @@ private fun WorkbenchAndInventory(
                     Spacer(Modifier.width(GAP.dp))
                 }
             }
-            InventoryArea(slots, layout)
+            InventoryArea(slots, layout, top = WORKBENCH_CONTENT_TOP)
         }
     } else {
-        // 工作区与背包区一样宽，一起在内容区里居中；背包的槽位在这个宽度里居中，标题靠左
+        // 工作区与背包区一样宽，一起在内容区里居中；背包的槽位在这个宽度里居中
         val columnWidth = maxOf(workbenches.contentWidth, INVENTORY_WIDTH)
         Box(Modifier.width(width.dp), contentAlignment = Alignment.TopCenter) {
             Column(Modifier.width(columnWidth.dp)) {
@@ -519,7 +526,7 @@ private fun WorkbenchAndInventory(
                 ) {
                     Column {
                         WorkbenchArea(state, send, layout, workbenches)
-                        Spacer(Modifier.height(GAP.dp))
+                        Spacer(Modifier.height(SECTION_GAP.dp))
                     }
                 }
                 InventoryArea(slots, layout, columnWidth)
@@ -529,18 +536,18 @@ private fun WorkbenchAndInventory(
 }
 
 /**
- * 背包区，[width] 宽：标题靠左，玩家背包的槽位居中。标题与工作区的下拉框一行一样高，并排时两边的槽位对齐。
+ * 背包区，[width] 宽，玩家背包的槽位居中；上方空出 [top]，并排时与工作台内容对齐。
  * 宽度与背包相差偶数个界面像素，居中后槽位的细框不会落在半个像素上
  */
 @Composable
 private fun InventoryArea(
     slots: ComposeMenuSlots<DimensionsNetMenu>,
     layout: StorageLayout,
-    width: Int = INVENTORY_WIDTH
+    width: Int = INVENTORY_WIDTH,
+    top: Int = 0,
 ) {
     Column(Modifier.width(width.dp)) {
-        BdSectionLabel(layout.text.inventory, Modifier.height(LABEL_HEIGHT.dp))
-        Spacer(Modifier.height(4.dp))
+        if (top > 0) Spacer(Modifier.height(top.dp))
         Box(Modifier.align(Alignment.CenterHorizontally).bdSlotFrame(Bd.colors)) {
             BdPlayerInventory(
                 slots,
@@ -573,7 +580,7 @@ private fun WorkbenchArea(
                 ReturnToggle(state.returnToStorage, layout.text) { send(StorageAction.ReturnToStorage(it)) }
             }
         }
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(3.dp))
         // 工作台比工作区小时居中，偏移取整到界面像素，槽位的细框不会落在半个像素上
         Layout(
             { Box { workbenches.Content(id) } },
