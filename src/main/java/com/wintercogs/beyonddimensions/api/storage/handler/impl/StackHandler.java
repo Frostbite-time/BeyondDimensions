@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions.api.storage.handler.impl;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
+import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
 import com.wintercogs.beyonddimensions.api.storage.key.ErrorData;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
@@ -65,6 +66,11 @@ public class StackHandler implements IStackHandler
      * 槽位上的数量（空槽位必须为 0，与 keys 同步）
      */
     private final long[] amounts;
+
+    /**
+     * 读档时每个资源在存档里的原样数据，保存时编码不了就写回它；正常编码过一次后不再需要
+     */
+    private final Map<IStackKey<?>, CompoundTag> loadedKeys = new HashMap<>();
 
     /**
      * key -> 具体存储物的对照（只维护类型，不维护数量；不缓存 EmptyStackKey）
@@ -654,9 +660,21 @@ public class StackHandler implements IStackHandler
             IStackKey<?> k = keys[i];
             long amt = (k == EmptyStackKey.INSTANCE) ? 0L : amounts[i];
 
+            // 编码不了的资源写回读档时的原样数据或封装成错误数据，一个资源不会拖垮整台机器的保存
+            ErrorData.Saved key = ErrorData.encodeForSave(k, loadedKeys.get(k));
             CompoundTag e = new CompoundTag();
-            e.put("key", IStackKey.serializeNBTCommon(k));
-            e.putLong("amount", amt);
+            if (key == null)
+            {
+                // 连错误数据都存不下的资源跳过，这一格记为空
+                e.put("key", IStackKey.serializeNBTCommon(EmptyStackKey.INSTANCE));
+                e.putLong("amount", 0L);
+            }
+            else
+            {
+                if (key.encoded()) loadedKeys.remove(k);
+                e.put("key", key.tag());
+                e.putLong("amount", amt);
+            }
             list.add(e);
         }
 
@@ -670,6 +688,7 @@ public class StackHandler implements IStackHandler
     public void deserializeNBT(CompoundTag tag)
     {
         clearStorage();
+        loadedKeys.clear();
         if (tag == null) return;
         try (ErrorData.Report ignored = ErrorData.report("device storage"))
         {
@@ -694,11 +713,21 @@ public class StackHandler implements IStackHandler
             {
                 CompoundTag e = list.getCompound(i);
 
-                // key: 使用 common 统一反序列化
+                // key: 使用 common 统一反序列化；这一格出任何错都只打一条日志后留空
                 IStackKey<?> k = EmptyStackKey.INSTANCE;
                 if (e.contains("key", Tag.TAG_COMPOUND))
                 {
-                    k = IStackKey.deserializeNBTCommon(e.getCompound("key"));
+                    try
+                    {
+                        k = IStackKey.deserializeNBTCommon(e.getCompound("key"));
+                    }
+                    catch (Throwable t)
+                    {
+                        BeyondDimensions.LOGGER.warn("Skipped device storage slot {}: {}", i, t.toString());
+                        continue;
+                    }
+                    // 记下键在存档里的原样数据，保存时编码不了就写回它
+                    if (!k.isEmpty()) loadedKeys.put(k, e.getCompound("key"));
                 }
 
                 long amt = e.getLong("amount");

@@ -23,6 +23,7 @@ public final class ErrorData
     // 错误数据物品 NBT 中保存封装内容的键
     private static final String TAG = "error_data";
     private static final String RAW = "raw";
+    private static final String SOURCE = "source";
     private static final ThreadLocal<Report> REPORT = new ThreadLocal<>();
 
     private ErrorData()
@@ -63,22 +64,65 @@ public final class ErrorData
     }
 
     /**
-     * 原始数据的资源类型与内容 id，用于提示与日志；认不出时返回 null
+     * 原始数据的资源类型，用于提示与日志；认不出时返回 null
      */
     public static @Nullable String type(Tag raw)
     {
         return raw instanceof CompoundTag tag && tag.contains("type", Tag.TAG_STRING) ? tag.getString("type") : null;
     }
 
-    public static @Nullable String content(Tag raw)
+    /**
+     * 保存时封装的错误数据记下的资源 id，用于提示与日志；读档时解析不了的原样数据没有这一项，返回 null
+     */
+    public static @Nullable String source(Tag raw)
     {
-        if (!(raw instanceof CompoundTag tag))
+        return raw instanceof CompoundTag tag && tag.contains(SOURCE, Tag.TAG_STRING) ? tag.getString(SOURCE) : null;
+    }
+
+    /**
+     * 保存时编码一个资源键，捕获一切错误，一个资源编码不了不影响其余资源的保存。
+     * 编码不了时写回它读档时的原样数据 {@code loaded}；本次新放入、没有原样数据的资源记下类型、资源 id 与描述，封装成错误数据；
+     * 连错误数据都封装不了时打一条日志，返回 null，由调用方跳过
+     */
+    public static @Nullable Saved encodeForSave(IStackKey<?> key, @Nullable CompoundTag loaded)
+    {
+        String reason;
+        try
+        {
+            return new Saved(IStackKey.serializeNBTCommon(key), true);
+        }
+        catch (Throwable e)
+        {
+            reason = e.toString();
+        }
+        if (loaded != null)
+        {
+            LOGGER.error("Could not save stored resource {}, wrote back the data it was loaded from: {}", key, reason);
+            return new Saved(loaded, false);
+        }
+        try
+        {
+            CompoundTag described = new CompoundTag();
+            described.putString("type", key.getTypeId().toString());
+            // 资源 id 显示在错误数据的提示里，让玩家知道丢了什么
+            described.putString(SOURCE, key.getSourceId().toString());
+            described.putString("unsaved", key.toString());
+            CompoundTag tag = IStackKey.serializeNBTCommon(wrap(described));
+            LOGGER.error("Could not save stored resource {}, kept it as error data: {}", key, reason);
+            return new Saved(tag, false);
+        }
+        catch (Throwable e)
+        {
+            LOGGER.error("Could not save stored resource {} even as error data, skipped it: {}", key, reason, e);
             return null;
-        CompoundTag stack = tag.getCompound("stack");
-        for (String field : new String[]{"item", "fluid", "gas", "infuse_type", "pigment", "slurry", "id"})
-            if (stack.contains(field, Tag.TAG_STRING))
-                return stack.getString(field);
-        return null;
+        }
+    }
+
+    /**
+     * 保存时编码的结果；encoded 为 false 时 tag 是读档时的原样数据或错误数据
+     */
+    public record Saved(CompoundTag tag, boolean encoded)
+    {
     }
 
     /**
@@ -93,7 +137,7 @@ public final class ErrorData
             Tag raw = raw(key);
             return raw == null ? key : reread(strict, raw, key);
         }
-        catch (RuntimeException e)
+        catch (Throwable e)
         {
             reason = e.toString();
         }
@@ -123,7 +167,7 @@ public final class ErrorData
                 }
             }
         }
-        catch (RuntimeException ignored)
+        catch (Throwable ignored)
         {
             // 仍然无法解析，保持封装
         }
@@ -135,8 +179,8 @@ public final class ErrorData
     private static String describe(Tag raw)
     {
         String type = type(raw);
-        String content = content(raw);
-        return (type == null ? "unknown type" : type) + (content == null ? "" : " " + content);
+        String source = source(raw);
+        return (type == null ? "unknown type" : type) + (source == null ? "" : " " + source);
     }
 
     /**

@@ -33,11 +33,11 @@ public class ErrorDataItem extends Item
         if (raw != null)
         {
             String type = ErrorData.type(raw);
-            String content = ErrorData.content(raw);
+            String source = ErrorData.source(raw);
             if (type != null)
                 tooltip.add(Component.translatable("tooltip.beyonddimensions.error_data.type", type).withStyle(ChatFormatting.DARK_GRAY));
-            if (content != null)
-                tooltip.add(Component.translatable("tooltip.beyonddimensions.error_data.content", content).withStyle(ChatFormatting.DARK_GRAY));
+            if (source != null)
+                tooltip.add(Component.translatable("tooltip.beyonddimensions.error_data.content", source).withStyle(ChatFormatting.DARK_GRAY));
         }
         tooltip.add(Component.translatable("tooltip.beyonddimensions.error_data.hint").withStyle(ChatFormatting.DARK_GRAY));
     }

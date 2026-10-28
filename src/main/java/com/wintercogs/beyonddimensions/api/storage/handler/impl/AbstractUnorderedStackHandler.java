@@ -72,6 +72,9 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     /* ---------- 存档：每个键编码后的 NBT。键不可变，编码结果不再修改，可直接复用 ---------- */
     private final Map<IStackKey<?>, CompoundTag> encodedKeys = new HashMap<>();
 
+    /* ---------- 读档：每个键在存档里的原样数据，保存时编码不了就写回它；正常编码过一次后不再需要 ---------- */
+    private final Map<IStackKey<?>, CompoundTag> loadedKeys = new HashMap<>();
+
     /* ---------- 仅供 UI 使用的时间表 ---------- */
     /**
      * 记录该 Key 最近一次“从无到有建槽位”的时间（毫秒时间戳）。仅供 UI 展示，无其他语义。
@@ -409,6 +412,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         tagIndexGeneration = -1;
         fuzzyIndex.clear();
         encodedKeys.clear();
+        loadedKeys.clear();
         creationTimeMap.clear();
         lastModifiedTimeMap.clear();
     }
@@ -791,6 +795,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             key.getTags().forEach(tag -> tag2stackMap.remove(tag, key));
         }
         encodedKeys.remove(key);
+        loadedKeys.remove(key);
         // 为避免无上限增长，这里选择在移除槽位时一并清理时间记录
         creationTimeMap.remove(key);
         lastModifiedTimeMap.remove(key);
@@ -878,7 +883,11 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             CompoundTag ct = encodedKeys.get(key);
             if (ct == null)
             {
-                ct = IStackKey.serializeNBTCommon(key);
+                // 一个资源编码不了不中断整个存储的保存：写回读档时的原样数据，或封装成错误数据
+                ErrorData.Saved saved = ErrorData.encodeForSave(key, loadedKeys.get(key));
+                if (saved == null) continue;
+                if (saved.encoded()) loadedKeys.remove(key);
+                ct = saved.tag();
                 encodedKeys.put(key, ct);
             }
 
@@ -939,6 +948,8 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
 
                 long amount = one.contains("amount", Tag.TAG_LONG) ? one.getLong("amount") : one.getLong("Amount");
                 acceptEntry(key, amount);
+                // 记下键在存档里的原样数据，保存时编码不了就写回它
+                if (!key.isEmpty()) loadedKeys.put(key, one.getCompound("key"));
             }
             return;
         }
@@ -964,6 +975,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
                 }
                 catch (Throwable t)
                 {
+                    BeyondDimensions.LOGGER.warn("Error while decoding an old-format entry (index={} type={}): {}", i, typeStr, t.toString());
                     continue;
                 }
                 acceptEntry(ka.key(), ka.amount());
