@@ -1,9 +1,9 @@
 ## English
 
-- The storage screen shows the inventory title again when the work area is collapsed or sits beside the inventory.
-- The scrollbar beside the storage grid is always shown. When there is nothing to scroll, its knob stays at the top, as does the Stonecutter recipe list's.
+- Stored resources are saved one by one, so when one cannot be saved, the rest still save: a resource read from the save keeps its saved data, and a newly stored one is saved as an Error Data item whose tooltip shows its type and ID.
+- Scrolling the storage grid performs better.
 
 ## 中文
 
-- 收起工作区或工作区与背包并排时，存储界面重新显示背包标题。
-- 存储格右侧的滚动条始终显示；无需滚动时滑块停在顶端，切石机的配方列表也是如此。
+- 存储中的资源逐个保存，某个资源无法保存时其余资源照常保存：从存档读出的资源写回原有数据，新存入的资源保存为“错误数据”物品，提示中显示其类型与 ID。
+- 存储界面滚动性能更佳。
