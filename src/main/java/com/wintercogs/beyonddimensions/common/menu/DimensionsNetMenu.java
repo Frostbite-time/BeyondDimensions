@@ -430,23 +430,26 @@ public class DimensionsNetMenu extends BDBaseMenu
 
         // 2 构建linedata
         updateScrollLineData(indexes.size());
-        // 3 填入索引表
+        // 3 填入索引表：槽位按行轮换，翻动一行时只有移出与移入的那一行槽位换内容
+        int lines = getLines();
         ArrayList<Integer> indexList = new ArrayList<>();
-        for (int i = 0; i < getLines() * columns; i++)
+        for (int i = 0; i < lines * columns; i++)
         {
-            //根据翻页数据构建索引列表
-            if (i + lineData * columns < indexes.size())
-            {
-                int index = indexes.get(i + lineData * columns);
-                indexList.add(index);
-            }
-            else
-            {
-                indexList.add(-1); //传入不存在的索引，可以使对应槽位成为空
-            }
+            int position = (lineData + displayRow(i / columns, lineData, lines)) * columns + i % columns;
+            //传入不存在的索引，可以使对应槽位成为空
+            indexList.add(position < indexes.size() ? indexes.get(position) : -1);
         }
         // 加载索引表
         loadIndexList(indexList);
+    }
+
+    /**
+     * 首行为 lineData 时，第 slotRow 行存储槽位显示在网格的第几行。
+     * 可见的第 lineData + k 行资源放在第 (lineData + k) % lines 行槽位里
+     */
+    public static int displayRow(int slotRow, int lineData, int lines)
+    {
+        return Math.floorMod(slotRow - lineData, lines);
     }
 
     // 双端函数，根据传入列表构建索引
