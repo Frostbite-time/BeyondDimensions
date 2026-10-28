@@ -12,7 +12,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,13 +37,17 @@ import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.toSize
 import com.wintercogs.beyonddimensions.client.ui.theme.Bd
 import com.wintercogs.beyonddimensions.client.ui.theme.BdColors
 import dev.compixel.forge.item.ItemIcon
@@ -198,25 +201,31 @@ fun Modifier.bdClickable(
     }
 }
 
+/**
+ * 数量标签共用的排版器：同样的数量在整个界面里只排版一次，格子换内容时不必逐格重新排版。
+ * 由 BdDesign 在界面根部提供，缓存够放下最多的格子
+ */
+val LocalBdAmountMeasurer = staticCompositionLocalOf<TextMeasurer?> { null }
+
 /** 数量标签：像原版的物品数量那样带一层错开的投影，颜色取自配色的 amount 与 amountShadow */
 @Composable
 fun BdAmountPill(text: String, modifier: Modifier = Modifier) {
     val colors = Bd.colors
-    val shadow = with(LocalDensity.current) { AMOUNT_FONT_PIXEL.toPx() }
+    val density = LocalDensity.current
+    val shadow = with(density) { AMOUNT_FONT_PIXEL.toPx() }
+    // 投影是一份错开的实心字，不模糊
+    val style = Bd.amount.copy(
+        color = colors[BdColors.amount],
+        shadow = Shadow(colors[BdColors.amountShadow], Offset(shadow, shadow), 0f),
+    )
+    val measurer = LocalBdAmountMeasurer.current ?: rememberTextMeasurer()
+    val layout = remember(text, style, measurer) { measurer.measure(narrowDots(text), style, maxLines = 1) }
     // 四个字符正好占满槽位的宽度；放不下时向左伸出，不截掉末尾的单位
     Box(
         modifier.wrapContentWidth(Alignment.End, unbounded = true)
             .padding(end = AMOUNT_FONT_PIXEL, bottom = AMOUNT_FONT_PIXEL)
     ) {
-        BasicText(
-            remember(text) { narrowDots(text) },
-            // 投影是一份错开的实心字，不模糊
-            style = Bd.amount.copy(
-                color = colors[BdColors.amount],
-                shadow = Shadow(colors[BdColors.amountShadow], Offset(shadow, shadow), 0f),
-            ),
-            maxLines = 1,
-        )
+        Canvas(Modifier.size(with(density) { layout.size.toSize().toDpSize() })) { drawText(layout) }
     }
 }
 

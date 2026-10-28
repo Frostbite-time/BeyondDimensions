@@ -9,9 +9,11 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wintercogs.beyonddimensions.client.ui.kit.BdContextMenu
+import com.wintercogs.beyonddimensions.client.ui.kit.LocalBdAmountMeasurer
 import dev.compixel.ui.UiDesign
 import dev.compixel.ui.ore.theme.OreColors
 import dev.compixel.ui.ore.theme.OreTheme
@@ -138,6 +140,9 @@ object BdColors : ColorSchema("beyonddimensions") {
 
 val LocalBdColors = staticCompositionLocalOf { BdColors.defaults }
 
+/** 共用排版器缓存的数量标签数：存储格子最多 891 个 */
+private const val AMOUNT_LAYOUTS = 1024
+
 /** BD 界面的设计：提供玩家所选配色的 BD 颜色与文本框的右键菜单，并按 BD 的颜色为其中的 Ore 控件配色 */
 object BdDesign : UiDesign {
     override val owner = SchemeOwner("beyonddimensions", BdColors, default = "casing")
@@ -149,6 +154,7 @@ object BdDesign : UiDesign {
         OreTheme(ore, BdTypography) {
             CompositionLocalProvider(
                 LocalBdColors provides colors,
+                LocalBdAmountMeasurer provides rememberTextMeasurer(AMOUNT_LAYOUTS),
                 LocalContextMenuRepresentation provides BdContextMenu,
                 content = content,
             )
