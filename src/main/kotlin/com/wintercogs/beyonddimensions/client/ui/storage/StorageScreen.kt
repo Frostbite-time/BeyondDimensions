@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -219,6 +220,25 @@ private const val SCREEN_MARGIN = 8
 
 /** 格子区域（含边框）、间隔与滚动条的总宽度 */
 private fun contentWidth(columns: Int) = columns * SLOT_PITCH + 2 + 2 + SCROLLBAR_WIDTH
+
+/**
+ * 存储格子：槽位按行轮换（见 [DimensionsNetMenu.buildIndexList]），翻动时其余各行槽位内容不变，
+ * 只在摆放时挪到 [firstRow] 对应的行，不重新组合
+ */
+@Composable
+private fun StorageSlotGrid(slots: ComposeMenuSlots<*>, ids: List<Int>, columns: Int, firstRow: Int) {
+    val rows = ids.size / columns
+    Layout({ for (id in ids) BdSlot(slots, id) }) { measurables, _ ->
+        val pitch = SLOT_PITCH.dp.roundToPx()
+        val placeables = measurables.map { it.measure(Constraints.fixed(pitch, pitch)) }
+        layout(columns * pitch, rows * pitch) {
+            placeables.forEachIndexed { index, placeable ->
+                val row = DimensionsNetMenu.displayRow(index / columns, firstRow, rows)
+                placeable.place(index % columns * pitch, row * pitch)
+            }
+        }
+    }
+}
 
 /** 窗口中除格子区域外的宽度 */
 private const val CHROME_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 2
@@ -416,7 +436,7 @@ private fun StorageView(
                                 }
                         ) {
                             val ids = List(gridColumns * gridRows) { layout.storageStart + it }
-                            BdSlotGrid(slots, ids, gridColumns)
+                            StorageSlotGrid(slots, ids, gridColumns, state.firstRow)
                             state.slotMenu?.let { menu ->
                                 key(menu.serial) {
                                     SlotMenuPopup(
