@@ -20,9 +20,9 @@ import java.util.stream.Stream;
 public interface IStackKey<T>
 {
     /**
-     * CODEC定义，根据StackKeyRegistry分发到对应子类
+     * 严格的CODEC，根据StackKeyRegistry分发到对应子类；类型未注册或数据有误时解析失败（可能抛出异常）
      */
-    public static final Codec<IStackKey<?>> CODEC = Identifier.CODEC
+    public static final Codec<IStackKey<?>> STRICT_CODEC = Identifier.CODEC
             .dispatch(
                     "type",
                     IStackKey::getTypeId,  // 分发到具体实现的编解码器
@@ -31,6 +31,11 @@ public interface IStackKey<T>
                         return type.codec(); // A → MapCodec
                     }
             );
+
+    /**
+     * 存档用的CODEC：解析不了的资源原样封装成错误数据而不是失败，解析到错误数据时尝试还原，见 {@link ErrorData}
+     */
+    public static final Codec<IStackKey<?>> CODEC = ErrorData.lenient(STRICT_CODEC);
 
     /*
      * 流编码器定义，根据StackKeyRegistry分发到对应子类
@@ -112,6 +117,14 @@ public interface IStackKey<T>
      * 获取资源所属的模组id
      */
     String getModId();
+
+    /**
+     * 获取资源自身的 id，如物品 id、流体 id；能量这类没有注册表的资源默认返回 {@link #getTypeId()}
+     */
+    default Identifier getSourceId()
+    {
+        return getTypeId();
+    }
 
     /**
      * 判断堆叠是否为空堆叠

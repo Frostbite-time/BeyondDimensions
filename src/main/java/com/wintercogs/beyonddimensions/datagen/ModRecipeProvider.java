@@ -4,15 +4,14 @@ import com.wintercogs.beyonddimensions.common.init.BDBlocks;
 import com.wintercogs.beyonddimensions.common.init.BDItems;
 import com.wintercogs.beyonddimensions.datagen.util.BDRecipeProvider;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.data.recipes.*;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.data.worldgen.BootstrapContext;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.CompletableFuture;
+import net.minecraft.world.item.crafting.Recipe;
 
 public class ModRecipeProvider extends BDRecipeProvider
 {

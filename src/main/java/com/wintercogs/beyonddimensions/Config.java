@@ -65,7 +65,9 @@ public class Config
         INSTANCE = new Config(container);
     }
 
-    /** 兼容26.3早期与新版FML的配置类型名称。 */
+    /**
+     * 兼容26.3早期与新版FML的配置类型名称。
+     */
     private static ModConfig.Type resolveConfigType(String currentName, String legacyName)
     {
         try

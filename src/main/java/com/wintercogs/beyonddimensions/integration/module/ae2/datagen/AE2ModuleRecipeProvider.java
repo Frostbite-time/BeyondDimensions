@@ -8,14 +8,10 @@ import com.wintercogs.beyonddimensions.integration.module.ae2.init.AE2ModuleItem
 import net.minecraft.advancements.Advancement;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.worldgen.BootstrapContext;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.CompletableFuture;
+import net.minecraft.world.item.crafting.Recipe;
 
 import static net.neoforged.neoforge.common.conditions.NeoForgeConditions.modLoaded;
 

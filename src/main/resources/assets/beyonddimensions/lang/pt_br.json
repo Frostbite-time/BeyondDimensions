@@ -141,6 +141,11 @@
   "item.beyonddimensions.net_feeder_item": "Alimentador de Rede",
   "item.beyonddimensions.xp_fluid_bucket": "Balde de XP líquido",
   "item.beyonddimensions.xp_exchange_item": "Varinha de XP",
+  "item.beyonddimensions.error_data": "Dados com erro",
+  "tooltip.beyonddimensions.error_data": "Dados armazenados que não puderam ser lidos, guardados aqui sem alterações",
+  "tooltip.beyonddimensions.error_data.type": "Tipo: %s",
+  "tooltip.beyonddimensions.error_data.content": "Conteúdo: %s",
+  "tooltip.beyonddimensions.error_data.hint": "Quando o mod correspondente for reinstalado, os dados com erro que ficaram em uma rede ou dispositivo serão restaurados automaticamente no próximo carregamento",
   "item.beyonddimensions.warden_soul_tag_item": "Marcador de Almas",
 
   "menu.title.beyonddimensions.xp_exchange_menu": "Configurações da Varinha de XP",

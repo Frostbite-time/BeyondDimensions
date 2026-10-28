@@ -1,7 +1,6 @@
 package com.wintercogs.beyonddimensions.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Window;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet;
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel;

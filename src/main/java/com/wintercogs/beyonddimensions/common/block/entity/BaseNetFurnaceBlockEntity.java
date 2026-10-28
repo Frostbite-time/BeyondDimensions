@@ -20,14 +20,13 @@ import com.wintercogs.beyonddimensions.common.machine.PopMode;
 import com.wintercogs.beyonddimensions.common.machine.ReceiveMode;
 import com.wintercogs.beyonddimensions.common.menu.NetFurnaceMenu;
 import com.wintercogs.beyonddimensions.util.ItemStackHelper;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.SimpleContainer;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;

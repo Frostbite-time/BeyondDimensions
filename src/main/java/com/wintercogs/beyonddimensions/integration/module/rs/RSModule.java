@@ -14,11 +14,11 @@ import com.wintercogs.beyonddimensions.integration.module.rs.datagen.RSModuleRec
 import com.wintercogs.beyonddimensions.integration.module.rs.init.RSModuleBlockEntities;
 import com.wintercogs.beyonddimensions.integration.module.rs.init.RSModuleBlocks;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.loot.LootTableProvider;
+import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -27,7 +27,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;

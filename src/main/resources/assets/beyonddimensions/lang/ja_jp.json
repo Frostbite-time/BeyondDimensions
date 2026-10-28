@@ -141,6 +141,11 @@
   "item.beyonddimensions.net_feeder_item": "ネットフィーダー",
   "item.beyonddimensions.xp_fluid_bucket": "液体経験値のバケツ",
   "item.beyonddimensions.xp_exchange_item": "経験値の杖",
+  "item.beyonddimensions.error_data": "エラーデータ",
+  "tooltip.beyonddimensions.error_data": "読み込めなかった保存データを、そのままここに保管しています",
+  "tooltip.beyonddimensions.error_data.type": "種類：%s",
+  "tooltip.beyonddimensions.error_data.content": "内容：%s",
+  "tooltip.beyonddimensions.error_data.hint": "対応するMODを入れ直すと、ネットワークや装置に残ったエラーデータは次回の読み込み時に自動で復元されます",
   "item.beyonddimensions.warden_soul_tag_item": "魂マーカー",
 
   "menu.title.beyonddimensions.xp_exchange_menu": "経験値の杖設定",

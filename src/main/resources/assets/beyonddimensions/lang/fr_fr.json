@@ -141,6 +141,11 @@
   "item.beyonddimensions.net_feeder_item": "Distributeur Réseau",
   "item.beyonddimensions.xp_fluid_bucket": "Seau d'XP liquide",
   "item.beyonddimensions.xp_exchange_item": "Baguette d'XP",
+  "item.beyonddimensions.error_data": "Données erronées",
+  "tooltip.beyonddimensions.error_data": "Données stockées illisibles, conservées ici telles quelles",
+  "tooltip.beyonddimensions.error_data.type": "Type : %s",
+  "tooltip.beyonddimensions.error_data.content": "Contenu : %s",
+  "tooltip.beyonddimensions.error_data.hint": "Une fois son mod réinstallé, les données erronées restées dans un réseau ou un appareil sont restaurées automatiquement au prochain chargement",
   "item.beyonddimensions.warden_soul_tag_item": "Marqueur d'Âmes",
 
   "menu.title.beyonddimensions.xp_exchange_menu": "Paramètres de la baguette d'XP",

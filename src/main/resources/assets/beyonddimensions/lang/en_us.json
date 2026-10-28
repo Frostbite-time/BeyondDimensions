@@ -145,6 +145,11 @@
   "item.beyonddimensions.net_restocker_item": "Net Restocker",
   "item.beyonddimensions.xp_fluid_bucket": "Bucket of Liquid XP",
   "item.beyonddimensions.xp_exchange_item": "XP Rod",
+  "item.beyonddimensions.error_data": "Error Data",
+  "tooltip.beyonddimensions.error_data": "Stored data that could not be read, kept here unchanged",
+  "tooltip.beyonddimensions.error_data.type": "Type: %s",
+  "tooltip.beyonddimensions.error_data.content": "Content: %s",
+  "tooltip.beyonddimensions.error_data.hint": "Once its mod is back, error data left in a network or device is restored the next time it loads",
   "item.beyonddimensions.warden_soul_tag_item": "Warden Soul Tagger",
 
   "menu.title.beyonddimensions.xp_exchange_menu": "XP Rod Settings",

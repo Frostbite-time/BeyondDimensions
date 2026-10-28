@@ -8,11 +8,11 @@ import com.wintercogs.beyonddimensions.integration.module.ae2.datagen.AE2ModuleM
 import com.wintercogs.beyonddimensions.integration.module.ae2.datagen.AE2ModuleRecipeProvider;
 import com.wintercogs.beyonddimensions.integration.module.ae2.init.AE2ModuleItems;
 import com.wintercogs.beyonddimensions.integration.module.ae2.me.CellHandler;
+import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraft.core.RegistrySetBuilder;
-import net.minecraft.data.recipes.RecipeProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 @BDIntegrationModule(modId = OtherModIds.AE2)

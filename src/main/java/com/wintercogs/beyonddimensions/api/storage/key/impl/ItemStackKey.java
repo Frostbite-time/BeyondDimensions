@@ -175,6 +175,12 @@ public final class ItemStackKey implements IStackKey<ItemStack>
     }
 
     @Override
+    public Identifier getSourceId()
+    {
+        return BuiltInRegistries.ITEM.getKey(item);
+    }
+
+    @Override
     public boolean isEmpty()
     {
         return this == ItemStackKey.EMPTY || this.item == Items.AIR;

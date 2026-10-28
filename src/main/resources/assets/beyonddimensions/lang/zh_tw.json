@@ -145,6 +145,11 @@
   "item.beyonddimensions.net_restocker_item": "網路補貨器",
   "item.beyonddimensions.xp_fluid_bucket": "液態經驗桶",
   "item.beyonddimensions.xp_exchange_item": "經驗棒",
+  "item.beyonddimensions.error_data": "錯誤資料",
+  "tooltip.beyonddimensions.error_data": "讀不出來的儲存資料，原樣保存在這裡",
+  "tooltip.beyonddimensions.error_data.type": "類型：%s",
+  "tooltip.beyonddimensions.error_data.content": "內容：%s",
+  "tooltip.beyonddimensions.error_data.hint": "對應模組裝回後，留在維度網路或裝置裡的錯誤資料會在下次載入時自動還原",
   "item.beyonddimensions.warden_soul_tag_item": "靈魂標記器",
 
   "menu.title.beyonddimensions.xp_exchange_menu": "經驗棒設定",
