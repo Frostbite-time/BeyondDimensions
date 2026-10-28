@@ -1,9 +1,11 @@
 package com.wintercogs.beyonddimensions.api.dimensionnet;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.event.dimensionnet.DimensionsNetEvent;
 import com.wintercogs.beyonddimensions.api.storage.handler.impl.AbstractUnorderedStackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.ErrorData;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EnergyStackKey;
@@ -15,6 +17,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -28,6 +31,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.util.*;
 
@@ -40,6 +44,7 @@ import java.util.*;
  */
 public class DimensionsNet extends SavedData
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
     static final String NET_DATA_PREFIX = "bd_net_";
     public static final int NO_PRIMARY_NET_ID = -1;
     public static final int MAX_NETWORK_NAME_LENGTH = 48;
@@ -325,28 +330,23 @@ public class DimensionsNet extends SavedData
             net.owner = UUID.fromString(owner);
         }
 
-        net.unifiedStorage.deserializeNBT(currentRegistryAccess(), tag.getCompoundOrEmpty(SAVE_KEY_UNIFIED_STORAGE));
+        // 解析不了的资源封装成错误数据，汇总成一条带网络 id 的日志
+        try (ErrorData.Report ignored = ErrorData.report("dimensional network #" + net.id))
+        {
+            net.unifiedStorage.deserializeNBT(currentRegistryAccess(), tag.getCompoundOrEmpty(SAVE_KEY_UNIFIED_STORAGE));
+        }
 
         if (tag.contains("EnergyStorage"))
         {
             CompoundTag energyTag = tag.getCompoundOrEmpty("EnergyStorage");
             if (energyTag.contains("Energy"))
             {
-                net.unifiedStorage.insert(EnergyStackKey.INSTANCE, energyTag.getLongOr("Energy", 0L), false);
+                net.unifiedStorage.restore(EnergyStackKey.INSTANCE, energyTag.getLongOr("Energy", 0L));
             }
         }
 
-        if (tag.contains(SAVE_KEY_MANAGERS))
-        {
-            ListTag managerList = tag.getListOrEmpty(SAVE_KEY_MANAGERS);
-            managerList.forEach(manager -> manager.asString().ifPresent(managerId -> net.managers.add(UUID.fromString(managerId))));
-        }
-
-        if (tag.contains(SAVE_KEY_PLAYERS))
-        {
-            ListTag playerList = tag.getListOrEmpty(SAVE_KEY_PLAYERS);
-            playerList.forEach(player -> player.asString().ifPresent(playerId -> net.players.add(UUID.fromString(playerId))));
-        }
+        readMembers(tag, SAVE_KEY_MANAGERS, net.managers, net.id);
+        readMembers(tag, SAVE_KEY_PLAYERS, net.players, net.id);
 
         net.currentTime = tag.getIntOr(SAVE_KEY_CURRENT_TIME, 0);
         net.deleted = tag.getBooleanOr(SAVE_KEY_DELETED, false);
@@ -387,6 +387,24 @@ public class DimensionsNet extends SavedData
         tag.putBoolean(SAVE_KEY_DELETED, this.deleted);
 
         return tag;
+    }
+
+    // 成员 UUID 逐个解析：坏掉的一条只跳过它本身
+    private static void readMembers(CompoundTag tag, String key, Set<UUID> into, int netId)
+    {
+        for (Tag entry : tag.getListOrEmpty(key))
+        {
+            String member = entry.asString().orElse(null);
+            if (member == null) continue;
+            try
+            {
+                into.add(UUID.fromString(member));
+            }
+            catch (IllegalArgumentException e)
+            {
+                LOGGER.warn("Dimensional network #{}: skipped an unparsable player UUID in {}: {}", netId, key, member);
+            }
+        }
     }
 
     // 功能函数

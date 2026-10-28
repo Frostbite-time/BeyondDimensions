@@ -2,10 +2,10 @@ package com.wintercogs.beyonddimensions.api.storage.handler.impl;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
+import com.wintercogs.beyonddimensions.api.storage.key.ErrorData;
 import com.wintercogs.beyonddimensions.api.storage.key.IStackKey;
 import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
@@ -56,6 +56,9 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     protected final Map<IStackKey<?>, Object> key2stackMap = new HashMap<>();
     protected final Map<Identifier, TypeBucket> type2buckets = new HashMap<>();
     protected final Multimap<TagKey<?>, IStackKey<?>> tag2stackMap = HashMultimap.create();
+
+    /* ---------- 读档：每个键在存档里的原样数据，保存时编码不了就写回它；正常编码过一次后不再需要 ---------- */
+    private final Map<IStackKey<?>, Tag> loadedKeys = new HashMap<>();
 
     /* ---------- 仅供 UI 使用的时间表 ---------- */
     /**
@@ -379,15 +382,21 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     @Override
     public void clearStorage()
     {
+        resetContents();
+        onChange();
+    }
+
+    private void resetContents()
+    {
         storage.clear();
         slotIndex.clear();
         posMap.clear();
         key2stackMap.clear();
         type2buckets.clear();
         tag2stackMap.clear();
+        loadedKeys.clear();
         creationTimeMap.clear();
         lastModifiedTimeMap.clear();
-        onChange();
     }
 
     @Override
@@ -706,6 +715,24 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         return extractByKey(key.get(), amount, simulate);
     }
 
+    /**
+     * 直接加入数量：不经过插入钩子，不受容量与种类上限约束，用于读档。
+     * 只发出增量通知，调用方在一批之后调用 {@link #onChange()}
+     */
+    public void restore(IStackKey<?> key, long amount)
+    {
+        if (key == null || key.isEmpty() || amount <= 0L) return;
+        long current = storage.getOrDefault(key, 0L);
+        long next = current + amount;
+        storage.put(key, next < 0L ? Long.MAX_VALUE : next);
+        ensureInIndex(key);
+        if (uiTimestampPolicy == UiTimestampPolicy.AUTO)
+        {
+            lastModifiedTimeMap.put(key, nowMillis());
+        }
+        fireDelta(key, amount, true);
+    }
+
     @Override
     public long getSlotCapacity(int slot)
     {
@@ -760,6 +787,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         key.getTags().forEach(tag -> {
             tag2stackMap.remove(tag, key);
         });
+        loadedKeys.remove(key);
         // 为避免无上限增长，这里选择在移除槽位时一并清理时间记录
         creationTimeMap.remove(key);
         lastModifiedTimeMap.remove(key);
@@ -837,20 +865,16 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             if (key == null || key.isEmpty()) continue;
             if (!writeZero && value <= 0L) continue;
 
-            DataResult<Tag> enc = IStackKey.CODEC.encodeStart(ops, key);
-            Tag encoded = enc.resultOrPartial(err ->
-                    BeyondDimensions.LOGGER.warn("编码 IStackKey 失败：{} | key={}", err, key)
-            ).orElse(null);
-
-            if (!(encoded instanceof CompoundTag ct))
+            // 一个资源编码不了不中断整个存储的保存：写回读档时的原样数据，或封装成错误数据
+            ErrorData.Saved saved = ErrorData.encodeForSave(key, ops, loadedKeys.get(key));
+            if (saved == null) continue;
+            if (!(saved.tag() instanceof CompoundTag ct))
             {
-                if (encoded != null)
-                {
-                    BeyondDimensions.LOGGER.warn("IStackKey 编码结果不是 CompoundTag：{} | key={}",
-                            encoded.getClass().getName(), key);
-                }
+                BeyondDimensions.LOGGER.warn("Encoded IStackKey is not a CompoundTag: {} | key={}",
+                        saved.tag().getClass().getName(), key);
                 continue;
             }
+            if (saved.encoded()) loadedKeys.remove(key);
 
             CompoundTag stackTag = new CompoundTag();
             stackTag.put("key", ct);
@@ -863,9 +887,22 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     }
 
     /* ---------------- NBT 反序列化（新优先 + 旧兼容） ---------------- */
+
+    /**
+     * 读档：条目按存档原样恢复，不经过插入钩子，也不受容量与种类上限约束；解析不了的资源封装成错误数据
+     */
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag)
     {
-        clearStorage();
+        try (ErrorData.Report ignored = ErrorData.report("storage"))
+        {
+            readEntries(provider, tag);
+        }
+        onChange();
+    }
+
+    private void readEntries(HolderLookup.Provider provider, CompoundTag tag)
+    {
+        resetContents();
 
         slotCapacity = tag.getLongOr("slot_capacity", Long.MAX_VALUE);
         slotMaxSize = tag.getIntOr("slot_max_size", Integer.MAX_VALUE);
@@ -881,38 +918,38 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
                 if (!(el instanceof CompoundTag stackTag)) continue;
 
                 long amount = stackTag.getLongOr("amount", 0);
-                Tag rawKeyTag = stackTag.get("key");
-                if (!(rawKeyTag instanceof CompoundTag keyTag)) continue;
+                Tag keyTag = stackTag.get("key");
+                if (keyTag == null) continue;
 
                 try
                 {
                     IStackKey.CODEC.parse(ops, keyTag)
-                            .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("解码 IStackKey 失败：{}", err))
-                            .ifPresent(key -> acceptEntry(key, amount));
+                            .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("Failed to decode IStackKey: {}", err))
+                            .ifPresent(key -> acceptLoaded(key, amount, keyTag));
                 }
                 catch (Throwable t)
                 {
-                    BeyondDimensions.LOGGER.warn("解码第 {} 个新格式条目时出错: {}", i, t.toString());
+                    BeyondDimensions.LOGGER.warn("Error while decoding new-format entry {}: {}", i, t.toString());
                 }
             }
         }
     }
 
-    /* ---------- 辅助：把解码后的 (key, amount) 写入当前结构，含零值与 UI 时间策略 ---------- */
+    // 读档的条目照常写入，并记下键在存档里的原样数据
+    private void acceptLoaded(IStackKey<?> key, long amount, Tag raw)
+    {
+        acceptEntry(key, amount);
+        if (key != null && !key.isEmpty()) loadedKeys.put(key, raw);
+    }
+
+    /* ---------- 辅助：把解码后的 (key, amount) 原样写入当前结构，含零值与 UI 时间策略 ---------- */
     private void acceptEntry(IStackKey<?> key, long amount)
     {
         if (key == null || key.isEmpty()) return;
 
-        if (uiTimestampPolicy == UiTimestampPolicy.AUTO)
-        {
-            long now = nowMillis();
-            creationTimeMap.put(key, now);
-            lastModifiedTimeMap.put(key, now);
-        }
-
         if (amount <= 0L)
         {
-            if (zeroPolicy == ZeroPolicy.KEEP_ZERO)
+            if (zeroPolicy == ZeroPolicy.KEEP_ZERO && !storage.containsKey(key))
             {
                 storage.put(key, 0L);
                 ensureInIndex(key);
@@ -920,7 +957,14 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         }
         else
         {
-            insert(key, amount, false);
+            restore(key, amount);
+        }
+
+        if (uiTimestampPolicy == UiTimestampPolicy.AUTO)
+        {
+            long now = nowMillis();
+            creationTimeMap.put(key, now);
+            lastModifiedTimeMap.put(key, now);
         }
     }
 

@@ -63,6 +63,9 @@ public class BDItems
     // 经验交换棒
     public static final DeferredItem<@NotNull Item> XP_EXCHANGE_ITEM = registerItem(BDItemIds.XP_EXCHANGE_ITEM, XpExchangeItem::new);
 
+    // 错误数据：封装读不懂的存储资源，不进创造物品栏
+    public static final DeferredItem<@NotNull Item> ERROR_DATA = registerItem(BDItemIds.ERROR_DATA, ErrorDataItem::new);
+
     // 测试物品 -----------------------
     // 随机物品生成器
     public static final DeferredItem<@NotNull Item> TEST_ITEM_GENERATE = registerItem(BDItemIds.TEST_ITEM_GENERATE, TestItem_ItemGenerate::new);
