@@ -141,6 +141,11 @@
   "item.beyonddimensions.net_feeder_item": "Netz-Fütterer",
   "item.beyonddimensions.xp_fluid_bucket": "Eimer mit flüssiger Erfahrung",
   "item.beyonddimensions.xp_exchange_item": "XP-Stab",
+  "item.beyonddimensions.error_data": "Fehlerdaten",
+  "tooltip.beyonddimensions.error_data": "Gespeicherte Daten, die nicht gelesen werden konnten, unverändert hier aufbewahrt",
+  "tooltip.beyonddimensions.error_data.type": "Typ: %s",
+  "tooltip.beyonddimensions.error_data.content": "Inhalt: %s",
+  "tooltip.beyonddimensions.error_data.hint": "Sobald der zugehörige Mod wieder installiert ist, werden Fehlerdaten in einem Netzwerk oder Gerät beim nächsten Laden automatisch wiederhergestellt",
   "item.beyonddimensions.warden_soul_tag_item": "Seelenmarkierer",
 
   "menu.title.beyonddimensions.xp_exchange_menu": "XP-Stab-Einstellungen",

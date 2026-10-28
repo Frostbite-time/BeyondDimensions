@@ -171,6 +171,12 @@ public final class FluidStackKey implements IStackKey<FluidStack>
     }
 
     @Override
+    public Identifier getSourceId()
+    {
+        return BuiltInRegistries.FLUID.getKey(fluid);
+    }
+
+    @Override
     public boolean isEmpty()
     {
         return this == FluidStackKey.EMPTY || this.fluid == Fluids.EMPTY;

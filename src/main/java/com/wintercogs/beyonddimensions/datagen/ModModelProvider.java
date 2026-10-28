@@ -19,6 +19,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
@@ -84,6 +85,8 @@ public class ModModelProvider extends BDModelProvider
         itemModels.generateFlatItem(BDItems.NET_FEEDER_ITEM.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(BDItems.NET_RESTOCKER_ITEM.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(BDItems.XP_EXCHANGE_ITEM.get(), ModelTemplates.FLAT_ITEM);
+        // 错误数据沿用原版屏障的贴图
+        itemModels.generateFlatItem(BDItems.ERROR_DATA.get(), Items.BARRIER, ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(BDItems.TEST_ITEM_GENERATE.get(), ModelTemplates.FLAT_ITEM);
 
         generateFluidBucketModels(itemModels);

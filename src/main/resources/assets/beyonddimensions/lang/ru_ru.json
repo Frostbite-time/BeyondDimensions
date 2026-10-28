@@ -141,6 +141,11 @@
   "item.beyonddimensions.net_feeder_item": "Сетевой Питатель",
   "item.beyonddimensions.xp_fluid_bucket": "Ведро жидкого опыта",
   "item.beyonddimensions.xp_exchange_item": "Жезл опыта",
+  "item.beyonddimensions.error_data": "Ошибочные данные",
+  "tooltip.beyonddimensions.error_data": "Сохранённые данные, которые не удалось прочитать, хранятся здесь без изменений",
+  "tooltip.beyonddimensions.error_data.type": "Тип: %s",
+  "tooltip.beyonddimensions.error_data.content": "Содержимое: %s",
+  "tooltip.beyonddimensions.error_data.hint": "Когда соответствующий мод будет установлен снова, ошибочные данные, оставшиеся в сети или устройстве, автоматически восстановятся при следующей загрузке",
   "item.beyonddimensions.warden_soul_tag_item": "Маркер душ",
 
   "menu.title.beyonddimensions.xp_exchange_menu": "Настройки жезла опыта",

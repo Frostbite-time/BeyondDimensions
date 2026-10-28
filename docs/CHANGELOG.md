@@ -1,3 +1,2 @@
-* Arrange the storage UI's left-side buttons using a sidebar layout
-* Add item ID search (contributed by [luo-zi](https://github.com/luo-zi))
-* Change the maximum level for the Experience Rod to 21863
+* Resources that can't be read for now are no longer discarded, for example items and fluids from a mod you've temporarily removed. They are kept as Error Data items and restored once the mod is back.
+* Stored resources are saved one by one, so when one cannot be saved, the rest still save: a resource read from the save keeps its saved data, and a newly stored one is saved as an Error Data item whose tooltip shows its type and ID.
