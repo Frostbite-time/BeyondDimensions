@@ -2,7 +2,6 @@ package com.wintercogs.beyonddimensions.api.storage.handler.impl;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.wintercogs.beyonddimensions.BeyondDimensions;
 import com.wintercogs.beyonddimensions.api.storage.handler.IStackHandler;
