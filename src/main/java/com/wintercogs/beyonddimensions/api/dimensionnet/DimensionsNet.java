@@ -607,7 +607,7 @@ public class DimensionsNet extends SavedData
             LOGGER.error("Dimensional network #{}: failed to encode attached data {}, keeping the last saved content: {}", id,
                     BDRegistries.NET_DATA_TYPES.getKey(type), result.error().map(DataResult.Error::message).orElse(""));
         }
-        catch (RuntimeException e)
+        catch (Throwable e)
         {
             LOGGER.error("Dimensional network #{}: error while encoding attached data {}, keeping the last saved content", id, BDRegistries.NET_DATA_TYPES.getKey(type), e);
         }
@@ -663,7 +663,7 @@ public class DimensionsNet extends SavedData
             }
             return result.error().map(DataResult.Error::message).orElse("unknown");
         }
-        catch (RuntimeException e)
+        catch (Throwable e)
         {
             return e.toString();
         }

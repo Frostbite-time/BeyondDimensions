@@ -10,6 +10,7 @@ import com.wintercogs.beyonddimensions.api.storage.key.KeyAmount;
 import com.wintercogs.beyonddimensions.api.storage.key.impl.EmptyStackKey;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
@@ -142,6 +143,11 @@ public class StackHandler implements IStackHandler
      * 槽位上的数量（空槽位必须为 0，与 keys 同步）
      */
     private final long[] amounts;
+
+    /**
+     * 读档时每个资源在存档里的原样数据，保存时编码不了就写回它；正常编码过一次后不再需要
+     */
+    private final Map<IStackKey<?>, Tag> loadedKeys = new HashMap<>();
 
     /**
      * key -> 具体存储物的对照（只维护类型，不维护数量；不缓存 EmptyStackKey）
@@ -717,29 +723,72 @@ public class StackHandler implements IStackHandler
         return eb != null && eb.size() == size;
     }
 
+    /**
+     * 存档，格式同 {@link #CODEC}：逐个槽位编码，编码不了的资源写回读档时的原样数据或封装成错误数据，
+     * 一个资源不会拖垮整台机器的保存
+     */
     public CompoundTag serializeNBT(HolderLookup.Provider provider)
     {
         RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, provider);
-        Tag encoded = CODEC.encodeStart(ops, this)
-                .getOrThrow(IllegalStateException::new);
-        return (CompoundTag) encoded; // 记录结构
+        ListTag stacks = new ListTag();
+        for (int i = 0; i < size; i++)
+        {
+            ErrorData.Saved key = ErrorData.encodeForSave(keys[i], ops, loadedKeys.get(keys[i]));
+            CompoundTag entry = new CompoundTag();
+            if (key == null)
+            {
+                // 连错误数据都存不下的资源跳过，这一格记为空
+                entry.put("key", IStackKey.CODEC.encodeStart(ops, EmptyStackKey.INSTANCE).getOrThrow());
+                entry.putLong("amount", 0L);
+            }
+            else
+            {
+                if (key.encoded()) loadedKeys.remove(keys[i]);
+                entry.put("key", key.tag());
+                entry.putLong("amount", amounts[i]);
+            }
+            stacks.add(entry);
+        }
+        CompoundTag tag = new CompoundTag();
+        tag.put("stacks", stacks);
+        return tag;
     }
 
     /**
-     * 读档；解析不了的资源封装成错误数据留在原槽位
+     * 读档：逐个槽位解析并捕获一切错误；解析不了的资源封装成错误数据留在原槽位，连这样也不行的槽位打一条日志后留空。
+     * 同时记下每个资源在存档里的原样数据
      */
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag)
     {
         clearStorage();
+        loadedKeys.clear();
         RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, provider);
-        StackHandler decoded;
         try (ErrorData.Report ignored = ErrorData.report("device storage"))
         {
-            decoded = CODEC.parse(ops, tag).getOrThrow(IllegalStateException::new);
-        }
-        for (int i = 0; i < decoded.size; i++)
-        {
-            setStackDirectly(i, decoded.keys[i], decoded.amounts[i]);
+            if (!tag.contains("stacks", Tag.TAG_LIST))
+            {
+                // 旧格式整体解析
+                StackHandler decoded = CODEC.parse(ops, tag).getOrThrow(IllegalStateException::new);
+                for (int i = 0; i < decoded.size; i++)
+                    setStackDirectly(i, decoded.keys[i], decoded.amounts[i]);
+                return;
+            }
+            ListTag stacks = tag.getList("stacks", Tag.TAG_COMPOUND);
+            for (int i = 0; i < Math.min(size, stacks.size()); i++)
+            {
+                CompoundTag entry = stacks.getCompound(i);
+                try
+                {
+                    KeyAmount slot = KeyAmount.CODEC.parse(ops, entry).getOrThrow();
+                    setStackDirectly(i, slot.key(), slot.amount());
+                    Tag raw = entry.get("key");
+                    if (raw != null && !slot.key().isEmpty()) loadedKeys.put(slot.key(), raw);
+                }
+                catch (Throwable e)
+                {
+                    BeyondDimensions.LOGGER.warn("Skipped device storage slot {}: {}", i, e.toString());
+                }
+            }
         }
     }
 

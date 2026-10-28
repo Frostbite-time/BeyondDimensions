@@ -79,6 +79,9 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
     private final Map<IStackKey<?>, CompoundTag> encodedKeys = new HashMap<>();
     private HolderLookup.Provider encodedProvider;
 
+    /* ---------- 读档：每个键在存档里的原样数据，保存时编码不了就写回它；正常编码过一次后不再需要 ---------- */
+    private final Map<IStackKey<?>, Tag> loadedKeys = new HashMap<>();
+
     /* ---------- 仅供 UI 使用的时间表 ---------- */
     /**
      * 记录该 Key 最近一次“从无到有建槽位”的时间（毫秒时间戳）。仅供 UI 展示，无其他语义。
@@ -416,6 +419,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
         tagIndexGeneration = -1;
         fuzzyIndex.clear();
         encodedKeys.clear();
+        loadedKeys.clear();
         creationTimeMap.clear();
         lastModifiedTimeMap.clear();
     }
@@ -798,6 +802,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             key.getTags().forEach(tag -> tag2stackMap.remove(tag, key));
         }
         encodedKeys.remove(key);
+        loadedKeys.remove(key);
         // 为避免无上限增长，这里选择在移除槽位时一并清理时间记录
         creationTimeMap.remove(key);
         lastModifiedTimeMap.remove(key);
@@ -892,20 +897,16 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             CompoundTag ct = encodedKeys.get(key);
             if (ct == null)
             {
-                DataResult<Tag> enc = IStackKey.CODEC.encodeStart(ops, key);
-                Tag encoded = enc.resultOrPartial(err ->
-                        BeyondDimensions.LOGGER.warn("Failed to encode IStackKey: {} | key={}", err, key)
-                ).orElse(null);
-
-                if (!(encoded instanceof CompoundTag encodedTag))
+                // 一个资源编码不了不中断整个存储的保存：写回读档时的原样数据，或封装成错误数据
+                ErrorData.Saved saved = ErrorData.encodeForSave(key, ops, loadedKeys.get(key));
+                if (saved == null) continue;
+                if (!(saved.tag() instanceof CompoundTag encodedTag))
                 {
-                    if (encoded != null)
-                    {
-                        BeyondDimensions.LOGGER.warn("Encoded IStackKey is not a CompoundTag: {} | key={}",
-                                encoded.getClass().getName(), key);
-                    }
+                    BeyondDimensions.LOGGER.warn("Encoded IStackKey is not a CompoundTag: {} | key={}",
+                            saved.tag().getClass().getName(), key);
                     continue;
                 }
+                if (saved.encoded()) loadedKeys.remove(key);
                 ct = encodedTag;
                 encodedKeys.put(key, ct);
             }
@@ -961,7 +962,7 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
                 {
                     IStackKey.CODEC.parse(ops, keyTag)
                             .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("Failed to decode IStackKey: {}", err))
-                            .ifPresent(key -> acceptEntry(key, amount));
+                            .ifPresent(key -> acceptLoaded(key, amount, keyTag));
                 }
                 catch (Throwable t)
                 {
@@ -1001,13 +1002,20 @@ public abstract class AbstractUnorderedStackHandler implements IStackHandler
             {
                 IStackKey.CODEC.parse(ops, compatKey)
                         .resultOrPartial(err -> BeyondDimensions.LOGGER.warn("Failed to decode old-format IStackKey: {} | type={}", err, typeStr))
-                        .ifPresent(key -> acceptEntry(key, amount));
+                        .ifPresent(key -> acceptLoaded(key, amount, compatKey));
             }
             catch (Throwable t)
             {
                 BeyondDimensions.LOGGER.warn("Error while decoding an old-format entry (index={} type={}): {}", i, typeStr, t.toString());
             }
         }
+    }
+
+    // 读档的条目照常写入，并记下键在存档里的原样数据
+    private void acceptLoaded(IStackKey<?> key, long amount, Tag raw)
+    {
+        acceptEntry(key, amount);
+        if (key != null && !key.isEmpty()) loadedKeys.put(key, raw);
     }
 
     /* ---------- 辅助：统一处理 amount 兼容 ---------- */
