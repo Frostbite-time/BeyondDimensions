@@ -437,9 +437,10 @@ public class ClientNetStorageSearchHelper
             if (!(k instanceof ItemStackKey item))
                 return -1;
             ItemStack stack = item.getReadOnlyStack();
-            if (!stack.isDamageableItem())
+            int maxDamage = stack.getMaxDamage();
+            if (!stack.isDamageableItem() || maxDamage <= 0)
                 return -1;
-            return (stack.getMaxDamage() - stack.getDamageValue()) * 100 / stack.getMaxDamage();
+            return (stack.getMaxDamage() - stack.getDamageValue()) * 100 / maxDamage;
         });
     }
 
