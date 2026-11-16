@@ -13,9 +13,9 @@ import org.jetbrains.annotations.UnknownNullability;
 import vazkii.botania.api.internal.ManaBurst;
 import vazkii.botania.api.mana.ManaCollector;
 import vazkii.botania.api.mana.ManaPool;
-import vazkii.botania.api.mana.spark.SparkAttachable;
+import vazkii.botania.api.mana.spark.ManaSparkAttachable;
 
-public class ManaStackTypedHandler implements ManaCollector, ManaPool, SparkAttachable
+public class ManaStackTypedHandler implements ManaCollector, ManaPool, ManaSparkAttachable
 {
     private final StackHandler storageHandler;
     private final Level level;

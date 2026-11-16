@@ -8,7 +8,7 @@ import com.wintercogs.beyonddimensions.integration.module.botania.capabilities.B
 import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaStackTypedHandler;
 import com.wintercogs.beyonddimensions.integration.module.botania.storage.ManaUnifiedStorageHandler;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import vazkii.botania.api.mana.spark.SparkAttachable;
+import vazkii.botania.api.mana.spark.ManaSparkAttachable;
 import vazkii.botania.common.item.BotaniaItems;
 
 /**
@@ -24,7 +24,7 @@ public class BDBotaniaPlugin
     public static void registerCapability(RegisterCapabilitiesEvent event)
     {
         event.registerBlockEntity(
-                BotaniaCapabilitiesHelper.getBlockApiLookupById(SparkAttachable.LOOKUP),
+                BotaniaCapabilitiesHelper.getBlockApiLookupById(ManaSparkAttachable.LOOKUP),
                 BDBlockEntities.NET_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> {
                     DimensionsNet net = be.getNet();
@@ -37,7 +37,7 @@ public class BDBotaniaPlugin
         );
 
         event.registerBlockEntity(
-                BotaniaCapabilitiesHelper.getBlockApiLookupById(SparkAttachable.LOOKUP),
+                BotaniaCapabilitiesHelper.getBlockApiLookupById(ManaSparkAttachable.LOOKUP),
                 BDBlockEntities.NET_INTERFACE_BLOCK_ENTITY.get(),
                 (be, side) -> {
                     return new ManaStackTypedHandler(be.getStackHandler(), new CapCtx(be.getLevel(), be.getBlockPos(), be));

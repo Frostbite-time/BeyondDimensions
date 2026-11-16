@@ -7,7 +7,7 @@ import vazkii.botania.api.mana.ManaCollector;
 import vazkii.botania.api.mana.ManaItem;
 import vazkii.botania.api.mana.ManaPool;
 import vazkii.botania.api.mana.ManaReceiver;
-import vazkii.botania.api.mana.spark.SparkAttachable;
+import vazkii.botania.api.mana.spark.ManaSparkAttachable;
 
 public class ManaHandlerWrapper implements IStackHandlerWrapper<ManaType>
 {
@@ -134,7 +134,7 @@ public class ManaHandlerWrapper implements IStackHandlerWrapper<ManaType>
                 {
                     return collector.getMaxMana();
                 }
-                else if (receiver instanceof SparkAttachable sparkAttachable) // 火花附着
+                else if (receiver instanceof ManaSparkAttachable sparkAttachable) // 火花附着
                 {
                     return receiver.getCurrentMana() + sparkAttachable.getAvailableSpaceForMana();
                 }
