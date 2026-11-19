@@ -11,41 +11,33 @@ page can use BD's own controls.
 A page gets a tab in the screen's tab rail, after the screen's own tabs and before Settings. It is registered for a
 menu class and appears on every screen of that menu or its subclasses:
 
-| Member of `BdPage<M, S, A>` | Runs on | Does |
-| --- | --- | --- |
-| `icon` | | The tab's 10×10 pixel icon, such as `BdIcons.Info`, or your own `BdPixelIcon` |
-| `title(context)` | Game thread | The tab's tooltip |
-| `appliesTo(context)` | Game thread | Whether this screen shows the page; `true` by default |
-| `size(context)` | Game thread | The page's size; the main page's size by default, see [Page size](#page-size) |
-| `snapshot(context)` | Game thread | The page's state `S`; only reads, and may run several times a tick |
-| `handle(context, action)` | Game thread | Handles an action `A` sent by the page; a new snapshot follows |
-| `Content(state, scope)` | Compose thread | Draws the page from the state |
+| Member of `BdPage<M>` | Does |
+| --- | --- |
+| `icon` | The tab's 10×10 pixel icon, such as `BdIcons.Info`, or your own `BdPixelIcon` |
+| `title(context)` | The tab's tooltip, read once when the screen opens |
+| `appliesTo(context)` | Whether this screen shows the page; `true` by default |
+| `size(context)` | The page's size; the main page's size by default, see [Page size](#page-size) |
+| `Content(context, scope)` | Draws the page on the game thread |
 
-Keep the state an immutable value, without menus, stacks or other game objects. In `Content`, `scope.send(action)` passes
-an action to `handle`, `scope.open(BdPages.SETTINGS)` switches pages, `scope.shown` tells whether the page is showing and
-`scope.slots` draws the menu's slots with `BdSlot`.
+Read changing game data inside `Content` with `gameState { ... }` (returning immutable values, without menus, stacks or
+other game objects), and post mutations or server requests with `scope.gameThread.post { ... }`. In `Content`,
+`scope.open(BdPages.SETTINGS)` switches pages, `scope.shown` tells whether the page is showing and `scope.slots` draws
+the menu's slots with `BdSlot`.
 
 ```kotlin
-object NetworkInfoPage : BdPage<DimensionsNetMenu, NetworkInfoPage.State, NetworkInfoPage.Ping> {
-    data class State(val name: String, val id: Int)
-    data object Ping
+object NetworkInfoPage : BdPage<DimensionsNetMenu> {
+    data class Info(val name: String, val id: Int)
 
     override val icon = BdIcons.Info
 
     override fun title(context: BdPageContext<DimensionsNetMenu>) = Component.literal("Network info")
 
-    override fun snapshot(context: BdPageContext<DimensionsNetMenu>) =
-        State(context.menu.networkName().string, context.menu.networkId())
-
-    override fun handle(context: BdPageContext<DimensionsNetMenu>, action: Ping) {
-        context.request(PING, 3)
-    }
-
     @Composable
-    override fun ColumnScope.Content(state: State, scope: BdPageScope<Ping>) {
+    override fun ColumnScope.Content(context: BdPageContext<DimensionsNetMenu>, scope: BdPageScope) {
+        val info by gameState { Info(context.menu.networkName().string, context.menu.networkId()) }
         BdSectionLabel("Network")
-        OreText("${state.name} #${state.id}", color = Bd.colors[BdColors.text])
-        BdChip({ scope.send(Ping) }, enabled = scope.shown) {
+        OreText("${info.name} #${info.id}", color = Bd.colors[BdColors.text])
+        BdChip({ scope.gameThread.post { context.request(PING, 3) } }, enabled = scope.shown) {
             OreText("Ping", color = Bd.colors[BdColors.text])
         }
     }

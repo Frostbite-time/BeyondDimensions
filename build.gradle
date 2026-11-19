@@ -21,6 +21,7 @@ group = mod_group_id
 
 repositories {
     mavenCentral()
+    google()
     // CompixelUI is published only here; other repositories are never asked for it, so their outages cannot fail
     // the build.
     exclusiveContent {
@@ -173,10 +174,8 @@ configurations {
 
 dependencies {
 
-    // CompixelUI 单独安装：编译用带 Kotlin 的坐标，运行用标准版并由 Kotlin for Forge 提供 Kotlin，与玩家装 KFF 时相同。
-    // 标准版写进发布的 POM，引用 BD 的项目会自动带上它
-    compileOnly "dev.compixel:compixel-neoforge-1.21.1-with-kotlin:${compixel_version}"
-    runtimeOnly "dev.compixel:compixel-neoforge-1.21.1:${compixel_version}"
+    // CompixelUI 单独安装：开发运行由 Kotlin for Forge 提供 Kotlin；标准版写进发布的 POM，引用 BD 的项目会自动带上它
+    implementation "dev.compixel:compixel-neoforge-1.21.1:${compixel_version}"
     localRuntime "maven.modrinth:kotlin-for-forge:${kff_version}"
 
     // 引入对拼音库的依赖 并将其打包到模组

@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.client.ui.machine
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -19,6 +20,7 @@ import com.wintercogs.beyonddimensions.common.menu.NetEnergyMenu
 import com.wintercogs.beyonddimensions.common.menu.state.EnergyHistory
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.host.gameState
 import dev.compixel.ui.ore.display.OreText
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
@@ -33,56 +35,27 @@ import kotlin.math.roundToLong
  * 网络的容量极大，填充比例看不出变化，所以展示存量的走势。柱状图的数据由服务端为每个网络记录，打开界面时就是完整的
  */
 class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) :
-    BdInventoryScreen<NetEnergyMenu, EnergyState, EnergyAction>(menu, title) {
+    BdInventoryScreen<NetEnergyMenu>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(BDBlocks.NET_ENERGY_PATHWAY.get()))
     private val playerSlots = menu.playerSlotIds()
     private val text = EnergyText(title.string)
     private val sides = machineSidesView(menu.be)
 
-    // 图表只在同步来新的一格时重算，每刻的快照沿用
+    // 图表只在同步来新的一格时重算，每刻读取沿用
     private var chartsSource = EnergyHistory.Bars.EMPTY
     private var charts = Charts(chartsSource)
 
-    override fun snapshot(): EnergyState {
-        val stored = container.energyStored()
-        val capacity = container.energyCapacity()
-        val limited = capacity != Long.MAX_VALUE
-        val rate = container.energyRate()
+    private fun readCharts(): Charts {
         val history = container.energyBars()
         if (history !== chartsSource) {
             chartsSource = history
             charts = Charts(history)
         }
-        return EnergyState(
-            settings = machineSettingRows(container.machineSettings().snapshot(), sides),
-            stored = stored,
-            rate = rate,
-            capacity = tr(
-                "ui.beyonddimensions.energy.capacity",
-                if (limited) formatReadout(capacity) else text.unlimited
-            ),
-            used =
-                if (limited && capacity > 0)
-                    tr(
-                        "ui.beyonddimensions.energy.used",
-                        String.format(Locale.ROOT, "%.0f%%", stored * 100.0 / capacity)
-                    )
-                else null,
-            flow = charts.flow,
-            peak = charts.peak,
-            trend = charts.trend,
-            range = charts.range,
-        )
-    }
-
-    override fun handle(action: EnergyAction) {
-        when (action) {
-            is EnergyAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
-        }
+        return charts
     }
 
     @Composable
-    override fun Content(state: EnergyState, slots: ComposeMenuSlots<NetEnergyMenu>) {
+    override fun Content(slots: ComposeMenuSlots<NetEnergyMenu>) {
         val page = rememberPageSelection()
         val settingsOpen = page.settings
         BdScreenFrame {
@@ -99,39 +72,25 @@ class EnergyScreen(menu: NetEnergyMenu, inventory: Inventory, title: Component) 
                 },
             ) {
                 BdMainPage(page.main) {
-                    EnergyReadout(state, text)
+                    val stored by gameState { container.energyStored() }
+                    val capacity by gameState { container.energyCapacity() }
+                    val rate by gameState { container.energyRate() }
+                    val charts by gameState { readCharts() }
+                    EnergyReadout(stored, capacity, rate, charts, text)
                     Spacer(Modifier.height(8.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)
                 }
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
+                    val settings by gameState { machineSettingRows(container.machineSettings().snapshot(), sides) }
                     BdSectionLabel(text.settings)
-                    BdMachineSettings(state.settings, settingsOpen) { send(EnergyAction.Setting(it)) }
+                    BdMachineSettings(settings, settingsOpen) { pick ->
+                        gameThread.post { container.requestSetting(pick.setting, pick.value) }
+                    }
                 }
             }
         }
     }
-}
-
-data class EnergyState(
-    val settings: List<MachineSettingRow>,
-    val stored: Long,
-    /** 最近一秒平均每刻的变化，正数为流入 */
-    val rate: Double,
-    val capacity: String,
-    /** 已用的比例，容量有上限时才有 */
-    val used: String?,
-    /** 收支柱状图每一格平均每刻的变化，从旧到新 */
-    val flow: List<Float>,
-    val peak: String,
-    /** 存量柱状图每一格结束时的存量，从旧到新 */
-    val trend: List<Long>,
-    /** 存量柱状图覆盖的最低与最高存量 */
-    val range: String,
-)
-
-sealed interface EnergyAction {
-    data class Setting(val pick: MachineSettingPick) : EnergyAction
 }
 
 private class EnergyText(val title: String) {
@@ -194,15 +153,21 @@ private fun formatRate(rate: Double): String {
 
 /** 网络能量：存量与速率、容量与已用比例、存量与收支柱状图 */
 @Composable
-private fun EnergyReadout(state: EnergyState, text: EnergyText) {
+private fun EnergyReadout(stored: Long, capacity: Long, rate: Double, charts: Charts, text: EnergyText) {
     val colors = Bd.colors
+    val limited = capacity != Long.MAX_VALUE
+    val capacityLabel = tr("ui.beyonddimensions.energy.capacity", if (limited) formatReadout(capacity) else text.unlimited)
+    val usedLabel =
+        if (limited && capacity > 0)
+            tr("ui.beyonddimensions.energy.used", String.format(Locale.ROOT, "%.0f%%", stored * 100.0 / capacity))
+        else null
     BdSectionLabel(text.network)
     Spacer(Modifier.height(5.dp))
     Row(verticalAlignment = Alignment.Bottom) {
-        BdTooltip(formatExact(state.stored) + " FE") {
+        BdTooltip(formatExact(stored) + " FE") {
             Row {
                 OreText(
-                    formatReadout(state.stored),
+                    formatReadout(stored),
                     Modifier.alignByBaseline(),
                     color = colors[BdColors.text],
                     style = Bd.title,
@@ -221,33 +186,33 @@ private fun EnergyReadout(state: EnergyState, text: EnergyText) {
         Spacer(Modifier.weight(1f))
         val rateColor =
             when {
-                state.rate > 0 -> colors[BdColors.online]
-                state.rate < 0 -> colors[BdColors.danger]
+                rate > 0 -> colors[BdColors.online]
+                rate < 0 -> colors[BdColors.danger]
                 else -> colors[BdColors.faint]
             }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (state.rate != 0.0) {
+            if (rate != 0.0) {
                 BdIcon(
-                    if (state.rate > 0) BdIcons.ArrowUp else BdIcons.ArrowDown,
+                    if (rate > 0) BdIcons.ArrowUp else BdIcons.ArrowDown,
                     color = rateColor
                 )
                 Spacer(Modifier.width(2.dp))
             }
-            OreText(formatRate(state.rate) + " FE/t", color = rateColor, style = Bd.caption, maxLines = 1)
+            OreText(formatRate(rate) + " FE/t", color = rateColor, style = Bd.caption, maxLines = 1)
         }
     }
     Spacer(Modifier.height(1.dp))
     Row(Modifier.fillMaxWidth()) {
-        OreText(state.capacity, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
+        OreText(capacityLabel, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
         Spacer(Modifier.weight(1f))
-        if (state.used != null) OreText(state.used, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
+        if (usedLabel != null) OreText(usedLabel, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
     }
     Spacer(Modifier.height(4.dp))
-    BdTooltip(state.range, Modifier.fillMaxWidth(), enabled = state.trend.isNotEmpty()) {
-        TrendChart(state.trend, Modifier.fillMaxWidth().height(21.dp))
+    BdTooltip(charts.range, Modifier.fillMaxWidth(), enabled = charts.trend.isNotEmpty()) {
+        TrendChart(charts.trend, Modifier.fillMaxWidth().height(21.dp))
     }
     Spacer(Modifier.height(3.dp))
-    BdTooltip(state.peak, Modifier.fillMaxWidth()) { FlowChart(state.flow, Modifier.fillMaxWidth().height(33.dp)) }
+    BdTooltip(charts.peak, Modifier.fillMaxWidth()) { FlowChart(charts.flow, Modifier.fillMaxWidth().height(33.dp)) }
 }
 
 /**

@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.client.ui.machine
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.api.ui.page.BdPages
@@ -15,6 +16,7 @@ import com.wintercogs.beyonddimensions.common.item.XpExchangeSettings
 import com.wintercogs.beyonddimensions.common.menu.XpExchangeMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.host.gameState
 import dev.compixel.ui.ore.display.OreText
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
@@ -24,28 +26,13 @@ private val TARGET_RANGE = 0..XpExchangeSettings.MAX_TARGET_LEVEL
 
 /** 经验棒：主页面上是目标等级与维持等级的设置，下面是用法说明与玩家背包 */
 class XpExchangeScreen(menu: XpExchangeMenu, inventory: Inventory, title: Component) :
-    BdInventoryScreen<XpExchangeMenu, XpExchangeState, XpExchangeAction>(menu, title) {
+    BdInventoryScreen<XpExchangeMenu>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(BDItems.XP_EXCHANGE_ITEM.get()))
     private val playerSlots = menu.playerSlotIds()
     private val text = XpExchangeText(title.string)
 
-    override fun snapshot() =
-        XpExchangeState(
-            keep = container.keep(),
-            keepEditable = container.keepEditable(),
-            target = container.target(),
-            targetEditable = container.targetEditable(),
-        )
-
-    override fun handle(action: XpExchangeAction) {
-        when (action) {
-            is XpExchangeAction.SetKeep -> container.requestKeep(action.keep)
-            is XpExchangeAction.SetTarget -> container.requestTarget(action.level)
-        }
-    }
-
     @Composable
-    override fun Content(state: XpExchangeState, slots: ComposeMenuSlots<XpExchangeMenu>) {
+    override fun Content(slots: ComposeMenuSlots<XpExchangeMenu>) {
         val colors = Bd.colors
         val page = rememberPageSelection()
         BdScreenFrame {
@@ -59,19 +46,27 @@ class XpExchangeScreen(menu: XpExchangeMenu, inventory: Inventory, title: Compon
                 },
             ) {
                 BdMainPage(page.main) {
+                    val target by gameState { container.target() }
+                    val targetEditable by gameState { container.targetEditable() }
+                    val keep by gameState { container.keep() }
+                    val keepEditable by gameState { container.keepEditable() }
                     BdSectionLabel(text.level)
                     Spacer(Modifier.height(5.dp))
                     BdSettingRow(text.target, text.targetHint) {
                         BdNumberEditor(
-                            state.target,
-                            { send(XpExchangeAction.SetTarget(it)) },
+                            target,
+                            { level -> gameThread.post { container.requestTarget(level) } },
                             TARGET_RANGE,
-                            state.targetEditable,
+                            targetEditable,
                         )
                     }
                     Spacer(Modifier.height(5.dp))
                     BdSettingRow(text.keep, text.keepHint) {
-                        BdToggle(state.keep, { send(XpExchangeAction.SetKeep(it)) }, state.keepEditable)
+                        BdToggle(
+                            keep,
+                            { enabled -> gameThread.post { container.requestKeep(enabled) } },
+                            keepEditable,
+                        )
                     }
                     Spacer(Modifier.height(7.dp))
                     BdSectionLabel(text.usage)
@@ -86,19 +81,6 @@ class XpExchangeScreen(menu: XpExchangeMenu, inventory: Inventory, title: Compon
             }
         }
     }
-}
-
-data class XpExchangeState(
-    val keep: Boolean,
-    val keepEditable: Boolean,
-    val target: Int,
-    val targetEditable: Boolean,
-)
-
-sealed interface XpExchangeAction {
-    data class SetKeep(val keep: Boolean) : XpExchangeAction
-
-    data class SetTarget(val level: Int) : XpExchangeAction
 }
 
 private class XpExchangeText(val title: String) {

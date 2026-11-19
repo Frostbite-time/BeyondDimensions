@@ -53,7 +53,7 @@ class BdSlotAdapter<M : BDBaseMenu>(private val menu: M) : VanillaMenuSlotAdapte
         menu.commands().flushPreference()
     }
 
-    /** 该槽位是否显示虚拟资源；可在 Compose 线程调用 */
+    /** 该槽位是否显示虚拟资源 */
     fun isResource(slotId: Int) = slotId in resourceSlots
 
     override fun visual(slot: Slot, previous: MenuSlotVisual?): MenuSlotVisual {

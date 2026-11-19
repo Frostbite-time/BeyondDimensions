@@ -31,17 +31,17 @@ object StorageWorkbenches {
     val STONECUTTER: ResourceLocation = StorageWorkbenchTypes.STONECUTTER
 
     @Volatile
-    private var entries = emptyMap<ResourceLocation, StorageWorkbench<*, *>>()
+    private var entries = emptyMap<ResourceLocation, StorageWorkbench>()
 
     /** 注册工作台 [id] 的界面 */
     @JvmStatic
     @Synchronized
-    fun register(id: ResourceLocation, workbench: StorageWorkbench<*, *>) {
+    fun register(id: ResourceLocation, workbench: StorageWorkbench) {
         check(id !in entries) { "Storage workbench UI $id is already registered" }
         entries = entries + (id to workbench)
     }
 
     /** 工作台 [id] 的界面，没有注册时为 null */
     @JvmStatic
-    fun get(id: ResourceLocation): StorageWorkbench<*, *>? = entries[id]
+    fun get(id: ResourceLocation): StorageWorkbench? = entries[id]
 }

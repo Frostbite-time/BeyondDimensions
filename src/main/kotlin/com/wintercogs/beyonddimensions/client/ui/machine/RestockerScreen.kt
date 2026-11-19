@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.client.ui.machine
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.api.ui.page.BdPages
@@ -12,6 +13,7 @@ import com.wintercogs.beyonddimensions.common.init.BDItems
 import com.wintercogs.beyonddimensions.common.menu.NetRestockerMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.host.gameState
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
@@ -21,22 +23,14 @@ import net.minecraft.world.item.ItemStack
  * 模板与玩家背包一一对应，所以按背包的排布显示
  */
 class RestockerScreen(menu: NetRestockerMenu, inventory: Inventory, title: Component) :
-    BdInventoryScreen<NetRestockerMenu, RestockerState, RestockerAction>(menu, title) {
+    BdInventoryScreen<NetRestockerMenu>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(BDItems.NET_RESTOCKER_ITEM.get()))
     private val templates = menu.flagSlotIds()
     private val playerSlots = menu.playerSlotIds()
     private val text = RestockerText(title.string)
 
-    override fun snapshot() = RestockerState(machineSettingRows(container.machineSettings().snapshot()))
-
-    override fun handle(action: RestockerAction) {
-        when (action) {
-            is RestockerAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
-        }
-    }
-
     @Composable
-    override fun Content(state: RestockerState, slots: ComposeMenuSlots<NetRestockerMenu>) {
+    override fun Content(slots: ComposeMenuSlots<NetRestockerMenu>) {
         val page = rememberPageSelection()
         val settingsOpen = page.settings
         BdScreenFrame {
@@ -62,18 +56,15 @@ class RestockerScreen(menu: NetRestockerMenu, inventory: Inventory, title: Compo
                 }
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
+                    val settings by gameState { machineSettingRows(container.machineSettings().snapshot()) }
                     BdSectionLabel(text.settings)
-                    BdMachineSettings(state.settings, settingsOpen) { send(RestockerAction.Setting(it)) }
+                    BdMachineSettings(settings, settingsOpen) { pick ->
+                        gameThread.post { container.requestSetting(pick.setting, pick.value) }
+                    }
                 }
             }
         }
     }
-}
-
-data class RestockerState(val settings: List<MachineSettingRow>)
-
-sealed interface RestockerAction {
-    data class Setting(val pick: MachineSettingPick) : RestockerAction
 }
 
 private class RestockerText(val title: String) {

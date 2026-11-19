@@ -13,26 +13,36 @@ import com.wintercogs.beyonddimensions.api.ui.storage.StorageWorkbenches
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
 import com.wintercogs.beyonddimensions.config.ClientConfigRuntime
 import dev.compixel.forge.slots.ComposeMenuSlots
-import dev.compixel.host.UiBinding
+import dev.compixel.host.GameThread
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.resources.ResourceLocation
 
-/** 下拉框里的一个工作台，打开界面时在游戏线程取一次；[holdsItems] 时它的菜单部件放着玩家的物品，显示退回方向按钮 */
+/** 下拉框里的一个工作台，打开界面时取一次；[holdsItems] 时它的菜单部件放着玩家的物品，显示退回方向按钮 */
 @Immutable
 data class WorkbenchInfo(val id: String, val title: String, val holdsItems: Boolean)
 
 /**
  * 一个存储界面上可用的工作台，按注册顺序：服务端打开菜单时判断出哪些可用，界面只挂上它们。
- * 在游戏线程取快照、处理动作，用 [Content] 画出其中一个
+ * 工作台直接共享存储界面的 `gameState` 与 [gameThread]，用 [Actions] 与 [Content] 画出其中一个
  */
 class StorageWorkbenchHost(
     menu: DimensionsNetMenu,
     screen: Screen,
     private val slots: ComposeMenuSlots<*>,
+    private val gameThread: GameThread,
     private val requestClose: () -> Unit,
-) : AutoCloseable {
-    private val mounted = LinkedHashMap<String, Mounted<*, *>>()
-    private var closed = false
+) {
+    private val mounted = LinkedHashMap<String, Mounted>()
+
+    private val scope = object : StorageWorkbenchScope {
+        override val slots
+            get() = this@StorageWorkbenchHost.slots
+
+        override val gameThread
+            get() = this@StorageWorkbenchHost.gameThread
+
+        override fun requestClose() = this@StorageWorkbenchHost.requestClose()
+    }
 
     /** 这个界面上有的工作台，按下拉框的顺序 */
     val info: List<WorkbenchInfo>
@@ -46,8 +56,7 @@ class StorageWorkbenchHost(
         var width = 0
         var height = 0
         for (workbenchId in menu.workbenches()) {
-            @Suppress("UNCHECKED_CAST") val workbench =
-                StorageWorkbenches.get(workbenchId) as StorageWorkbench<Any?, Any?>?
+            val workbench = StorageWorkbenches.get(workbenchId)
             if (workbench == null) {
                 logger.warn("Storage workbench {} has no UI registered on the client; it is left out", workbenchId)
                 continue
@@ -63,11 +72,11 @@ class StorageWorkbenchHost(
                 )
             width = maxOf(width, size.width.coerceAtMost(StorageWorkbenches.MAX_WIDTH))
             height = maxOf(height, size.height.coerceAtMost(StorageWorkbenches.MAX_HEIGHT))
-            mounted[id] = Mounted(workbench, context, UiBinding(workbench.snapshot(context)))
+            mounted[id] = Mounted(workbench, context)
             described += WorkbenchInfo(
                 id,
                 workbench.title(context).string,
-                menu.workbenchWidget(workbenchId) is ClearableWidget
+                menu.workbenchWidget(workbenchId) is ClearableWidget,
             )
         }
         info = described
@@ -81,55 +90,19 @@ class StorageWorkbenchHost(
     /** 要显示的工作台：玩家选的那个；它不在这个界面上时用第一个 */
     fun resolve(id: String): String = if (id in mounted) id else mounted.keys.firstOrNull().orEmpty()
 
-    /** 游戏线程：每刻与每个输入事件之后调用，先处理各工作台送来的动作，再取新快照 */
-    fun update() {
-        if (closed) return
-        for (workbench in mounted.values) workbench.update()
-    }
-
-    override fun close() {
-        if (closed) return
-        closed = true
-        for (workbench in mounted.values) workbench.binding.close()
-    }
-
     /** 工作台 [id] 放在下拉框一行右端的按钮 */
     @Composable
     fun Actions(id: String) {
-        key(id) { mounted[id]?.ShowActions() }
+        key(id) { mounted[id]?.let { it.workbench.Actions(it.context, scope) } }
     }
 
     /** 工作台 [id] 的内容 */
     @Composable
     fun Content(id: String) {
-        key(id) { mounted[id]?.ShowContent() }
+        key(id) { mounted[id]?.let { it.workbench.Content(it.context, scope) } }
     }
 
-    private inner class Mounted<S, A>(
-        val workbench: StorageWorkbench<S, A>,
-        val context: StorageWorkbenchContext,
-        val binding: UiBinding<S, A>,
-    ) {
-        private val scope = object : StorageWorkbenchScope<A> {
-            override val slots
-                get() = this@StorageWorkbenchHost.slots
-
-            override fun send(action: A) = binding.send(action)
-
-            override fun requestClose() = this@StorageWorkbenchHost.requestClose()
-        }
-
-        fun update() {
-            binding.drainActions { workbench.handle(context, it) }
-            binding.update(workbench.snapshot(context))
-        }
-
-        @Composable
-        fun ShowActions() = workbench.Actions(binding.value, scope)
-
-        @Composable
-        fun ShowContent() = workbench.Content(binding.value, scope)
-    }
+    private class Mounted(val workbench: StorageWorkbench, val context: StorageWorkbenchContext)
 
     private companion object {
         val logger = LogUtils.getLogger()

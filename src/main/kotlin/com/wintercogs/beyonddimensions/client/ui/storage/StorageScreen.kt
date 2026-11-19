@@ -46,6 +46,7 @@ import com.wintercogs.beyonddimensions.config.ClientConfigRuntime
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.item.MinecraftItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.host.gameState
 import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.ore.inventory.OreSlot
 import kotlinx.coroutines.launch
@@ -144,8 +145,8 @@ class StorageText {
 
 /** 存储终端与合成终端 */
 class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inventory, title: Component) :
-    BdInventoryScreen<DimensionsNetMenu, StorageState, StorageAction>(storageMenu, title) {
-    private val workbenches = StorageWorkbenchHost(storageMenu, this, this.inventory, ::requestClose)
+    BdInventoryScreen<DimensionsNetMenu>(storageMenu, title) {
+    private val workbenches = StorageWorkbenchHost(storageMenu, this, this.inventory, gameThread, ::requestClose)
     private val controller = StorageController(storageMenu, workbenches)
     private val layout = StorageLayout(storageMenu, workbenches)
 
@@ -153,35 +154,25 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
         adapter.resourceMenu = controller::openSlotMenu
     }
 
-    // 打开界面与窗口缩放时调用：先按屏幕定好格子行列，快照里就是最终尺寸
+    // 打开界面与窗口缩放时调用：先按屏幕定好格子行列，界面立即按最终尺寸布局
     override fun init() {
         controller.fitViewport()
         super.init()
     }
 
-    override fun snapshot() = controller.snapshot()
-
-    override fun handle(action: StorageAction) = controller.handle(action)
-
     @Composable
-    override fun Content(state: StorageState, slots: ComposeMenuSlots<DimensionsNetMenu>) =
-        StorageView(state, ::send, ::requestClose, slots, layout, pages, workbenches)
+    override fun Content(slots: ComposeMenuSlots<DimensionsNetMenu>) =
+        StorageView(controller, ::requestClose, slots, layout, pages, workbenches) { block ->
+            gameThread.post { controller.block() }
+        }
 
     override fun inventoryTick() {
         super.inventoryTick()
         controller.tick()
-        workbenches.update()
-    }
-
-    // 工作台送出的动作随即处理，不等下一刻
-    override fun afterInput() {
-        super.afterInput()
-        workbenches.update()
     }
 
     override fun menuClosed() {
         super.menuClosed()
-        workbenches.close()
         controller.saveSearch()
         controller.saveNow()
     }
@@ -312,16 +303,18 @@ internal fun fittedGridSize(
     return columns to fitRows.coerceAtMost(preferredRows).coerceAtLeast(2)
 }
 
+private typealias StorageAct = (StorageController.() -> Unit) -> Unit
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun StorageView(
-    state: StorageState,
-    send: (StorageAction) -> Unit,
+    controller: StorageController,
     close: () -> Unit,
     slots: ComposeMenuSlots<DimensionsNetMenu>,
     layout: StorageLayout,
     pages: BdPageHost<DimensionsNetMenu>,
     workbenches: StorageWorkbenchHost,
+    act: StorageAct,
 ) {
     val colors = Bd.colors
     val text = layout.text
@@ -335,15 +328,23 @@ private fun StorageView(
     var searchFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
+    val networkName by gameState { controller.networkName }
+    val networkId by gameState { controller.networkId }
+    val gridColumns by gameState { controller.columns }
+    val gridRows by gameState { controller.rows }
+    val firstRow by gameState { controller.firstRow }
+    val totalRows by gameState { controller.totalRows }
+    val currentEditor by gameState { controller.editorState() }
+    val slotMenu by gameState { controller.slotMenuState() }
+    val workbenchShown by gameState { controller.workbenchShown }
+
     CompositionLocalProvider(LocalBdPopovers provides popovers) {
         BdScreenFrame {
-            val editorOpen = state.editor != null
-            val gridColumns = state.columns
-            val gridRows = state.rows
+            val editorOpen = currentEditor != null
             val width = contentWidth(gridColumns)
             // 编辑区收起期间仍显示最后的内容，直到宽度收回
             val lastEditor = remember { arrayOfNulls<CategoryEditor>(1) }
-            state.editor?.let { lastEditor[0] = it }
+            currentEditor?.let { lastEditor[0] = it }
             val editorWidth by animateIntAsState(
                 if (editorOpen) EDITOR_WIDTH else 0,
                 tween(EDITOR_MILLIS, easing = FastOutSlowInEasing),
@@ -356,7 +357,7 @@ private fun StorageView(
                         // 分类标签与编辑区自己滚动时不翻动格子
                         if (event.changes.any { it.isConsumed }) return@onPointerEvent
                         val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
-                        if (delta != 0f && page.main) send(StorageAction.Scroll(if (delta > 0) 1 else -1))
+                        if (delta != 0f && page.main) act { scrollBy(if (delta > 0) 1 else -1) }
                     }
                     // 焦点在窗口里时由这里处理 Tab；没有焦点时 Tab 进入窗口后改到搜索框
                     .onPreviewKeyEvent { event ->
@@ -378,23 +379,23 @@ private fun StorageView(
                 header = {
                     BdHeader(
                         layout.icon,
-                        state.networkName.ifEmpty { text.storage },
+                        networkName.ifEmpty { text.storage },
                         close,
-                        tag = if (state.networkId >= 0) "#%04d".format(state.networkId) else null,
+                        tag = if (networkId >= 0) "#%04d".format(networkId) else null,
                     )
                 },
                 tabs = {
                     BdRailTab(text.storage, BdIcons.Main, selected = page.main) { page.open(BdPages.MAIN) }
                     // 展开或收起主页面上的工作区；在其他页上点它时回到主页面并展开
                     if (layout.workbenches.isNotEmpty()) {
-                        val hide = page.main && state.workbenchShown
+                        val hide = page.main && workbenchShown
                         BdRailTab(
                             if (hide) text.hideWorkbench else text.showWorkbench,
                             BdIcons.Crafting,
                             selected = false,
-                            active = state.workbenchShown,
+                            active = workbenchShown,
                         ) {
-                            send(StorageAction.ShowWorkbench(!hide))
+                            act { setShowWorkbench(!hide) }
                             page.open(BdPages.MAIN)
                         }
                     }
@@ -402,7 +403,7 @@ private fun StorageView(
                     // 切换网络不是页面，用未选中页签的样子当按钮
                     if (layout.showSwitcher) {
                         BdRailTab(text.switcher, BdIcons.Switch, selected = false) {
-                            send(StorageAction.OpenSwitcher)
+                            act { openSwitcher() }
                         }
                     }
                 },
@@ -411,9 +412,9 @@ private fun StorageView(
                 },
             ) {
                 BdMainPage(page.main) {
-                    Toolbar(state, send, text, width, searchFocus) { searchFocused = it }
+                    Toolbar(controller, act, text, width, searchFocus) { searchFocused = it }
                     Spacer(Modifier.height(3.dp))
-                    CategoryTabs(state, send, text, width)
+                    CategoryTabs(controller, currentEditor?.index ?: -1, act, text, width)
                     Spacer(Modifier.height(3.dp))
                     // 工作区展开与收起时格子增减行数，高度与工作区一同以动画变化
                     val gridHeight by animateIntAsState(
@@ -432,29 +433,24 @@ private fun StorageView(
                                 }
                         ) {
                             val ids = List(gridColumns * gridRows) { layout.storageStart + it }
-                            StorageSlotGrid(slots, ids, gridColumns, state.firstRow)
-                            state.slotMenu?.let { menu ->
+                            StorageSlotGrid(slots, ids, gridColumns, firstRow)
+                            slotMenu?.let { menu ->
                                 key(menu.serial) {
-                                    SlotMenuPopup(
-                                        menu,
-                                        pressAt,
-                                        send,
-                                        text
-                                    )
+                                    SlotMenuPopup(menu, pressAt, act, text)
                                 }
                             }
                         }
                         // 滚动条始终显示，放得下全部资源时滑块停在顶端
                         Spacer(Modifier.width(2.dp))
                         BdScrollbar(
-                            state.firstRow,
+                            firstRow,
                             gridRows,
-                            state.totalRows,
-                            { send(StorageAction.ScrollTo(it)) },
+                            totalRows,
+                            { row -> act { scrollTo(row) } },
                             Modifier.width(SCROLLBAR_WIDTH.dp).fillMaxHeight(),
                         )
                     }
-                    WorkbenchAndInventory(state, send, slots, layout, workbenches, width)
+                    WorkbenchAndInventory(controller, workbenchShown, act, slots, layout, workbenches, width)
                     // 给编辑区留出位置
                     Spacer(Modifier.width((width + editorWidth).dp))
                 }
@@ -482,7 +478,7 @@ private fun StorageView(
                                 Spacer(Modifier.width(GAP.dp))
                                 key(editor.index) {
                                     BdScrollColumn(Modifier.width(EDITOR_CONTENT_WIDTH.dp).fillMaxHeight()) {
-                                        CategoryEditorPanel(editor, send, text, enabled = editorOpen && page.main)
+                                        CategoryEditorPanel(editor, act, text, enabled = editorOpen && page.main)
                                     }
                                 }
                             }
@@ -490,7 +486,7 @@ private fun StorageView(
                     }
                 }
                 InjectedPages(pages, page)
-                BdTabPage(settingsOpen) { ViewOptions(state, send, text, settingsOpen) }
+                BdTabPage(settingsOpen) { ViewOptions(controller, act, text, settingsOpen) }
             }
         }
     }
@@ -502,8 +498,9 @@ private fun StorageView(
  */
 @Composable
 private fun WorkbenchAndInventory(
-    state: StorageState,
-    send: (StorageAction) -> Unit,
+    controller: StorageController,
+    workbenchShown: Boolean,
+    act: StorageAct,
     slots: ComposeMenuSlots<DimensionsNetMenu>,
     layout: StorageLayout,
     workbenches: StorageWorkbenchHost,
@@ -518,12 +515,12 @@ private fun WorkbenchAndInventory(
         val height = maxOf(workbenchAreaHeight(workbenches), WORKBENCH_CONTENT_TOP + INVENTORY_HEIGHT)
         Row(Modifier.width(width.dp).height(height.dp), horizontalArrangement = Arrangement.Center) {
             AnimatedVisibility(
-                state.workbenchShown,
+                workbenchShown,
                 enter = expandHorizontally(resize, Alignment.End) + fadeIn(fade),
                 exit = shrinkHorizontally(resize, Alignment.End) + fadeOut(fade),
             ) {
                 Row {
-                    WorkbenchArea(state, send, layout, workbenches)
+                    WorkbenchArea(controller, act, layout, workbenches)
                     Spacer(Modifier.width(GAP.dp))
                     Box(Modifier.width(1.dp).fillMaxHeight().background(colors[BdColors.line]))
                     Spacer(Modifier.width(GAP.dp))
@@ -537,16 +534,16 @@ private fun WorkbenchAndInventory(
         Box(Modifier.width(width.dp), contentAlignment = Alignment.TopCenter) {
             Column(Modifier.width(columnWidth.dp)) {
                 AnimatedVisibility(
-                    state.workbenchShown,
+                    workbenchShown,
                     enter = expandVertically(resize, Alignment.Top) + fadeIn(fade),
                     exit = shrinkVertically(resize, Alignment.Top) + fadeOut(fade),
                 ) {
                     Column {
-                        WorkbenchArea(state, send, layout, workbenches)
+                        WorkbenchArea(controller, act, layout, workbenches)
                         Spacer(Modifier.height(SECTION_GAP.dp))
                     }
                 }
-                InventoryArea(slots, layout, titled = !state.workbenchShown, width = columnWidth)
+                InventoryArea(slots, layout, titled = !workbenchShown, width = columnWidth)
             }
         }
     }
@@ -592,21 +589,22 @@ private fun InventoryArea(
  */
 @Composable
 private fun WorkbenchArea(
-    state: StorageState,
-    send: (StorageAction) -> Unit,
+    controller: StorageController,
+    act: StorageAct,
     layout: StorageLayout,
     workbenches: StorageWorkbenchHost,
 ) {
-    val id = state.workbench
+    val id by gameState { controller.workbench }
+    val returnToStorage by gameState { controller.returnToStorage }
     Column(Modifier.width(workbenches.contentWidth.dp)) {
         Row(Modifier.fillMaxWidth().height(LABEL_HEIGHT.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.weight(1f)) {
-                WorkbenchChooser(layout.workbenches, id, layout.text) { send(StorageAction.SelectWorkbench(it)) }
+                WorkbenchChooser(layout.workbenches, id, layout.text) { chosen -> act { selectWorkbench(chosen) } }
             }
             workbenches.Actions(id)
             if (layout.workbenches.firstOrNull { it.id == id }?.holdsItems == true) {
                 Spacer(Modifier.width(2.dp))
-                ReturnToggle(state.returnToStorage, layout.text) { send(StorageAction.ReturnToStorage(it)) }
+                ReturnToggle(returnToStorage, layout.text) { enabled -> act { setReturnToStorage(enabled) } }
             }
         }
         Spacer(Modifier.height(3.dp))
@@ -737,20 +735,23 @@ private fun WorkbenchOption(workbench: WorkbenchInfo, selected: Boolean, onClick
 
 @Composable
 private fun Toolbar(
-    state: StorageState,
-    send: (StorageAction) -> Unit,
+    controller: StorageController,
+    act: StorageAct,
     text: StorageText,
     width: Int,
     searchFocus: FocusRequester,
     onSearchFocus: (Boolean) -> Unit,
 ) {
+    val externalSearch by gameState { controller.searchText }
+    val sort by gameState { controller.sort }
+    val reverse by gameState { controller.reverse }
     // 配方查看器改动搜索时同步进来
-    val search = rememberLocalText(state.search)
+    val search = rememberLocalText(externalSearch)
     val colors = Bd.colors
     Row(Modifier.width(width.dp), verticalAlignment = Alignment.CenterVertically) {
         BdSearchField(
             search.value,
-            { search.edit(it) { value -> send(StorageAction.Search(value)) } },
+            { search.edit(it) { value -> act { search(value) } } },
             text.search,
             Modifier.weight(1f).focusRequester(searchFocus).onFocusChanged { onSearchFocus(it.hasFocus) },
             help = { SearchHelp(text) },
@@ -761,14 +762,14 @@ private fun Toolbar(
             BdChip({ open = !open }, active = open) {
                 BdIcon(BdIcons.Bars, color = colors[BdColors.faint])
                 Spacer(Modifier.width(3.dp))
-                OreText(text.sortNames[state.sort] ?: text.sort, color = colors[BdColors.text], maxLines = 1)
+                OreText(text.sortNames[sort] ?: text.sort, color = colors[BdColors.text], maxLines = 1)
                 Spacer(Modifier.width(3.dp))
                 BdIcon(
-                    if (state.reverse) BdIcons.ArrowUp else BdIcons.ArrowDown,
+                    if (reverse) BdIcons.ArrowUp else BdIcons.ArrowDown,
                     color = colors[BdColors.accent]
                 )
             }
-            if (open) BdPopover({ open = false }) { SortOptions(state, send, text) }
+            if (open) BdPopover({ open = false }) { SortOptions(controller, act, text) }
         }
     }
 }
@@ -836,7 +837,15 @@ private fun rememberLocalText(external: String): LocalText {
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun CategoryTabs(state: StorageState, send: (StorageAction) -> Unit, text: StorageText, width: Int) {
+private fun CategoryTabs(
+    controller: StorageController,
+    editing: Int,
+    act: StorageAct,
+    text: StorageText,
+    width: Int,
+) {
+    val categories by gameState { controller.categoryTabs }
+    val selectedCategory by gameState { controller.selectedCategory }
     val colors = Bd.colors
     val scroll = rememberScrollState()
     val scope = rememberCoroutineScope()
@@ -846,8 +855,7 @@ private fun CategoryTabs(state: StorageState, send: (StorageAction) -> Unit, tex
     var dragOffset by remember { mutableFloatStateOf(0f) }
     val spans = remember { HashMap<Int, Pair<Float, Float>>() }
     var viewport by remember { mutableIntStateOf(0) }
-    val count = state.categories.size
-    val editing = state.editor?.index ?: -1
+    val count = categories.size
 
     fun dropIndex(): Int {
         val (start, size) = spans[dragged] ?: return dragged
@@ -867,7 +875,7 @@ private fun CategoryTabs(state: StorageState, send: (StorageAction) -> Unit, tex
             }
         scroll.scrollTo(target.roundToInt())
     }
-    LaunchedEffect(state.category) { if (state.category >= 0) reveal(state.category) }
+    LaunchedEffect(selectedCategory) { if (selectedCategory >= 0) reveal(selectedCategory) }
     LaunchedEffect(editing) { if (editing >= 0) reveal(editing) }
 
     Row(
@@ -896,14 +904,14 @@ private fun CategoryTabs(state: StorageState, send: (StorageAction) -> Unit, tex
                     .horizontalScroll(scroll, enabled = false),
                 horizontalArrangement = Arrangement.spacedBy(9.dp),
             ) {
-                state.categories.forEachIndexed { index, tab ->
+                categories.forEachIndexed { index, tab ->
                     CategoryTabView(
                         tab,
                         index,
                         count,
-                        selected = index == state.category,
+                        selected = index == selectedCategory,
                         editing = index == editing,
-                        send = send,
+                        act = act,
                         text = text,
                         modifier = Modifier
                             .onGloballyPositioned {
@@ -917,13 +925,16 @@ private fun CategoryTabs(state: StorageState, send: (StorageAction) -> Unit, tex
                                 detectDragGestures(
                                     onDragStart = {
                                         // 按下后稍一移动就算拖动；拖动同样打开这个分类，点击不会落空
-                                        send(StorageAction.SelectCategory(index))
+                                        act { selectCategory(index) }
                                         dragged = index
                                         dragOffset = 0f
                                     },
                                     onDragEnd = {
                                         val target = dropIndex()
-                                        if (target != dragged) send(StorageAction.MoveCategory(dragged, target))
+                                        if (target != dragged) {
+                                            val from = dragged
+                                            act { moveCategory(from, target) }
+                                        }
                                         dragged = -1
                                     },
                                     onDragCancel = { dragged = -1 },
@@ -939,12 +950,12 @@ private fun CategoryTabs(state: StorageState, send: (StorageAction) -> Unit, tex
             BdGlyphButton(
                 BdIcons.Plus,
                 text.addCategory,
-                { send(StorageAction.AddCategory) },
+                { act { addCategory() } },
                 size = 11.dp,
             )
         }
         Spacer(Modifier.width(4.dp))
-        CategoryList(state, editing, send, text)
+        CategoryList(categories, selectedCategory, editing, act, text)
     }
 }
 
@@ -956,7 +967,7 @@ private fun CategoryTabView(
     count: Int,
     selected: Boolean,
     editing: Boolean,
-    send: (StorageAction) -> Unit,
+    act: StorageAct,
     text: StorageText,
     modifier: Modifier,
 ) {
@@ -969,7 +980,7 @@ private fun CategoryTabView(
             .width(IntrinsicSize.Max)
             .fillMaxHeight()
             .hoverable(interaction)
-            .bdClickable(interaction, enabled = !selected) { send(StorageAction.SelectCategory(index)) }
+            .bdClickable(interaction, enabled = !selected) { act { selectCategory(index) } }
             .onPointerEvent(PointerEventType.Press) {
                 if (it.buttons.isSecondaryPressed) menuAt = it.changes.first().position.round()
             }
@@ -1007,7 +1018,7 @@ private fun CategoryTabView(
             )
         }
         menuAt?.let { point ->
-            CategoryMenu(point, index, count, vertical = false, send, text, onDismiss = { menuAt = null })
+            CategoryMenu(point, index, count, vertical = false, act, text, onDismiss = { menuAt = null })
         }
     }
 }
@@ -1019,7 +1030,7 @@ private fun CategoryMenu(
     index: Int,
     count: Int,
     vertical: Boolean,
-    send: (StorageAction) -> Unit,
+    act: StorageAct,
     text: StorageText,
     onDismiss: () -> Unit,
     onEdit: () -> Unit = {},
@@ -1028,52 +1039,58 @@ private fun CategoryMenu(
         BdMenuRow(text.edit) {
             onDismiss()
             onEdit()
-            send(StorageAction.EditCategory(index))
+            act { editCategory(index) }
         }
         if (index > 0) BdMenuRow(if (vertical) text.moveUp else text.moveLeft) {
             onDismiss()
-            send(StorageAction.MoveCategory(index, index - 1))
+            act { moveCategory(index, index - 1) }
         }
         if (index < count - 1) BdMenuRow(if (vertical) text.moveDown else text.moveRight) {
             onDismiss()
-            send(StorageAction.MoveCategory(index, index + 1))
+            act { moveCategory(index, index + 1) }
         }
         BdMenuRow(text.delete) {
             onDismiss()
-            send(StorageAction.DeleteCategory(index))
+            act { deleteCategory(index) }
         }
     }
 }
 
 /** 下拉列出全部标签 */
 @Composable
-private fun CategoryList(state: StorageState, editing: Int, send: (StorageAction) -> Unit, text: StorageText) {
+private fun CategoryList(
+    categories: List<CategoryTab>,
+    selectedCategory: Int,
+    editing: Int,
+    act: StorageAct,
+    text: StorageText,
+) {
     var open by remember { mutableStateOf(false) }
     Box {
         BdGlyphButton(
             BdIcons.ChevronDown,
             text.categoryList,
             { open = !open },
-            enabled = state.categories.isNotEmpty(),
+            enabled = categories.isNotEmpty(),
             selected = open,
             size = 11.dp,
         )
         if (open) {
             BdPopover({ open = false }) {
                 BdScrollColumn(Modifier.widthIn(max = 160.dp).heightIn(max = 150.dp)) {
-                    state.categories.forEachIndexed { index, tab ->
+                    categories.forEachIndexed { index, tab ->
                         CategoryOption(
                             tab,
                             index,
-                            state.categories.size,
-                            selected = index == state.category,
+                            categories.size,
+                            selected = index == selectedCategory,
                             editing = index == editing,
-                            send = send,
+                            act = act,
                             text = text,
                             // 打开编辑区时收起列表；移动与删除后列表留着
                             onEdit = { open = false },
                         ) {
-                            send(StorageAction.SelectCategory(index))
+                            act { selectCategory(index) }
                             open = false
                         }
                     }
@@ -1092,7 +1109,7 @@ private fun CategoryOption(
     count: Int,
     selected: Boolean,
     editing: Boolean,
-    send: (StorageAction) -> Unit,
+    act: StorageAct,
     text: StorageText,
     onEdit: () -> Unit,
     onClick: () -> Unit,
@@ -1104,7 +1121,7 @@ private fun CategoryOption(
     // 菜单以这一行为锚点，展开在按下右键的位置
     Box {
         menuAt?.let { point ->
-            CategoryMenu(point, index, count, vertical = true, send, text, { menuAt = null }, onEdit)
+            CategoryMenu(point, index, count, vertical = true, act, text, { menuAt = null }, onEdit)
         }
         Row(
             Modifier.fillMaxWidth()
@@ -1149,24 +1166,24 @@ private fun CategoryOption(
 @Composable
 private fun ColumnScope.CategoryEditorPanel(
     editor: CategoryEditor,
-    send: (StorageAction) -> Unit,
+    act: StorageAct,
     text: StorageText,
     enabled: Boolean,
 ) {
     val colors = Bd.colors
     BdSectionLabel(text.editorTitle) {
-        BdGlyphButton(BdIcons.Close, null, { send(StorageAction.CloseEditor) }, size = 11.dp)
+        BdGlyphButton(BdIcons.Close, null, { act { closeEditor() } }, size = 11.dp)
     }
     Spacer(Modifier.height(4.dp))
     Row(verticalAlignment = Alignment.CenterVertically) {
         BdTooltip(text.iconHint) {
-            MarkerBox(editor.icon, null, selected = false, enabled) { right -> send(StorageAction.CategoryIcon(right)) }
+            MarkerBox(editor.icon, null, selected = false, enabled) { right -> act { clickCategoryIcon(right) } }
         }
         Spacer(Modifier.width(4.dp))
         val name = rememberLocalText(editor.name)
         BdTextField(
             name.value,
-            { name.edit(it) { value -> send(StorageAction.RenameCategory(value)) } },
+            { name.edit(it) { value -> act { renameCategory(value) } } },
             text.name,
             Modifier.weight(1f),
         )
@@ -1177,7 +1194,7 @@ private fun ColumnScope.CategoryEditorPanel(
     val search = rememberLocalText(editor.search)
     BdTextArea(
         search.value,
-        { search.edit(it) { value -> send(StorageAction.CategorySearch(value)) } },
+        { search.edit(it) { value -> act { setCategorySearch(value) } } },
         text.rulePlaceholder,
         minLines = 4,
         help = { SearchHelp(text, text.ruleHelp) },
@@ -1195,7 +1212,7 @@ private fun ColumnScope.CategoryEditorPanel(
                     for (index in row) {
                         val key = editor.keys.getOrNull(index)
                         MarkerBox(key?.icon, key?.name, selected = index == editor.inspected, enabled) { right ->
-                            send(StorageAction.CategoryKeyClick(index, right))
+                            act { clickCategoryKey(index, right) }
                         }
                     }
                 }
@@ -1207,7 +1224,7 @@ private fun ColumnScope.CategoryEditorPanel(
         BdSectionLabel(text.syntax) { HintMark(text.syntaxHint) }
         Spacer(Modifier.height(3.dp))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            for (chip in editor.chips) SyntaxChip(chip, enabled) { send(StorageAction.AppendToSearch(chip)) }
+            for (chip in editor.chips) SyntaxChip(chip, enabled) { act { appendToSearch(chip) } }
         }
     }
 }
@@ -1279,10 +1296,10 @@ private fun SyntaxChip(syntax: String, enabled: Boolean, onClick: () -> Unit) {
 
 /** 存储格子的右键菜单：取出一个、取出指定数量，以及把这种资源加入某个分类 */
 @Composable
-private fun SlotMenuPopup(menu: SlotMenu, point: IntOffset, send: (StorageAction) -> Unit, text: StorageText) {
+private fun SlotMenuPopup(menu: SlotMenu, point: IntOffset, act: StorageAct, text: StorageText) {
     val colors = Bd.colors
     var amount by remember { mutableIntStateOf((menu.takeable + 1) / 2) }
-    BdPointMenu(point, { send(StorageAction.CloseSlotMenu) }) {
+    BdPointMenu(point, { act { closeSlotMenu() } }) {
         OreText(
             menu.name,
             Modifier.widthIn(max = 120.dp).padding(horizontal = 5.dp, vertical = 2.dp),
@@ -1292,9 +1309,9 @@ private fun SlotMenuPopup(menu: SlotMenu, point: IntOffset, send: (StorageAction
             overflow = TextOverflow.Ellipsis,
         )
         if (menu.takeable > 0) {
-            BdMenuRow(text.takeOne) { send(StorageAction.TakeFromMenu(1)) }
+            BdMenuRow(text.takeOne) { act { takeFromMenu(1) } }
             if (menu.takeable > 1) TakeAmountRow(amount, { amount = it }, menu.takeable, text) {
-                send(StorageAction.TakeFromMenu(amount))
+                act { takeFromMenu(amount) }
             }
         }
         if (menu.categories.isNotEmpty()) {
@@ -1311,7 +1328,7 @@ private fun SlotMenuPopup(menu: SlotMenu, point: IntOffset, send: (StorageAction
             // 分类很多时在菜单里滚动
             BdScrollColumn(Modifier.heightIn(max = (13 * MENU_CATEGORY_ROWS).dp)) {
                 for ((index, name) in menu.categories.withIndex()) {
-                    BdMenuRow(name) { send(StorageAction.AddToCategory(index)) }
+                    BdMenuRow(name) { act { addToCategory(index) } }
                 }
             }
         }
@@ -1353,51 +1370,60 @@ private fun TakeAmountRow(amount: Int, onAmountChange: (Int) -> Unit, max: Int, 
 
 /** 排序方式：主要与次要排序各一列，底部是倒序开关 */
 @Composable
-private fun SortOptions(state: StorageState, send: (StorageAction) -> Unit, text: StorageText) {
+private fun SortOptions(controller: StorageController, act: StorageAct, text: StorageText) {
+    val sort by gameState { controller.sort }
+    val secondarySort by gameState { controller.secondarySort }
+    val reverse by gameState { controller.reverse }
     Row {
         Column(Modifier.width(IntrinsicSize.Max)) {
             BdSectionLabel(text.sort)
             Spacer(Modifier.height(3.dp))
             for (policy in StorageSort.entries) {
-                OptionRow(text.sortNames.getValue(policy), state.sort == policy) { send(StorageAction.Sort(policy)) }
+                OptionRow(text.sortNames.getValue(policy), sort == policy) { act { setSort(policy) } }
             }
         }
         Spacer(Modifier.width(8.dp))
         Column(Modifier.width(IntrinsicSize.Max)) {
             BdSectionLabel(text.secondarySort)
             Spacer(Modifier.height(3.dp))
-            OptionRow(text.none, state.secondarySort == null) { send(StorageAction.SecondarySort(null)) }
+            OptionRow(text.none, secondarySort == null) { act { setSecondarySort(null) } }
             for (policy in StorageSort.entries) {
                 OptionRow(
                     text.sortNames.getValue(policy),
-                    state.secondarySort == policy,
-                    enabled = policy != state.sort
+                    secondarySort == policy,
+                    enabled = policy != sort
                 ) {
-                    send(StorageAction.SecondarySort(policy))
+                    act { setSecondarySort(policy) }
                 }
             }
         }
     }
     Spacer(Modifier.height(5.dp))
-    BdSettingRow(text.reverse) { BdToggle(state.reverse, { send(StorageAction.Reverse(it)) }) }
+    BdSettingRow(text.reverse) { BdToggle(reverse, { enabled -> act { setReverse(enabled) } }) }
 }
 
 /** 设置页的视图设置：行列与搜索行为；[shown] 为 false 时控件不响应 */
 @Composable
-private fun ViewOptions(state: StorageState, send: (StorageAction) -> Unit, text: StorageText, shown: Boolean) {
+private fun ViewOptions(controller: StorageController, act: StorageAct, text: StorageText, shown: Boolean) {
+    val preferredColumns by gameState { controller.preferredColumns }
+    val preferredRows by gameState { controller.preferredRows }
+    val rightClickMenu by gameState { controller.rightClickMenu }
+    val keepSearch by gameState { controller.keepSearch }
+    val syncSearch by gameState { controller.syncSearch }
+    val keepCrafting by gameState { controller.keepCrafting }
     BdSectionLabel(text.layout)
     BdSettingRow(text.columns) {
         BdNumberEditor(
-            state.preferredColumns,
-            { send(StorageAction.PreferredSize(it, state.preferredRows)) },
+            preferredColumns,
+            { columns -> act { setPreferredSize(columns, preferredRows) } },
             9..99,
             shown
         )
     }
     BdSettingRow(text.rows) {
         BdNumberEditor(
-            state.preferredRows,
-            { send(StorageAction.PreferredSize(state.preferredColumns, it)) },
+            preferredRows,
+            { rows -> act { setPreferredSize(preferredColumns, rows) } },
             2..99,
             shown
         )
@@ -1405,22 +1431,18 @@ private fun ViewOptions(state: StorageState, send: (StorageAction) -> Unit, text
     BdSectionDivider()
     BdSectionLabel(text.interaction)
     BdSettingRow(text.rightClickMenu, text.rightClickMenuHint) {
-        BdToggle(state.rightClickMenu, { send(StorageAction.RightClickMenu(it)) }, shown)
+        BdToggle(rightClickMenu, { enabled -> act { setRightClickMenu(enabled) } }, shown)
     }
     BdSectionDivider()
     BdSectionLabel(text.searchTitle)
-    BdSettingRow(text.keepSearch) { BdToggle(state.keepSearch, { send(StorageAction.KeepSearch(it)) }, shown) }
+    BdSettingRow(text.keepSearch) { BdToggle(keepSearch, { enabled -> act { setKeepSearch(enabled) } }, shown) }
     BdSettingRow(text.syncSearch, text.syncSearchHint) {
-        BdToggle(
-            state.syncSearch,
-            { send(StorageAction.SyncSearch(it)) },
-            shown
-        )
+        BdToggle(syncSearch, { enabled -> act { setSyncSearch(enabled) } }, shown)
     }
     BdSectionDivider()
     BdSectionLabel(text.workbench)
     BdSettingRow(text.keepCrafting, text.keepCraftingHint) {
-        BdToggle(state.keepCrafting, { send(StorageAction.KeepCrafting(it)) }, shown)
+        BdToggle(keepCrafting, { enabled -> act { setKeepCrafting(enabled) } }, shown)
     }
 }
 

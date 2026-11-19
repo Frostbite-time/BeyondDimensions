@@ -94,7 +94,7 @@ config="${mod_id}.mixins.json"
     side="BOTH"
 
 # 只需 Kotlin 运行库，不依赖 KFF 的特定 API，因此不限制其版本。
-# Kotlin 运行库可由 KFF 或 CompixelUI 的 with-kotlin 版本提供。
+# 保持 optional 以兼容 Kotlin for Forge 之外的其他 Kotlin 运行时模组。
 [[dependencies.${mod_id}]]
     modId="kotlinforforge"
     type="optional"

@@ -108,7 +108,7 @@
 在 [CurseForge](https://www.curseforge.com/projects/1222890) 下载对应 Minecraft 版本的文件，所需前置以文件页面为准。使用 CompixelUI 界面的版本还需要安装：
 
 - [CompixelUI](https://www.curseforge.com/projects/1715758)：超越维度的界面库；
-- Kotlin：安装 [Kotlin for Forge](https://www.curseforge.com/minecraft/mc-mods/kotlin-for-forge)，或使用文件名以 `-with-kotlin` 结尾、自带 Kotlin 的 CompixelUI。
+- Kotlin：安装 [Kotlin for Forge](https://www.curseforge.com/minecraft/mc-mods/kotlin-for-forge)（或其他兼容的 Kotlin 运行时模组）。
 
 ### 版本支持
 

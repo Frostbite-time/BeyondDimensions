@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.client.ui.machine
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.api.ui.page.BdPages
@@ -12,29 +13,22 @@ import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.NetPumpMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.host.gameState
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 
 /** 网络泵：过滤槽与玩家背包；设置页是从哪些面抽取、过滤模式与红石控制 */
 class PumpScreen(menu: NetPumpMenu, inventory: Inventory, title: Component) :
-    BdInventoryScreen<NetPumpMenu, PumpState, PumpAction>(menu, title) {
+    BdInventoryScreen<NetPumpMenu>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(BDBlocks.NET_PUMP_BLOCK.get()))
     private val filterSlots = menu.flagSlotIds()
     private val playerSlots = menu.playerSlotIds()
     private val text = PumpText(title.string)
     private val sides = machineSidesView(menu.be)
 
-    override fun snapshot() = PumpState(machineSettingRows(container.machineSettings().snapshot(), sides))
-
-    override fun handle(action: PumpAction) {
-        when (action) {
-            is PumpAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
-        }
-    }
-
     @Composable
-    override fun Content(state: PumpState, slots: ComposeMenuSlots<NetPumpMenu>) {
+    override fun Content(slots: ComposeMenuSlots<NetPumpMenu>) {
         val page = rememberPageSelection()
         val settingsOpen = page.settings
         BdScreenFrame {
@@ -57,18 +51,15 @@ class PumpScreen(menu: NetPumpMenu, inventory: Inventory, title: Component) :
                 }
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
+                    val settings by gameState { machineSettingRows(container.machineSettings().snapshot(), sides) }
                     BdSectionLabel(text.settings)
-                    BdMachineSettings(state.settings, settingsOpen) { send(PumpAction.Setting(it)) }
+                    BdMachineSettings(settings, settingsOpen) { pick ->
+                        gameThread.post { container.requestSetting(pick.setting, pick.value) }
+                    }
                 }
             }
         }
     }
-}
-
-data class PumpState(val settings: List<MachineSettingRow>)
-
-sealed interface PumpAction {
-    data class Setting(val pick: MachineSettingPick) : PumpAction
 }
 
 private class PumpText(val title: String) {

@@ -45,109 +45,6 @@ data class CategoryEditor(
  */
 data class SlotMenu(val serial: Int, val name: String, val takeable: Int, val categories: List<String>)
 
-data class StorageState(
-    val networkName: String = "",
-    val networkId: Int = -1,
-    val columns: Int = 9,
-    val rows: Int = 5,
-    val preferredColumns: Int = 9,
-    val preferredRows: Int = 5,
-    val firstRow: Int = 0,
-    val totalRows: Int = 0,
-    val stored: Int = 0,
-    val categories: List<CategoryTab> = emptyList(),
-    /** 打开的分类标签，没有时为 -1 */
-    val category: Int = -1,
-    val editor: CategoryEditor? = null,
-    val slotMenu: SlotMenu? = null,
-    val search: String = "",
-    val sort: StorageSort = StorageSort.NAME,
-    val secondarySort: StorageSort? = null,
-    val reverse: Boolean = false,
-    val keepSearch: Boolean = false,
-    val syncSearch: Boolean = false,
-    /** 空手右键资源时打开菜单，否则取出一半 */
-    val rightClickMenu: Boolean = true,
-    /** 关闭界面后保留工作台里的物品 */
-    val keepCrafting: Boolean = false,
-    /** 工作台被清空时物品优先退回存储，否则优先退回背包 */
-    val returnToStorage: Boolean = false,
-    /** 工作区显示的工作台 */
-    val workbench: String = "",
-    /** 工作区展开着 */
-    val workbenchShown: Boolean = false,
-)
-
-sealed interface StorageAction {
-    data class Search(val text: String) : StorageAction
-
-    data class Scroll(val rows: Int) : StorageAction
-
-    data class ScrollTo(val row: Int) : StorageAction
-
-    /** 玩家设定的首选行列，会写入配置 */
-    data class PreferredSize(val columns: Int, val rows: Int) : StorageAction
-
-    data class SelectCategory(val index: Int) : StorageAction
-
-    /** 新建分类并打开编辑区 */
-    data object AddCategory : StorageAction
-
-    data class EditCategory(val index: Int) : StorageAction
-
-    data object CloseEditor : StorageAction
-
-    data class DeleteCategory(val index: Int) : StorageAction
-
-    data class MoveCategory(val from: Int, val to: Int) : StorageAction
-
-    /** 以下修改编辑区里的分类 */
-    data class RenameCategory(val name: String) : StorageAction
-
-    data class CategorySearch(val text: String) : StorageAction
-
-    /** 左键把手上的物品设为图标，右键清除 */
-    data class CategoryIcon(val right: Boolean) : StorageAction
-
-    /** 点击第 [index] 个特定补充：左键列出它的写法，右键移除；点末尾的空格是加入手上的物品或容器的内容物 */
-    data class CategoryKeyClick(val index: Int, val right: Boolean) : StorageAction
-
-    /** 把一个写法加入搜索式：按住 Shift 时与已有条件同时符合，否则符合其一即可 */
-    data class AppendToSearch(val text: String) : StorageAction
-
-    /** 以下是存储格子右键菜单里的操作 */
-    data class TakeFromMenu(val amount: Int) : StorageAction
-
-    data class AddToCategory(val index: Int) : StorageAction
-
-    data object CloseSlotMenu : StorageAction
-
-    data class Sort(val policy: StorageSort) : StorageAction
-
-    data class SecondarySort(val policy: StorageSort?) : StorageAction
-
-    data class Reverse(val enabled: Boolean) : StorageAction
-
-    data class KeepSearch(val enabled: Boolean) : StorageAction
-
-    data class SyncSearch(val enabled: Boolean) : StorageAction
-
-    data class RightClickMenu(val enabled: Boolean) : StorageAction
-
-    data object OpenSwitcher : StorageAction
-
-    data class KeepCrafting(val enabled: Boolean) : StorageAction
-
-    /** 设定工作台被清空时物品的退回方向，所有工作台共用，会写入配置 */
-    data class ReturnToStorage(val enabled: Boolean) : StorageAction
-
-    /** 展开或收起工作区，会写入配置 */
-    data class ShowWorkbench(val shown: Boolean) : StorageAction
-
-    /** 选择工作区显示的工作台，会写入配置 */
-    data class SelectWorkbench(val id: String) : StorageAction
-}
-
 /** 分类停止改动多久后写进文件 */
 private const val SAVE_DELAY_MILLIS = 1000L
 
@@ -181,6 +78,10 @@ class StorageController(private val menu: DimensionsNetMenu, private val workben
     private var menuTarget: MenuTarget? = null
     private var menuSerial = 0
 
+    // 分类列表不变时沿用上次生成的标签列表，避免每刻重建
+    private var tabsVersion = -1
+    private var cachedTabs: List<CategoryTab> = emptyList()
+
     // 最后一次改动分类而还没写进文件的时间，0 表示都已写入
     private var unsavedSince = 0L
 
@@ -196,169 +97,250 @@ class StorageController(private val menu: DimensionsNetMenu, private val workben
         sendWorkbenchPreference(menu)
     }
 
-    fun snapshot(): StorageState {
-        if (ClientConfigRuntime.recipeViewerSyncSearch) followViewerSearch()
-        if (workbenchShown() != fittedShown) fitViewport()
-        val stored = menu.storage.storage.size
-        return StorageState(
-            networkName = menu.networkName().string,
-            networkId = menu.networkId(),
-            columns = menu.columns,
-            rows = menu.lines,
-            preferredColumns = ClientConfigRuntime.storageColumns,
-            preferredRows = ClientConfigRuntime.storageRows,
-            firstRow = menu.lineData,
-            totalRows = menu.maxLineData + menu.lines,
-            stored = stored,
-            categories = categories.map { CategoryTab(it.name, it.icon?.let(::iconOf)) },
-            category = selected,
-            editor = editorState(stored),
-            slotMenu = slotMenuState(),
-            search = lastSearch,
-            sort = ClientConfigRuntime.storageSort,
-            secondarySort = ClientConfigRuntime.storageSecondarySort.takeIf { ClientConfigRuntime.storageUseSecondarySort },
-            reverse = ClientConfigRuntime.storageReverse,
-            keepSearch = ClientConfigRuntime.storageKeepSearch,
-            syncSearch = ClientConfigRuntime.recipeViewerSyncSearch,
-            rightClickMenu = ClientConfigRuntime.storageRightClickMenu,
-            keepCrafting = ClientConfigRuntime.craftingKeepGrid,
-            returnToStorage = ClientConfigRuntime.craftingReturnToStorage,
-            workbench = workbenches.resolve(ClientConfigRuntime.storageWorkbench),
-            workbenchShown = fittedShown,
+    val networkName: String
+        get() = menu.networkName().string
+
+    val networkId: Int
+        get() = menu.networkId()
+
+    val columns: Int
+        get() = menu.columns
+
+    val rows: Int
+        get() = menu.lines
+
+    val firstRow: Int
+        get() = menu.lineData
+
+    val totalRows: Int
+        get() = menu.maxLineData + menu.lines
+
+    val searchText: String
+        get() = lastSearch
+
+    /** 打开的分类标签，没有时为 -1 */
+    val selectedCategory: Int
+        get() = selected
+
+    val categoryTabs: List<CategoryTab>
+        get() {
+            if (tabsVersion != version) {
+                tabsVersion = version
+                cachedTabs = categories.map { CategoryTab(it.name, it.icon?.let(::iconOf)) }
+            }
+            return cachedTabs
+        }
+
+    val sort: StorageSort
+        get() = ClientConfigRuntime.storageSort
+
+    val secondarySort: StorageSort?
+        get() = ClientConfigRuntime.storageSecondarySort.takeIf { ClientConfigRuntime.storageUseSecondarySort }
+
+    val reverse: Boolean
+        get() = ClientConfigRuntime.storageReverse
+
+    val preferredColumns: Int
+        get() = ClientConfigRuntime.storageColumns
+
+    val preferredRows: Int
+        get() = ClientConfigRuntime.storageRows
+
+    /** 空手右键资源时打开菜单，否则取出一半 */
+    val rightClickMenu: Boolean
+        get() = ClientConfigRuntime.storageRightClickMenu
+
+    val keepSearch: Boolean
+        get() = ClientConfigRuntime.storageKeepSearch
+
+    val syncSearch: Boolean
+        get() = ClientConfigRuntime.recipeViewerSyncSearch
+
+    /** 关闭界面后保留工作台里的物品 */
+    val keepCrafting: Boolean
+        get() = ClientConfigRuntime.craftingKeepGrid
+
+    /** 工作台被清空时物品优先退回存储，否则优先退回背包 */
+    val returnToStorage: Boolean
+        get() = ClientConfigRuntime.craftingReturnToStorage
+
+    /** 工作区显示的工作台 */
+    val workbench: String
+        get() = workbenches.resolve(ClientConfigRuntime.storageWorkbench)
+
+    /** 工作区展开着 */
+    val workbenchShown: Boolean
+        get() = fittedShown
+
+    fun search(text: String) {
+        applySearch(text)
+        if (ClientConfigRuntime.recipeViewerSyncSearch) RecipeViewerSearch.set(text)
+    }
+
+    fun scrollBy(rows: Int) = scrollTo(menu.lineData + rows)
+
+    fun scrollTo(row: Int) {
+        val target = row.coerceIn(0, menu.maxLineData)
+        if (target == menu.lineData) return
+        menu.lineData = target
+        menu.buildIndexList()
+    }
+
+    /** 玩家设定的首选行列，会写入配置 */
+    fun setPreferredSize(columns: Int, rows: Int) {
+        ClientConfigRuntime.storageColumns = columns
+        ClientConfigRuntime.storageRows = rows
+        Config.INSTANCE.clientConfig.STORAGE_COLUMNS.set(columns)
+        Config.INSTANCE.clientConfig.STORAGE_ROWS.set(rows)
+        Config.INSTANCE.clientConfig.STORAGE_ROWS.save()
+        fitViewport()
+    }
+
+    fun selectCategory(index: Int) = select(index)
+
+    /** 新建分类并打开编辑区 */
+    fun addCategory() {
+        categories = categories + StorageCategory(I18n.get("ui.beyonddimensions.storage.category.new"))
+        save()
+        openEditor(categories.lastIndex)
+        fitViewport()
+    }
+
+    fun editCategory(index: Int) {
+        openEditor(index)
+        fitViewport()
+    }
+
+    fun closeEditor() {
+        editing = -1
+        inspected = -1
+        fitViewport()
+    }
+
+    fun deleteCategory(index: Int) {
+        delete(index)
+        fitViewport()
+    }
+
+    fun moveCategory(from: Int, to: Int) = move(from, to)
+
+    fun renameCategory(name: String) = edit { it.copy(name = name) }
+
+    fun setCategorySearch(text: String) = edit { it.copy(search = text) }
+
+    /** 左键把手上的物品设为图标，右键清除 */
+    fun clickCategoryIcon(right: Boolean) {
+        val carried = menu.carried
+        if (right) edit { it.copy(icon = null) }
+        else if (!carried.isEmpty) edit { it.copy(icon = ItemStackKey(carried)) }
+    }
+
+    /** 点击第 [index] 个特定补充：左键列出它的写法，右键移除；点末尾的空格是加入手上的物品或容器的内容物 */
+    fun clickCategoryKey(index: Int, right: Boolean) = clickKey(index, right)
+
+    /** 把一个写法加入搜索式：按住 Shift 时与已有条件同时符合，否则符合其一即可 */
+    fun appendToSearch(text: String) = edit { category ->
+        val search = category.search.trimEnd()
+        category.copy(
+            search = when {
+                search.isEmpty() -> text
+                Screen.hasShiftDown() -> "$search $text"
+                else -> "$search|$text"
+            }
         )
     }
 
-    fun handle(action: StorageAction) {
-        when (action) {
-            is StorageAction.Search -> {
-                search(action.text)
-                if (ClientConfigRuntime.recipeViewerSyncSearch) RecipeViewerSearch.set(action.text)
-            }
+    fun takeFromMenu(amount: Int) {
+        menuTarget?.let { menu.commands().take(it.slot, it.key, amount.toLong()) }
+        menuTarget = null
+    }
 
-            is StorageAction.Scroll -> scrollTo(menu.lineData + action.rows)
-            is StorageAction.ScrollTo -> scrollTo(action.row)
-            is StorageAction.PreferredSize -> {
-                ClientConfigRuntime.storageColumns = action.columns
-                ClientConfigRuntime.storageRows = action.rows
-                Config.INSTANCE.clientConfig.STORAGE_COLUMNS.set(action.columns)
-                Config.INSTANCE.clientConfig.STORAGE_ROWS.set(action.rows)
-                Config.INSTANCE.clientConfig.STORAGE_ROWS.save()
-            }
-
-            is StorageAction.SelectCategory -> select(action.index)
-            StorageAction.AddCategory -> {
-                categories = categories + StorageCategory(I18n.get("ui.beyonddimensions.storage.category.new"))
-                save()
-                openEditor(categories.lastIndex)
-            }
-
-            is StorageAction.EditCategory -> openEditor(action.index)
-
-            StorageAction.CloseEditor -> {
-                editing = -1
-                inspected = -1
-            }
-
-            is StorageAction.DeleteCategory -> delete(action.index)
-            is StorageAction.MoveCategory -> move(action.from, action.to)
-            is StorageAction.RenameCategory -> edit { it.copy(name = action.name) }
-            is StorageAction.CategorySearch -> edit { it.copy(search = action.text) }
-            is StorageAction.CategoryIcon -> {
-                val carried = menu.carried
-                if (action.right) edit { it.copy(icon = null) }
-                else if (!carried.isEmpty) edit { it.copy(icon = ItemStackKey(carried)) }
-            }
-
-            is StorageAction.CategoryKeyClick -> clickKey(action.index, action.right)
-            is StorageAction.AppendToSearch -> edit { category ->
-                val search = category.search.trimEnd()
-                category.copy(
-                    search = when {
-                        search.isEmpty() -> action.text
-                        Screen.hasShiftDown() -> "$search ${action.text}"
-                        else -> "$search|${action.text}"
-                    }
-                )
-            }
-
-            is StorageAction.TakeFromMenu -> {
-                menuTarget?.let { menu.commands().take(it.slot, it.key, action.amount.toLong()) }
-                menuTarget = null
-            }
-
-            is StorageAction.AddToCategory -> {
-                val key = menuTarget?.key
-                menuTarget = null
-                if (key != null && action.index in categories.indices) {
-                    update(action.index) { if (key in it.keys) it else it.copy(keys = it.keys + key) }
-                }
-            }
-
-            StorageAction.CloseSlotMenu -> menuTarget = null
-
-            is StorageAction.Sort -> {
-                ClientConfigRuntime.storageSort = action.policy
-                Config.INSTANCE.clientConfig.STORAGE_SORT.set(action.policy)
-                Config.INSTANCE.clientConfig.STORAGE_SORT.save()
-                menu.buildIndexList()
-            }
-
-            is StorageAction.SecondarySort -> {
-                // 选"无"时只关掉开关，原来选的次排序留在配置里
-                val policy = action.policy
-                ClientConfigRuntime.storageUseSecondarySort = policy != null
-                Config.INSTANCE.clientConfig.STORAGE_USE_SECONDARY_SORT.set(policy != null)
-                if (policy != null) {
-                    ClientConfigRuntime.storageSecondarySort = policy
-                    Config.INSTANCE.clientConfig.STORAGE_SECONDARY_SORT.set(policy)
-                }
-                Config.INSTANCE.clientConfig.STORAGE_SECONDARY_SORT.save()
-                menu.buildIndexList()
-            }
-
-            is StorageAction.Reverse -> {
-                ClientConfigRuntime.storageReverse = action.enabled
-                Config.INSTANCE.clientConfig.STORAGE_REVERSE.set(action.enabled)
-                Config.INSTANCE.clientConfig.STORAGE_REVERSE.save()
-                menu.buildIndexList()
-            }
-
-            is StorageAction.KeepSearch -> {
-                ClientConfigRuntime.storageKeepSearch = action.enabled
-                Config.INSTANCE.clientConfig.STORAGE_KEEP_SEARCH.set(action.enabled)
-                Config.INSTANCE.clientConfig.STORAGE_KEEP_SEARCH.save()
-            }
-
-            is StorageAction.SyncSearch -> setSearchSync(action.enabled)
-            is StorageAction.RightClickMenu -> {
-                ClientConfigRuntime.storageRightClickMenu = action.enabled
-                Config.INSTANCE.clientConfig.STORAGE_RIGHT_CLICK_MENU.set(action.enabled)
-                Config.INSTANCE.clientConfig.STORAGE_RIGHT_CLICK_MENU.save()
-            }
-
-            StorageAction.OpenSwitcher -> {
-                saveTransferContext()
-                PacketDistributor.sendToServer(OpenPrimaryNetSwitcherPacket())
-            }
-
-            is StorageAction.KeepCrafting -> {
-                ClientConfigRuntime.craftingKeepGrid = action.enabled
-                Config.INSTANCE.clientConfig.CRAFTING_KEEP_GRID.set(action.enabled)
-                Config.INSTANCE.clientConfig.CRAFTING_KEEP_GRID.save()
-                sendWorkbenchPreference(menu)
-            }
-
-            is StorageAction.ReturnToStorage -> {
-                ClientConfigRuntime.craftingReturnToStorage = action.enabled
-                Config.INSTANCE.clientConfig.CRAFTING_RETURN_TO_STORAGE.set(action.enabled)
-                Config.INSTANCE.clientConfig.CRAFTING_RETURN_TO_STORAGE.save()
-                sendWorkbenchPreference(menu)
-            }
-
-            is StorageAction.ShowWorkbench -> StorageWorkbenchChoice.show(action.shown)
-            is StorageAction.SelectWorkbench -> StorageWorkbenchChoice.select(action.id)
+    fun addToCategory(index: Int) {
+        val key = menuTarget?.key
+        menuTarget = null
+        if (key != null && index in categories.indices) {
+            update(index) { if (key in it.keys) it else it.copy(keys = it.keys + key) }
         }
-        // 首选行列、编辑区与工作区都影响能放下的格数
+    }
+
+    fun closeSlotMenu() {
+        menuTarget = null
+    }
+
+    fun setSort(policy: StorageSort) {
+        ClientConfigRuntime.storageSort = policy
+        Config.INSTANCE.clientConfig.STORAGE_SORT.set(policy)
+        Config.INSTANCE.clientConfig.STORAGE_SORT.save()
+        menu.buildIndexList()
+    }
+
+    fun setSecondarySort(policy: StorageSort?) {
+        // 选"无"时只关掉开关，原来选的次排序留在配置里
+        ClientConfigRuntime.storageUseSecondarySort = policy != null
+        Config.INSTANCE.clientConfig.STORAGE_USE_SECONDARY_SORT.set(policy != null)
+        if (policy != null) {
+            ClientConfigRuntime.storageSecondarySort = policy
+            Config.INSTANCE.clientConfig.STORAGE_SECONDARY_SORT.set(policy)
+        }
+        Config.INSTANCE.clientConfig.STORAGE_SECONDARY_SORT.save()
+        menu.buildIndexList()
+    }
+
+    fun setReverse(enabled: Boolean) {
+        ClientConfigRuntime.storageReverse = enabled
+        Config.INSTANCE.clientConfig.STORAGE_REVERSE.set(enabled)
+        Config.INSTANCE.clientConfig.STORAGE_REVERSE.save()
+        menu.buildIndexList()
+    }
+
+    fun setKeepSearch(enabled: Boolean) {
+        ClientConfigRuntime.storageKeepSearch = enabled
+        Config.INSTANCE.clientConfig.STORAGE_KEEP_SEARCH.set(enabled)
+        Config.INSTANCE.clientConfig.STORAGE_KEEP_SEARCH.save()
+    }
+
+    fun setSyncSearch(enabled: Boolean) {
+        ClientConfigRuntime.recipeViewerSyncSearch = enabled
+        Config.INSTANCE.clientConfig.RECIPE_VIEWER_SYNC_SEARCH.set(enabled)
+        Config.INSTANCE.clientConfig.RECIPE_VIEWER_SYNC_SEARCH.save()
+        if (enabled) RecipeViewerSearch.set(lastSearch)
+    }
+
+    fun setRightClickMenu(enabled: Boolean) {
+        ClientConfigRuntime.storageRightClickMenu = enabled
+        Config.INSTANCE.clientConfig.STORAGE_RIGHT_CLICK_MENU.set(enabled)
+        Config.INSTANCE.clientConfig.STORAGE_RIGHT_CLICK_MENU.save()
+    }
+
+    fun openSwitcher() {
+        saveTransferContext()
+        PacketDistributor.sendToServer(OpenPrimaryNetSwitcherPacket())
+    }
+
+    fun setKeepCrafting(enabled: Boolean) {
+        ClientConfigRuntime.craftingKeepGrid = enabled
+        Config.INSTANCE.clientConfig.CRAFTING_KEEP_GRID.set(enabled)
+        Config.INSTANCE.clientConfig.CRAFTING_KEEP_GRID.save()
+        sendWorkbenchPreference(menu)
+    }
+
+    /** 设定工作台被清空时物品的退回方向，所有工作台共用，会写入配置 */
+    fun setReturnToStorage(enabled: Boolean) {
+        ClientConfigRuntime.craftingReturnToStorage = enabled
+        Config.INSTANCE.clientConfig.CRAFTING_RETURN_TO_STORAGE.set(enabled)
+        Config.INSTANCE.clientConfig.CRAFTING_RETURN_TO_STORAGE.save()
+        sendWorkbenchPreference(menu)
+    }
+
+    /** 展开或收起工作区，会写入配置 */
+    fun setShowWorkbench(shown: Boolean) {
+        StorageWorkbenchChoice.show(shown)
+        fitViewport()
+    }
+
+    /** 选择工作区显示的工作台，会写入配置 */
+    fun selectWorkbench(id: String) {
+        StorageWorkbenchChoice.select(id)
         fitViewport()
     }
 
@@ -383,14 +365,7 @@ class StorageController(private val menu: DimensionsNetMenu, private val workben
     // 没有能用的工作台时工作区无从展开
     private fun workbenchShown() = ClientConfigRuntime.storageWorkbenchShown && !workbenches.isEmpty
 
-    private fun setSearchSync(enabled: Boolean) {
-        ClientConfigRuntime.recipeViewerSyncSearch = enabled
-        Config.INSTANCE.clientConfig.RECIPE_VIEWER_SYNC_SEARCH.set(enabled)
-        Config.INSTANCE.clientConfig.RECIPE_VIEWER_SYNC_SEARCH.save()
-        if (enabled) RecipeViewerSearch.set(lastSearch)
-    }
-
-    private fun search(text: String) {
+    private fun applySearch(text: String) {
         if (text == lastSearch) return
         lastSearch = text
         ClientConfigRuntime.storageSearch = text
@@ -403,14 +378,7 @@ class StorageController(private val menu: DimensionsNetMenu, private val workben
     /** 配方查看器的搜索框被修改时，同步到本界面 */
     private fun followViewerSearch() {
         val viewer = RecipeViewerSearch.get() ?: return
-        if (viewer != lastSearch) search(viewer)
-    }
-
-    private fun scrollTo(row: Int) {
-        val target = row.coerceIn(0, menu.maxLineData)
-        if (target == menu.lineData) return
-        menu.lineData = target
-        menu.buildIndexList()
+        if (viewer != lastSearch) applySearch(viewer)
     }
 
     /** 存储格子的右键菜单：配置开启时，空手右键有资源的格子会打开它；返回是否打开了 */
@@ -423,7 +391,7 @@ class StorageController(private val menu: DimensionsNetMenu, private val workben
         return true
     }
 
-    private fun slotMenuState(): SlotMenu? {
+    fun slotMenuState(): SlotMenu? {
         val target = menuTarget ?: return null
         val key = target.key
         // 数量以打开菜单时为准，服务器按实际库存取出
@@ -433,8 +401,9 @@ class StorageController(private val menu: DimensionsNetMenu, private val workben
     }
 
     /** 编辑区：编辑的分类与当前打开的分类无关。符合的种数在分类或存储种数变化时重算，否则每秒最多一次 */
-    private fun editorState(stored: Int): CategoryEditor? {
+    fun editorState(): CategoryEditor? {
         val category = categories.getOrNull(editing) ?: return null
+        val stored = menu.storage.storage.size
         val now = Util.getMillis()
         val changed = countedEditing != editing || countedVersion != version || countedStored != stored
         if (changed || now - countedAt >= 1000) {
@@ -583,8 +552,10 @@ class StorageController(private val menu: DimensionsNetMenu, private val workben
         if (selected >= 0) StorageCategories.selected[player] = selected
     }
 
-    /** 菜单关闭或分类停止改动一会儿后再写文件，不必每个字都写一次 */
+    /** 每刻同步配方查看器搜索与外部展开的工作区；分类停止改动一会儿后再写文件，不必每个字都写一次 */
     fun tick() {
+        if (ClientConfigRuntime.recipeViewerSyncSearch) followViewerSearch()
+        if (workbenchShown() != fittedShown) fitViewport()
         if (unsavedSince != 0L && Util.getMillis() - unsavedSince >= SAVE_DELAY_MILLIS) saveNow()
     }
 

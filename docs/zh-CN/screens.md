@@ -8,39 +8,30 @@
 
 每个页面在界面左侧的页签栏中占一个页签，位于界面自带的页签之后、设置页签之前。页面按菜单类注册，会显示在该菜单（包括其子类）的所有界面上：
 
-| `BdPage<M, S, A>` 的成员 | 运行线程 | 作用 |
-| --- | --- | --- |
-| `icon` | | 页签的 10×10 像素图标，如 `BdIcons.Info`，也可以是自定义的 `BdPixelIcon` |
-| `title(context)` | 游戏线程 | 页签的悬停提示 |
-| `appliesTo(context)` | 游戏线程 | 当前界面是否显示该页面，默认显示 |
-| `size(context)` | 游戏线程 | 页面的大小，默认与主页面一样大，见[页面大小](#页面大小) |
-| `snapshot(context)` | 游戏线程 | 生成页面状态 `S`；只读，每刻可能调用多次 |
-| `handle(context, action)` | 游戏线程 | 处理页面发送的动作 `A`，处理后重新生成状态 |
-| `Content(state, scope)` | Compose 线程 | 根据状态绘制页面 |
+| `BdPage<M>` 的成员 | 作用 |
+| --- | --- |
+| `icon` | 页签的 10×10 像素图标，如 `BdIcons.Info`，也可以是自定义的 `BdPixelIcon` |
+| `title(context)` | 页签的悬停提示，打开界面时读取一次 |
+| `appliesTo(context)` | 当前界面是否显示该页面，默认显示 |
+| `size(context)` | 页面的大小，默认与主页面一样大，见[页面大小](#页面大小) |
+| `Content(context, scope)` | 在游戏线程绘制页面 |
 
-状态应为不可变值，不应包含菜单、物品堆叠等游戏对象。在 `Content` 中，`scope.send(action)` 将动作交给 `handle`，`scope.open(BdPages.SETTINGS)` 切换页面，`scope.shown` 表示该页面是否正在显示，`scope.slots` 配合 `BdSlot` 绘制菜单的槽位。
+在 `Content` 中通过 `gameState { ... }` 读取会变化的游戏数据（应返回不可变值，不要包含菜单、物品堆叠等游戏对象），通过 `scope.gameThread.post { ... }` 提交修改或服务端请求。`scope.open(BdPages.SETTINGS)` 切换页面，`scope.shown` 表示该页面是否正在显示，`scope.slots` 配合 `BdSlot` 绘制菜单的槽位。
 
 ```kotlin
-object NetworkInfoPage : BdPage<DimensionsNetMenu, NetworkInfoPage.State, NetworkInfoPage.Ping> {
-    data class State(val name: String, val id: Int)
-    data object Ping
+object NetworkInfoPage : BdPage<DimensionsNetMenu> {
+    data class Info(val name: String, val id: Int)
 
     override val icon = BdIcons.Info
 
     override fun title(context: BdPageContext<DimensionsNetMenu>) = Component.literal("Network info")
 
-    override fun snapshot(context: BdPageContext<DimensionsNetMenu>) =
-        State(context.menu.networkName().string, context.menu.networkId())
-
-    override fun handle(context: BdPageContext<DimensionsNetMenu>, action: Ping) {
-        context.request(PING, 3)
-    }
-
     @Composable
-    override fun ColumnScope.Content(state: State, scope: BdPageScope<Ping>) {
+    override fun ColumnScope.Content(context: BdPageContext<DimensionsNetMenu>, scope: BdPageScope) {
+        val info by gameState { Info(context.menu.networkName().string, context.menu.networkId()) }
         BdSectionLabel("Network")
-        OreText("${state.name} #${state.id}", color = Bd.colors[BdColors.text])
-        BdChip({ scope.send(Ping) }, enabled = scope.shown) {
+        OreText("${info.name} #${info.id}", color = Bd.colors[BdColors.text])
+        BdChip({ scope.gameThread.post { context.request(PING, 3) } }, enabled = scope.shown) {
             OreText("Ping", color = Bd.colors[BdColors.text])
         }
     }
