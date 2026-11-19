@@ -5,7 +5,7 @@ import net.neoforged.neoforge.capabilities.EntityCapability;
 import net.neoforged.neoforge.capabilities.ItemCapability;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import vazkii.botania.api.BotaniaForgeCapabilities;
+import vazkii.botania.api.neoforge.BotaniaNeoForgeCapabilities;
 import vazkii.botania.api.capability.*;
 
 import java.util.IdentityHashMap;
@@ -22,32 +22,32 @@ public final class BotaniaCapabilitiesHelper
 
     public static <A> BlockCapability<A, @UnknownNullability Void> getBlockApiLookupById(BlockApiNoContext<A> id)
     {
-        return getOrCreateBlock(id, Void.class, BotaniaForgeCapabilities.getBlockApiLookupById(id));
+        return getOrCreateBlock(id, Void.class, BotaniaNeoForgeCapabilities.getBlockApiLookupById(id));
     }
 
     public static <A, C> BlockCapability<A, @UnknownNullability C> getBlockApiLookupById(BlockApiWithContext<A, C> id)
     {
-        return getOrCreateBlock(id, id.getContextClass(), BotaniaForgeCapabilities.getBlockApiLookupById(id));
+        return getOrCreateBlock(id, id.getContextClass(), BotaniaNeoForgeCapabilities.getBlockApiLookupById(id));
     }
 
     public static <A> EntityCapability<A, @UnknownNullability Void> getEntityApiLookupById(EntityApiNoContext<A> id)
     {
-        return getOrCreateEntity(id, Void.class, BotaniaForgeCapabilities.getEntityApiLookupById(id));
+        return getOrCreateEntity(id, Void.class, BotaniaNeoForgeCapabilities.getEntityApiLookupById(id));
     }
 
     public static <A, C> EntityCapability<A, @UnknownNullability C> getEntityApiLookupById(EntityApiWithContext<A, C> id)
     {
-        return getOrCreateEntity(id, id.getContextClass(), BotaniaForgeCapabilities.getEntityApiLookupById(id));
+        return getOrCreateEntity(id, id.getContextClass(), BotaniaNeoForgeCapabilities.getEntityApiLookupById(id));
     }
 
     public static <A> ItemCapability<A, @UnknownNullability Void> getItemApiLookupById(ItemApiNoContext<A> id)
     {
-        return getOrCreateItem(id, Void.class, BotaniaForgeCapabilities.getItemApiLookupById(id));
+        return getOrCreateItem(id, Void.class, BotaniaNeoForgeCapabilities.getItemApiLookupById(id));
     }
 
     public static <A, C> ItemCapability<A, @UnknownNullability C> getItemApiLookupById(ItemApiWithContext<A, C> id)
     {
-        return getOrCreateItem(id, id.getContextClass(), BotaniaForgeCapabilities.getItemApiLookupById(id));
+        return getOrCreateItem(id, id.getContextClass(), BotaniaNeoForgeCapabilities.getItemApiLookupById(id));
     }
 
     @SuppressWarnings("unchecked")

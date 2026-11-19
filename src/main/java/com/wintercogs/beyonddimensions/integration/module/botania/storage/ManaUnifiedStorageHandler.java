@@ -11,10 +11,10 @@ import org.jetbrains.annotations.UnknownNullability;
 import vazkii.botania.api.internal.ManaBurst;
 import vazkii.botania.api.mana.ManaCollector;
 import vazkii.botania.api.mana.ManaPool;
-import vazkii.botania.api.mana.spark.SparkAttachable;
+import vazkii.botania.api.mana.spark.ManaSparkAttachable;
 
 // 默认实现作为魔力收集器-可以从产能花收集魔力
-public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, SparkAttachable
+public class ManaUnifiedStorageHandler implements ManaCollector, ManaPool, ManaSparkAttachable
 {
     private final UnifiedStorage storage;
     private final Level level;

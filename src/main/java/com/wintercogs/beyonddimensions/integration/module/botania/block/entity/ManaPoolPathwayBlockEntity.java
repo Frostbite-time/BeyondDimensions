@@ -45,7 +45,7 @@ import vazkii.botania.api.internal.ItemSource;
 import vazkii.botania.api.internal.ManaBurst;
 import vazkii.botania.api.item.ManaDissolvable;
 import vazkii.botania.api.mana.*;
-import vazkii.botania.api.mana.spark.SparkAttachable;
+import vazkii.botania.api.mana.spark.ManaSparkAttachable;
 import vazkii.botania.api.recipe.ManaInfusionRecipe;
 import vazkii.botania.client.core.helper.RenderHelper;
 import vazkii.botania.client.fx.SparkleParticleData;
@@ -70,7 +70,7 @@ import java.util.List;
  * 既可以为功能花提供魔力，也可以从产能花以及魔力发射器接收魔力，并能并入火花网络的魔力池
  */
 public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
-        implements ManaCollector, ManaPool, SparkAttachable, Wandable, KeyLocked, ThrottledPacket<@NotNull ManaPoolPathwayBlockEntity>
+        implements ManaCollector, ManaPool, ManaSparkAttachable, Wandable, KeyLocked, ThrottledPacket<@NotNull ManaPoolPathwayBlockEntity>
 {
 
     // Botania 常量/事件
@@ -144,7 +144,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
         );
 
         event.registerBlockEntity(
-                BotaniaCapabilitiesHelper.getBlockApiLookupById(SparkAttachable.LOOKUP),
+                BotaniaCapabilitiesHelper.getBlockApiLookupById(ManaSparkAttachable.LOOKUP),
                 BotaniaModuleBlockEntities.MANA_POOL_PATHWAY_BLOCK_ENTITY.get(),
                 (be, side) -> be instanceof ManaPoolPathwayBlockEntity pool ? pool : null
         );
@@ -357,7 +357,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
 
         if (playSound && soundTicks == 0)
         {
-            level.playSound(null, worldPosition, BotaniaSounds.manaPoolCraft, SoundSource.BLOCKS, 1F, 1F);
+            level.playSound(null, worldPosition, BotaniaSounds.MANA_POOL_CRAFT, SoundSource.BLOCKS, 1F, 1F);
             soundTicks = 6;
         }
 
@@ -564,7 +564,7 @@ public class ManaPoolPathwayBlockEntity extends NetedBlockEntity
         return refreshHandler() ? handler.getActualMaxMana() : 0;
     }
 
-    // ====== ManaCollector/ManaPool/SparkAttachable/Wandable 的实现 ======
+    // ====== ManaCollector/ManaPool/ManaSparkAttachable/Wandable 的实现 ======
     @Override
     public void onClientDisplayTick()
     {

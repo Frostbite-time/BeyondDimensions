@@ -259,8 +259,8 @@ dependencies {
     localRuntime "maven.modrinth:patchouli:1.21.1-92-neoforge" // 帕秋莎
 
     // 植物魔法以及其ae附属
-    compileOnly "vazkii.botania:botania-neoforge-1.21.1:454-SNAPSHOT"
-    localRuntime "vazkii.botania:botania-neoforge-1.21.1:454-SNAPSHOT"
+    compileOnly "vazkii.botania:botania-neoforge-1.21.1:457-SNAPSHOT"
+    localRuntime "vazkii.botania:botania-neoforge-1.21.1:457-SNAPSHOT"
     // ae-botania对botania新版api的注册时机有一点问题，保留兼容暂不纳入运行
     compileOnly "curse.maven:applied-botanics-addon-610632:8298277"
 
