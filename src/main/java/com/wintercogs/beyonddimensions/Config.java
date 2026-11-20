@@ -114,7 +114,7 @@ public class Config
                     .defineInRange("ui_scale", 0, -1, 16);
             STORAGE_AUTO_MIN_ROWS = builder
                     .comment("自动缩放模式下在最差情况下尽量保证显示的最少行数（最低为 2；倍率始终为不低于 1x 的整数倍）")
-                    .defineInRange("auto_min_rows", 5, 2, 99);
+                    .defineInRange("auto_min_rows", 3, 2, 99);
             STORAGE_KEEP_SEARCH = builder
                     .comment("关闭界面后是否保留搜索框内容")
                     .define("keep_search", false);
