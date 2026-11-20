@@ -156,7 +156,8 @@ private fun formatRate(rate: Double): String {
 private fun EnergyReadout(stored: Long, capacity: Long, rate: Double, charts: Charts, text: EnergyText) {
     val colors = Bd.colors
     val limited = capacity != Long.MAX_VALUE
-    val capacityLabel = tr("ui.beyonddimensions.energy.capacity", if (limited) formatReadout(capacity) else text.unlimited)
+    val capacityLabel =
+        tr("ui.beyonddimensions.energy.capacity", if (limited) formatReadout(capacity) else text.unlimited)
     val usedLabel =
         if (limited && capacity > 0)
             tr("ui.beyonddimensions.energy.used", String.format(Locale.ROOT, "%.0f%%", stored * 100.0 / capacity))

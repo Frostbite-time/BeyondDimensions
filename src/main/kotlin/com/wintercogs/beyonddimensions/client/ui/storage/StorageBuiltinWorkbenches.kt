@@ -88,7 +88,8 @@ internal object CraftingWorkbench : StorageWorkbench {
     @Composable
     override fun Actions(context: StorageWorkbenchContext, scope: StorageWorkbenchScope) {
         val clear = remember(context) { context.remember("clear") { WorkbenchClearText() } }
-        val recipeLabel = remember(context) { context.remember("recipe_label") { tr("ui.beyonddimensions.crafting.recipe") } }
+        val recipeLabel =
+            remember(context) { context.remember("recipe_label") { tr("ui.beyonddimensions.crafting.recipe") } }
         val choices by gameState(keys = arrayOf(context)) {
             recipeChoices(context)?.snapshot(context.menu).orEmpty()
         }
@@ -208,6 +209,7 @@ internal object AnvilWorkbench : StorageWorkbench {
                 cost <= 0 -> null to true
                 cost >= 40 && !context.player.abilities.instabuild ->
                     Component.translatable("container.repair.expensive").string to false
+
                 !result.hasItem() -> null to true
                 else -> Component.translatable("container.repair.cost", cost).string to result.mayPickup(context.player)
             }
@@ -387,7 +389,8 @@ internal object StonecutterWorkbench : StorageWorkbench {
                             for (index in row) {
                                 RecipeCell(recipes[index], index == selected) {
                                     scope.gameThread.post {
-                                        val stonecutter = context.menu.widget(StonecutterWidget::class.java) ?: return@post
+                                        val stonecutter =
+                                            context.menu.widget(StonecutterWidget::class.java) ?: return@post
                                         stonecutter.select(context.player, index)
                                         context.request(StonecutterWidget.SELECT, index)
                                     }

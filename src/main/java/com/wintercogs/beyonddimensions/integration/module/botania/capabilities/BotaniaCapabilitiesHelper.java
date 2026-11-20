@@ -5,8 +5,8 @@ import net.neoforged.neoforge.capabilities.EntityCapability;
 import net.neoforged.neoforge.capabilities.ItemCapability;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import vazkii.botania.api.neoforge.BotaniaNeoForgeCapabilities;
 import vazkii.botania.api.capability.*;
+import vazkii.botania.api.neoforge.BotaniaNeoForgeCapabilities;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
