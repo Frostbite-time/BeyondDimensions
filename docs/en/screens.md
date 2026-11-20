@@ -2,9 +2,10 @@
 
 [简体中文](../zh-CN/screens.md) · [All guides](../../README.md#guides)
 
-Other mods can add pages to the screens of Beyond Dimensions (BD), send actions from them to the server and change
-what clicks on slots do. BD's screens are built with [CompixelUI](https://github.com/Frostbite-time/CompixelUI) and Compose, and a
-page can use BD's own controls.
+Other mods can add pages to the screens of Beyond Dimensions (BD), register expandable side panels on the storage
+screen, send actions to the server and change what clicks on slots do. BD's screens are built with
+[CompixelUI](https://github.com/Frostbite-time/CompixelUI) and Compose, and pages and side panels can use BD's own
+controls.
 
 ## Add a page
 
@@ -64,6 +65,59 @@ animates to its size:
 | `Content(maxWidth, maxHeight)` | Follows the content, up to the optional limits. The outermost content needs a definite size, so no `fillMaxSize` or `weight` |
 
 A page shorter than the tab rail still leaves room for every tab, but never more than the main page's height.
+
+## Storage side panels
+
+The expandable area on the right side of the storage screen (shared with the built-in category editor) accepts panels
+registered by other mods, allowing add-ons to display substantial custom content alongside the storage grid without
+opening a separate page. Add-ons decide when and how to open or close their panels. Only one side panel is open at a
+time; opening one expands the window to the right, narrows the storage grid columns to fit, and hosts the panel inside a
+vertically scrollable `Column`:
+
+| Member of `StorageSidePanel` | Does |
+| --- | --- |
+| `appliesTo(context)` | Whether this storage screen mounts the panel; `true` by default, checked once when the screen opens |
+| `width(context)` | Content width in dp (excluding the divider and spacing); defaults to `127` and is clamped to `80..220` |
+| `onOpen(context)` | Called on the game thread when the panel opens |
+| `onClose(context)` | Called on the game thread when the panel closes, is replaced by another panel, or the screen closes |
+| `Content(context, scope)` | Draws the panel on the game thread |
+
+Inside `Content`, read changing game data with `gameState { ... }` and post mutations or server requests with
+`scope.gameThread.post { ... }`. `scope.openPanel(id)` switches to another side panel, `scope.closePanel()` closes the
+current panel, and `scope.shown` reports whether the panel is currently shown on the main page.
+`context.remember(key) { ... }` keeps per-screen state for the panel, and `context.request(action, value)` sends a menu
+action to the server.
+
+```kotlin
+val DETAILS_PANEL = ResourceLocation.fromNamespaceAndPath("examplemod", "details")
+
+object DetailsSidePanel : StorageSidePanel {
+    override fun width(context: StorageSidePanelContext): Int = 150
+
+    @Composable
+    override fun ColumnScope.Content(context: StorageSidePanelContext, scope: StorageSidePanelScope) {
+        val name by gameState { context.menu.networkName().string }
+        BdSectionLabel("Details")
+        OreText(name, color = Bd.colors[BdColors.text])
+        BdChip({ scope.closePanel() }, enabled = scope.shown) {
+            OreText("Close", color = Bd.colors[BdColors.text])
+        }
+    }
+}
+```
+
+Register side panels on the client (for example in your client mod constructor or `FMLClientSetupEvent`):
+
+```kotlin
+StorageSidePanels.register(DETAILS_PANEL, DetailsSidePanel)
+```
+
+Control the panel from your own buttons or callbacks on the client thread (for example inside `scope.gameThread.post`):
+
+- `StorageSidePanels.open(screen, id)`: opens the panel; if another tab such as Settings or an injected page is open, the screen switches back to the main page automatically.
+- `StorageSidePanels.close(screen)`: closes the currently open side panel.
+- `StorageSidePanels.toggle(screen, id)`: toggles the panel and returns whether it is now open.
+- `StorageSidePanels.current(screen)`: returns the currently open panel ID or `null` (the built-in category editor is `StorageSidePanels.CATEGORY_EDITOR`).
 
 ## Send an action to the server
 

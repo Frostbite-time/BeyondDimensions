@@ -2,6 +2,7 @@ package com.wintercogs.beyonddimensions;
 
 import com.wintercogs.beyonddimensions.api.ids.BDConstants;
 import com.wintercogs.beyonddimensions.client.init.BDBlockRenders;
+import com.wintercogs.beyonddimensions.client.init.BDSidePanels;
 import com.wintercogs.beyonddimensions.client.init.BDWorkbenches;
 import com.wintercogs.beyonddimensions.integration.IntegrationManager;
 import net.neoforged.api.distmarker.Dist;
@@ -22,8 +23,9 @@ public class BeyondDimensionsClient
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
         modEventBus.register(this);
         modEventBus.addListener(BDBlockRenders::onRegisterRenderers);
-        // 存储界面工作区里自带的工作台，附属注册的排在它们之后
+        // 存储界面工作区里自带的工作台与右侧展开面板，附属注册的排在它们之后
         BDWorkbenches.register();
+        BDSidePanels.register();
 
         IntegrationManager.bootstrapClient(modEventBus, NeoForge.EVENT_BUS);
     }

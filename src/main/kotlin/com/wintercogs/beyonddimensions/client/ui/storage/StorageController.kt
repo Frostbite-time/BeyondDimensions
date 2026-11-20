@@ -51,7 +51,13 @@ private const val SAVE_DELAY_MILLIS = 1000L
 /**
  * 存储界面的控制器，运行在游戏线程。
  */
-class StorageController(private val menu: DimensionsNetMenu, private val workbenches: StorageWorkbenchHost) {
+class StorageController(
+    private val menu: DimensionsNetMenu,
+    private val workbenches: StorageWorkbenchHost,
+    private val sidePanelWidth: () -> Int = { 0 },
+    private val onOpenCategoryEditor: () -> Unit = {},
+    private val onCloseCategoryEditor: () -> Unit = {},
+) {
     private var lastSearch = ClientConfigRuntime.storageSearch
     private val player = menu.player.uuid
     private val registries = menu.player.registryAccess()
@@ -233,22 +239,32 @@ class StorageController(private val menu: DimensionsNetMenu, private val workben
         categories = categories + StorageCategory(I18n.get("ui.beyonddimensions.storage.category.new"))
         save()
         openEditor(categories.lastIndex)
+        onOpenCategoryEditor()
         fitViewport()
     }
 
     fun editCategory(index: Int) {
         openEditor(index)
+        onOpenCategoryEditor()
         fitViewport()
     }
 
     fun closeEditor() {
-        editing = -1
-        inspected = -1
+        clearEditorSelection()
+        onCloseCategoryEditor()
         fitViewport()
     }
 
+    /** 侧边面板被收起或切到其他面板时同步清除正在编辑的分类标记 */
+    internal fun clearEditorSelection() {
+        editing = -1
+        inspected = -1
+    }
+
     fun deleteCategory(index: Int) {
+        val closed = editing == index
         delete(index)
+        if (closed) onCloseCategoryEditor()
         fitViewport()
     }
 
@@ -382,7 +398,7 @@ class StorageController(private val menu: DimensionsNetMenu, private val workben
             guiScale = guiScale,
             configuredScale = ClientConfigRuntime.storageUiScale,
             autoMinRows = ClientConfigRuntime.storageAutoMinRows,
-            editorOpen = editing in categories.indices,
+            sidePanelWidth = sidePanelWidth(),
             preferredColumns = ClientConfigRuntime.storageColumns,
             preferredRows = ClientConfigRuntime.storageRows,
             bottomHeight = { width -> bottomHeight(width, workbenches, shown = !workbenches.isEmpty) },
@@ -397,7 +413,7 @@ class StorageController(private val menu: DimensionsNetMenu, private val workben
         val (columns, rows) = fittedGridSize(
             screenWidth = (window.width / scale).toInt(),
             screenHeight = (window.height / scale).toInt(),
-            editorOpen = editing in categories.indices,
+            sidePanelWidth = sidePanelWidth(),
             preferredColumns = ClientConfigRuntime.storageColumns,
             preferredRows = ClientConfigRuntime.storageRows,
             bottomHeight = { width -> bottomHeight(width, workbenches, shown) },
