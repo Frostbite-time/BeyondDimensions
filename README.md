@@ -146,7 +146,7 @@ For add-on developers:
   custom data on a network
 - [Resource types](docs/en/resource-types.md): store a new kind of resource
 - [Machine settings](docs/en/machines.md): settings that save, sync and work with the Machine Configuration Talisman
-- [Screens](docs/en/screens.md): pages on Beyond Dimensions' screens, server actions and slot clicks
+- [Screens](docs/en/screens.md): pages and storage side panels on Beyond Dimensions' screens, server actions and slot clicks
 
 ## For developers
 
@@ -157,6 +157,7 @@ through a remapping configuration, as with other Forge mods. With ModDevGradle L
 
 ```groovy
 repositories {
+    google()
     maven { url = 'https://maven.wintercogs.com/releases' }
 }
 
