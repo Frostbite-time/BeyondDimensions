@@ -552,16 +552,26 @@ fun BdToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Bool
 
 /** 一行设置：左侧标题与说明，右侧控件 */
 @Composable
-fun BdSettingRow(title: String, description: String? = null, control: @Composable () -> Unit) {
+fun BdSettingRow(
+    title: String,
+    description: String? = null,
+    titleHelp: String? = null,
+    control: @Composable () -> Unit,
+) {
     val colors = Bd.colors
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            OreText(title, color = colors[BdColors.text], maxLines = 1)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OreText(title, color = colors[BdColors.text], maxLines = 1)
+                if (titleHelp != null) {
+                    Spacer(Modifier.width(3.dp))
+                    BdTooltip(titleHelp) { BdIcon(BdIcons.Info, color = colors[BdColors.faint]) }
+                }
+            }
             if (description != null) OreText(
                 description,
                 color = colors[BdColors.faint],
                 style = Bd.caption,
-                maxLines = 2
             )
         }
         Spacer(Modifier.width(4.dp))

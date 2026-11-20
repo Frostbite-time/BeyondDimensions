@@ -68,6 +68,8 @@ public class Config
         public final ForgeConfigSpec.BooleanValue STORAGE_REVERSE;
         public final ForgeConfigSpec.IntValue STORAGE_ROWS;
         public final ForgeConfigSpec.IntValue STORAGE_COLUMNS;
+        public final ForgeConfigSpec.IntValue STORAGE_UI_SCALE;
+        public final ForgeConfigSpec.IntValue STORAGE_AUTO_MIN_ROWS;
         public final ForgeConfigSpec.BooleanValue STORAGE_KEEP_SEARCH;
         public final ForgeConfigSpec.ConfigValue<String> STORAGE_SEARCH;
         public final ForgeConfigSpec.BooleanValue STORAGE_RIGHT_CLICK_MENU;
@@ -107,6 +109,12 @@ public class Config
             STORAGE_COLUMNS = builder
                     .comment("首选的列数，界面会按屏幕宽度自动收窄")
                     .defineInRange("columns", 9, 9, 99);
+            STORAGE_UI_SCALE = builder
+                    .comment("存储界面的独立整数缩放倍率：0 为自动，-1 为跟随游戏，正整数为固定倍率（仅影响存储界面）")
+                    .defineInRange("ui_scale", 0, -1, 16);
+            STORAGE_AUTO_MIN_ROWS = builder
+                    .comment("自动缩放模式下在最差情况下尽量保证显示的最少行数（最低为 2；倍率始终为不低于 1x 的整数倍）")
+                    .defineInRange("auto_min_rows", 5, 2, 99);
             STORAGE_KEEP_SEARCH = builder
                     .comment("关闭界面后是否保留搜索框内容")
                     .define("keep_search", false);
@@ -155,6 +163,8 @@ public class Config
             ClientConfigRuntime.storageReverse = STORAGE_REVERSE.get();
             ClientConfigRuntime.storageRows = STORAGE_ROWS.get();
             ClientConfigRuntime.storageColumns = STORAGE_COLUMNS.get();
+            ClientConfigRuntime.storageUiScale = STORAGE_UI_SCALE.get();
+            ClientConfigRuntime.storageAutoMinRows = STORAGE_AUTO_MIN_ROWS.get();
             ClientConfigRuntime.storageKeepSearch = STORAGE_KEEP_SEARCH.get();
             ClientConfigRuntime.storageSearch = STORAGE_SEARCH.get();
             ClientConfigRuntime.storageRightClickMenu = STORAGE_RIGHT_CLICK_MENU.get();

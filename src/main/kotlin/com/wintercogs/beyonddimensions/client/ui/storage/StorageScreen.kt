@@ -125,6 +125,12 @@ class StorageText {
     val layout = tr("ui.beyonddimensions.storage.layout")
     val columns = tr("ui.beyonddimensions.storage.columns")
     val rows = tr("ui.beyonddimensions.storage.rows")
+    val uiScale = tr("ui.beyonddimensions.storage.ui_scale")
+    val uiScaleHelp = tr("ui.beyonddimensions.storage.ui_scale.help")
+    val uiScaleAuto = tr("ui.beyonddimensions.storage.ui_scale.auto")
+    val uiScaleFollowGame = tr("ui.beyonddimensions.storage.ui_scale.follow_game")
+    val autoMinRows = tr("ui.beyonddimensions.storage.auto_min_rows")
+    val autoMinRowsHint = tr("ui.beyonddimensions.storage.auto_min_rows.hint")
     val interaction = tr("ui.beyonddimensions.storage.interaction")
     val rightClickMenu = tr("ui.beyonddimensions.storage.right_click_menu")
     val rightClickMenuHint = tr("ui.beyonddimensions.storage.right_click_menu.hint")
@@ -158,6 +164,11 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
     override fun init() {
         controller.fitViewport()
         super.init()
+    }
+
+    override fun guiUnitsPerDp(framebufferWidth: Int, framebufferHeight: Int, guiScale: Int): Float {
+        val scale = controller.effectiveScale(framebufferWidth, framebufferHeight, guiScale)
+        return if (scale == guiScale) 1f else scale.toFloat() / guiScale
     }
 
     @Composable
@@ -282,6 +293,37 @@ internal fun bottomHeight(width: Int, workbenches: StorageWorkbenchHost, shown: 
     return SECTION_GAP + areas
 }
 
+/** 存储界面的缩放模式：0 为自动，-1 为跟随游戏，正整数为固定整数倍率 */
+internal object StorageUiScale {
+    const val FOLLOW_GAME = -1
+    const val AUTO = 0
+}
+
+/** 窗口在保持原版基本可用空间（>= 320×240 dp）时可容纳的最大整数倍率 */
+internal fun maxWindowScale(framebufferWidth: Int, framebufferHeight: Int): Int {
+    var scale = 1
+    while (framebufferWidth / (scale + 1) >= 320 && framebufferHeight / (scale + 1) >= 240) {
+        scale++
+    }
+    return scale
+}
+
+private fun availableGridSize(
+    screenWidth: Int,
+    screenHeight: Int,
+    editorOpen: Boolean,
+    preferredColumns: Int,
+    bottomHeight: (contentWidth: Int) -> Int,
+): Pair<Int, Int> {
+    // 内容区居中，竖条对面也留出一条竖条宽的空位；分类编辑区打开时窗口向右扩展
+    val fitColumns =
+        (screenWidth - SCREEN_MARGIN * 2 - CHROME_WIDTH - SIDE_RAIL_WIDTH - contentWidth(0) -
+                if (editorOpen) EDITOR_WIDTH else 0) / SLOT_PITCH
+    val columns = fitColumns.coerceAtMost(preferredColumns).coerceAtLeast(9)
+    val fitRows = (screenHeight - SCREEN_MARGIN * 2 - CHROME_HEIGHT - bottomHeight(contentWidth(columns))) / SLOT_PITCH
+    return columns to fitRows
+}
+
 /**
  * 格子的实际列数与行数：首选行列按屏幕上放得下的格数收窄。[screenWidth]、[screenHeight] 是整个屏幕的 dp 尺寸，
  * [bottomHeight] 给出格子下方各区在某个内容宽度下的高度
@@ -294,13 +336,46 @@ internal fun fittedGridSize(
     preferredRows: Int,
     bottomHeight: (contentWidth: Int) -> Int,
 ): Pair<Int, Int> {
-    // 内容区居中，竖条对面也留出一条竖条宽的空位；分类编辑区打开时窗口向右扩展
-    val fitColumns =
-        (screenWidth - SCREEN_MARGIN * 2 - CHROME_WIDTH - SIDE_RAIL_WIDTH - contentWidth(0) -
-                if (editorOpen) EDITOR_WIDTH else 0) / SLOT_PITCH
-    val columns = fitColumns.coerceAtMost(preferredColumns).coerceAtLeast(9)
-    val fitRows = (screenHeight - SCREEN_MARGIN * 2 - CHROME_HEIGHT - bottomHeight(contentWidth(columns))) / SLOT_PITCH
+    val (columns, fitRows) = availableGridSize(screenWidth, screenHeight, editorOpen, preferredColumns, bottomHeight)
     return columns to fitRows.coerceAtMost(preferredRows).coerceAtLeast(2)
+}
+
+/**
+ * 计算存储界面使用的整数缩放倍率（始终 >= 1）：
+ * - [StorageUiScale.FOLLOW_GAME]：直接使用原版 [guiScale]
+ * - 正整数：固定该整数倍率（不超过当前窗口可用上限，避免极小窗口下界面超出屏幕）
+ * - [StorageUiScale.AUTO]：在不高于原版 [guiScale] 的整数倍率中选最大可用倍率，使界面至少显示 [autoMinRows] 行
+ *   （若玩家首选行数更少，则按玩家首选）
+ */
+internal fun storageUiScale(
+    framebufferWidth: Int,
+    framebufferHeight: Int,
+    guiScale: Int,
+    configuredScale: Int,
+    autoMinRows: Int,
+    editorOpen: Boolean,
+    preferredColumns: Int,
+    preferredRows: Int,
+    bottomHeight: (contentWidth: Int) -> Int,
+): Int {
+    val maxScale = guiScale.coerceAtLeast(1)
+    if (configuredScale == StorageUiScale.FOLLOW_GAME) return maxScale
+    if (configuredScale > 0) {
+        val windowMax = maxOf(maxScale, maxWindowScale(framebufferWidth, framebufferHeight))
+        return configuredScale.coerceIn(1, windowMax)
+    }
+    val minRows = minOf(autoMinRows.coerceAtLeast(2), preferredRows).coerceAtLeast(2)
+    for (scale in maxScale downTo 1) {
+        val (_, fitRows) = availableGridSize(
+            screenWidth = framebufferWidth / scale,
+            screenHeight = framebufferHeight / scale,
+            editorOpen = editorOpen,
+            preferredColumns = preferredColumns,
+            bottomHeight = bottomHeight,
+        )
+        if (fitRows >= minRows) return scale
+    }
+    return 1
 }
 
 private typealias StorageAct = (StorageController.() -> Unit) -> Unit
@@ -1402,11 +1477,14 @@ private fun SortOptions(controller: StorageController, act: StorageAct, text: St
     BdSettingRow(text.reverse) { BdToggle(reverse, { enabled -> act { setReverse(enabled) } }) }
 }
 
-/** 设置页的视图设置：行列与搜索行为；[shown] 为 false 时控件不响应 */
+/** 设置页的视图设置：行列、缩放与搜索行为；[shown] 为 false 时控件不响应 */
 @Composable
 private fun ViewOptions(controller: StorageController, act: StorageAct, text: StorageText, shown: Boolean) {
     val preferredColumns by gameState { controller.preferredColumns }
     val preferredRows by gameState { controller.preferredRows }
+    val uiScale by gameState { controller.uiScale }
+    val autoMinRows by gameState { controller.autoMinRows }
+    val maxUiScale by gameState { controller.maxUiScale }
     val rightClickMenu by gameState { controller.rightClickMenu }
     val keepSearch by gameState { controller.keepSearch }
     val syncSearch by gameState { controller.syncSearch }
@@ -1428,6 +1506,36 @@ private fun ViewOptions(controller: StorageController, act: StorageAct, text: St
             shown
         )
     }
+    val colors = Bd.colors
+    Column(Modifier.fillMaxWidth()) {
+        BdSettingRow(text.uiScale, titleHelp = text.uiScaleHelp) {
+            ScaleChooser(uiScale, maxUiScale, text, shown) { scale -> act { setUiScale(scale) } }
+        }
+        if (uiScale == StorageUiScale.AUTO) {
+            Spacer(Modifier.height(2.dp))
+            Box(
+                Modifier.fillMaxWidth()
+                    .padding(start = 4.dp)
+                    .drawBehind {
+                        drawRect(
+                            colors[BdColors.line],
+                            Offset.Zero,
+                            androidx.compose.ui.geometry.Size(1.dp.toPx(), size.height),
+                        )
+                    }
+                    .padding(start = 6.dp, top = 2.dp, bottom = 2.dp),
+            ) {
+                BdSettingRow(text.autoMinRows, text.autoMinRowsHint) {
+                    BdNumberEditor(
+                        autoMinRows,
+                        { rows -> act { setAutoMinRows(rows) } },
+                        2..99,
+                        shown,
+                    )
+                }
+            }
+        }
+    }
     BdSectionDivider()
     BdSectionLabel(text.interaction)
     BdSettingRow(text.rightClickMenu, text.rightClickMenuHint) {
@@ -1443,6 +1551,51 @@ private fun ViewOptions(controller: StorageController, act: StorageAct, text: St
     BdSectionLabel(text.workbench)
     BdSettingRow(text.keepCrafting, text.keepCraftingHint) {
         BdToggle(keepCrafting, { enabled -> act { setKeepCrafting(enabled) } }, shown)
+    }
+}
+
+/** 界面缩放下拉选择：自动、跟随游戏与可用整数倍率 */
+@Composable
+private fun ScaleChooser(
+    selected: Int,
+    maxScale: Int,
+    text: StorageText,
+    enabled: Boolean,
+    onSelect: (Int) -> Unit,
+) {
+    val colors = Bd.colors
+    var open by remember { mutableStateOf(false) }
+    LaunchedEffect(enabled) { if (!enabled) open = false }
+    val label =
+        when (selected) {
+            StorageUiScale.AUTO -> text.uiScaleAuto
+            StorageUiScale.FOLLOW_GAME -> text.uiScaleFollowGame
+            else -> "${selected}x"
+        }
+    val options = buildList {
+        add(StorageUiScale.AUTO to text.uiScaleAuto)
+        add(StorageUiScale.FOLLOW_GAME to text.uiScaleFollowGame)
+        val upper = maxOf(1, maxScale, selected)
+        for (scale in 1..upper) add(scale to "${scale}x")
+    }
+    Box {
+        BdChip({ open = !open }, enabled = enabled, active = open) {
+            OreText(label, color = colors[BdColors.text], maxLines = 1)
+            Spacer(Modifier.width(4.dp))
+            BdIcon(BdIcons.ChevronDown, color = colors[BdColors.faint])
+        }
+        if (open) {
+            BdPopover({ open = false }) {
+                Column(Modifier.width(IntrinsicSize.Max)) {
+                    for ((value, optionLabel) in options) {
+                        OptionRow(optionLabel, selected == value, enabled = enabled) {
+                            onSelect(value)
+                            open = false
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
