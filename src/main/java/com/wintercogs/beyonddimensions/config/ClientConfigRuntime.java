@@ -18,7 +18,7 @@ public final class ClientConfigRuntime
     public static volatile int storageRows = 5;
     public static volatile int storageColumns = 9;
     public static volatile int storageUiScale = 0;
-    public static volatile int storageAutoMinRows = 5;
+    public static volatile int storageAutoMinRows = 3;
     public static volatile boolean storageKeepSearch = false;
     public static volatile String storageSearch = "";
     public static volatile boolean storageRightClickMenu = true;
