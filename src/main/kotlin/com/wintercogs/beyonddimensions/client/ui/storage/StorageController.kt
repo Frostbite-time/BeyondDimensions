@@ -146,6 +146,18 @@ class StorageController(private val menu: DimensionsNetMenu, private val workben
     val preferredRows: Int
         get() = ClientConfigRuntime.storageRows
 
+    val uiScale: Int
+        get() = ClientConfigRuntime.storageUiScale
+
+    val autoMinRows: Int
+        get() = ClientConfigRuntime.storageAutoMinRows
+
+    val maxUiScale: Int
+        get() {
+            val window = Minecraft.getInstance().window
+            return maxOf(window.guiScale.toInt().coerceAtLeast(1), maxWindowScale(window.width, window.height))
+        }
+
     /** 空手右键资源时打开菜单，否则取出一半 */
     val rightClickMenu: Boolean
         get() = ClientConfigRuntime.storageRightClickMenu
@@ -193,6 +205,24 @@ class StorageController(private val menu: DimensionsNetMenu, private val workben
         Config.INSTANCE.clientConfig.STORAGE_COLUMNS.set(columns)
         Config.INSTANCE.clientConfig.STORAGE_ROWS.set(rows)
         Config.INSTANCE.clientConfig.STORAGE_ROWS.save()
+        fitViewport()
+    }
+
+    /** 玩家设定的存储界面缩放（0 自动，-1 跟随游戏，正整数为固定倍率），会写入配置 */
+    fun setUiScale(scale: Int) {
+        val clamped = scale.coerceIn(StorageUiScale.FOLLOW_GAME, 16)
+        ClientConfigRuntime.storageUiScale = clamped
+        Config.INSTANCE.clientConfig.STORAGE_UI_SCALE.set(clamped)
+        Config.INSTANCE.clientConfig.STORAGE_UI_SCALE.save()
+        fitViewport()
+    }
+
+    /** 自动缩放模式下最差情况尽量保证显示的最少行数（最低 2），会写入配置 */
+    fun setAutoMinRows(rows: Int) {
+        val clamped = rows.coerceIn(2, 99)
+        ClientConfigRuntime.storageAutoMinRows = clamped
+        Config.INSTANCE.clientConfig.STORAGE_AUTO_MIN_ROWS.set(clamped)
+        Config.INSTANCE.clientConfig.STORAGE_AUTO_MIN_ROWS.save()
         fitViewport()
     }
 
@@ -344,11 +374,24 @@ class StorageController(private val menu: DimensionsNetMenu, private val workben
         fitViewport()
     }
 
+    /** 计算存储界面在当前帧缓冲与原版 [guiScale] 下使用的整数缩放倍率 */
+    fun effectiveScale(framebufferWidth: Int, framebufferHeight: Int, guiScale: Int): Int =
+        storageUiScale(
+            framebufferWidth = framebufferWidth,
+            framebufferHeight = framebufferHeight,
+            guiScale = guiScale,
+            configuredScale = ClientConfigRuntime.storageUiScale,
+            autoMinRows = ClientConfigRuntime.storageAutoMinRows,
+            editorOpen = editing in categories.indices,
+            preferredColumns = ClientConfigRuntime.storageColumns,
+            preferredRows = ClientConfigRuntime.storageRows,
+            bottomHeight = { width -> bottomHeight(width, workbenches, shown = !workbenches.isEmpty) },
+        )
+
     /** 按屏幕尺寸与工作区定下格子的实际行列，设到菜单上 */
     fun fitViewport() {
         val window = Minecraft.getInstance().window
-        // 与界面拿到的尺寸相同：1 dp 是一个界面像素
-        val scale = window.guiScale.toFloat()
+        val scale = effectiveScale(window.width, window.height, window.guiScale.toInt()).toFloat()
         val shown = workbenchShown()
         fittedShown = shown
         val (columns, rows) = fittedGridSize(
