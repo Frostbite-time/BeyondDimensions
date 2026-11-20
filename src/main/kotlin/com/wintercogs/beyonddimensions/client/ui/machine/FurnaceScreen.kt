@@ -5,6 +5,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -20,6 +21,7 @@ import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.NetFurnaceMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.host.gameState
 import dev.compixel.ui.ore.display.OreText
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
@@ -31,30 +33,15 @@ import kotlin.math.ceil
  * 设置页最上面是各面的输入输出与主动弹出
  */
 class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component) :
-    BdInventoryScreen<NetFurnaceMenu, FurnaceState, FurnaceAction>(menu, title) {
+    BdInventoryScreen<NetFurnaceMenu>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(menu.be?.blockState?.block ?: BDBlocks.NET_FURNACE_BLOCK.get()))
     private val slotIds = FurnaceSlots(menu)
     private val playerSlots = menu.playerSlotIds()
     private val text = FurnaceText(title.string)
     private val sides = machineSidesView(menu.be)
 
-    override fun snapshot() =
-        FurnaceState(
-            lanes = container.lanes()
-                .map { Lane(fraction(it.cooking(), it.cookingTotal()), fraction(it.burning(), it.burningTotal())) },
-            settings = machineSettingRows(container.machineSettings().snapshot(), sides),
-        )
-
-    private fun fraction(value: Int, total: Int) = if (total > 0) (value.toFloat() / total).coerceIn(0f, 1f) else 0f
-
-    override fun handle(action: FurnaceAction) {
-        when (action) {
-            is FurnaceAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
-        }
-    }
-
     @Composable
-    override fun Content(state: FurnaceState, slots: ComposeMenuSlots<NetFurnaceMenu>) {
+    override fun Content(slots: ComposeMenuSlots<NetFurnaceMenu>) {
         val page = rememberPageSelection()
         val settingsOpen = page.settings
         BdScreenFrame {
@@ -70,28 +57,24 @@ class FurnaceScreen(menu: NetFurnaceMenu, inventory: Inventory, title: Component
                     BdRailTab(text.settings, BdIcons.Settings, selected = settingsOpen) { page.open(BdPages.SETTINGS) }
                 },
             ) {
-                BdMainPage(page.main) { Furnace(state, slotIds, playerSlots, text, slots) }
+                BdMainPage(page.main) {
+                    val lanes by gameState { container.lanes() }
+                    Furnace(lanes, slotIds, playerSlots, text, slots)
+                }
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
+                    val settings by gameState { machineSettingRows(container.machineSettings().snapshot(), sides) }
                     BdSectionLabel(text.settings)
-                    BdMachineSettings(state.settings, settingsOpen) { send(FurnaceAction.Setting(it)) }
+                    BdMachineSettings(settings, settingsOpen) { pick ->
+                        gameThread.post { container.requestSetting(pick.setting, pick.value) }
+                    }
                 }
             }
         }
     }
 }
 
-/** 一列熔炼位的熔炼进度与燃料余量，都在 0 到 1 之间 */
-data class Lane(val cooking: Float, val burning: Float)
-
-data class FurnaceState(
-    val lanes: List<Lane>,
-    val settings: List<MachineSettingRow>,
-)
-
-sealed interface FurnaceAction {
-    data class Setting(val pick: MachineSettingPick) : FurnaceAction
-}
+private fun fraction(value: Int, total: Int) = if (total > 0) (value.toFloat() / total).coerceIn(0f, 1f) else 0f
 
 /** 熔炉各区的槽位编号 */
 private class FurnaceSlots(menu: NetFurnaceMenu) {
@@ -136,14 +119,14 @@ private const val LABEL = 11
  */
 @Composable
 private fun Furnace(
-    state: FurnaceState,
+    lanes: List<NetFurnaceMenu.Lane>,
     ids: FurnaceSlots,
     playerSlots: List<Int>,
     text: FurnaceText,
     slots: ComposeMenuSlots<NetFurnaceMenu>,
 ) {
     // 有一列在熔炼或燃烧时才走动效的时钟，空闲时不额外刷新
-    val clock = if (state.lanes.any { it.cooking > 0f || it.burning > 0f }) rememberFurnaceClock() else null
+    val clock = if (lanes.any { it.cooking() > 0 || it.burning() > 0 }) rememberFurnaceClock() else null
     Row {
         FlagColumn(text.input, ids.inputFilters, ids.fuelReturn, slots)
         Spacer(Modifier.width(COLUMN_GAP.dp))
@@ -152,10 +135,10 @@ private fun Furnace(
             Spacer(Modifier.height(4.dp))
             Well { BdSlotGrid(slots, ids.inputs, 9) }
             Spacer(Modifier.height(CONDUIT_GAP.dp))
-            LaneGlyphs(state.lanes) { lane, _ -> CookConduit(lane.cooking, clock) }
+            LaneGlyphs(lanes) { lane, _ -> CookConduit(fraction(lane.cooking(), lane.cookingTotal()), clock) }
             Spacer(Modifier.height(CONDUIT_GAP.dp))
             Well { BdSlotGrid(slots, ids.outputs, 9) }
-            LaneGlyphs(state.lanes) { lane, index -> Flames(lane.burning, index, clock) }
+            LaneGlyphs(lanes) { lane, index -> Flames(fraction(lane.burning(), lane.burningTotal()), index, clock) }
             Spacer(Modifier.height(6.dp))
             BdInventorySection(text.inventory, playerSlots, slots)
         }
@@ -196,7 +179,7 @@ private fun Well(content: @Composable () -> Unit) =
 
 /** 每列熔炼位一个图标，与上方的槽位对齐 */
 @Composable
-private fun LaneGlyphs(lanes: List<Lane>, glyph: @Composable (Lane, Int) -> Unit) {
+private fun LaneGlyphs(lanes: List<NetFurnaceMenu.Lane>, glyph: @Composable (NetFurnaceMenu.Lane, Int) -> Unit) {
     Row(Modifier.padding(start = 0.5.dp)) {
         lanes.forEachIndexed { index, lane ->
             Box(Modifier.size(SLOT_PITCH.dp, GLYPH.dp), contentAlignment = Alignment.Center) { glyph(lane, index) }

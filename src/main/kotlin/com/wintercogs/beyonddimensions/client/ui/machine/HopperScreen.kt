@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.client.ui.machine
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.api.ui.page.BdPages
@@ -12,28 +13,21 @@ import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.NetHopperMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.host.gameState
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 
 /** 网络漏斗：主页面是过滤槽与玩家背包；设置页分为收集与过滤两组，由机器类型声明 */
 class HopperScreen(menu: NetHopperMenu, inventory: Inventory, title: Component) :
-    BdInventoryScreen<NetHopperMenu, HopperState, HopperAction>(menu, title) {
+    BdInventoryScreen<NetHopperMenu>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(BDBlocks.NET_HOPPER_BLOCK.get()))
     private val filterSlots = menu.flagSlotIds()
     private val playerSlots = menu.playerSlotIds()
     private val text = HopperText(title.string)
 
-    override fun snapshot() = HopperState(machineSettingRows(container.machineSettings().snapshot()))
-
-    override fun handle(action: HopperAction) {
-        when (action) {
-            is HopperAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
-        }
-    }
-
     @Composable
-    override fun Content(state: HopperState, slots: ComposeMenuSlots<NetHopperMenu>) {
+    override fun Content(slots: ComposeMenuSlots<NetHopperMenu>) {
         val page = rememberPageSelection()
         val settingsOpen = page.settings
         BdScreenFrame {
@@ -56,17 +50,14 @@ class HopperScreen(menu: NetHopperMenu, inventory: Inventory, title: Component) 
                 }
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
-                    BdMachineSettings(state.settings, settingsOpen) { send(HopperAction.Setting(it)) }
+                    val settings by gameState { machineSettingRows(container.machineSettings().snapshot()) }
+                    BdMachineSettings(settings, settingsOpen) { pick ->
+                        gameThread.post { container.requestSetting(pick.setting, pick.value) }
+                    }
                 }
             }
         }
     }
-}
-
-data class HopperState(val settings: List<MachineSettingRow>)
-
-sealed interface HopperAction {
-    data class Setting(val pick: MachineSettingPick) : HopperAction
 }
 
 private class HopperText(val title: String) {

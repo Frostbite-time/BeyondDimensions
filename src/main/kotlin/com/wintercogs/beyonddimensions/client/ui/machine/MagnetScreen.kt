@@ -3,6 +3,7 @@ package com.wintercogs.beyonddimensions.client.ui.machine
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.api.ui.page.BdPages
@@ -15,40 +16,28 @@ import com.wintercogs.beyonddimensions.common.machine.setting.PickupTarget
 import com.wintercogs.beyonddimensions.common.menu.NetMagnetMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.host.gameState
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 
 /** 网络磁铁：过滤槽、例外槽与玩家背包；设置页的分组由机器类型声明 */
 class MagnetScreen(menu: NetMagnetMenu, inventory: Inventory, title: Component) :
-    BdInventoryScreen<NetMagnetMenu, MagnetState, MagnetAction>(menu, title) {
+    BdInventoryScreen<NetMagnetMenu>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(BDItems.NET_MAGNET_ITEM.get()))
     private val filterSlots = menu.flagSlotIds().take(NetMagnetItem.FILTER_SLOTS)
     private val exceptionSlots = menu.flagSlotIds().drop(NetMagnetItem.FILTER_SLOTS)
     private val playerSlots = menu.playerSlotIds()
     private val text = MagnetText(title.string)
 
-    override fun snapshot(): MagnetState {
+    private fun readPickupTarget(): PickupTarget {
         val snapshot = container.machineSettings().snapshot()
-        // 先送网络时例外的物品进背包，先送背包时进网络
-        val target =
-            snapshot.machineType()?.entry(BDMachineSettings.PICKUP_TARGET.get())?.valueIn(snapshot.settings())
-                ?: PickupTarget.NETWORK_ONLY
-        return MagnetState(
-            settings = machineSettingRows(snapshot),
-            exceptions = if (target.prefersNetwork()) text.toInventory else text.toNetwork,
-            exceptionsHint = text.exceptionHints.getValue(target),
-        )
-    }
-
-    override fun handle(action: MagnetAction) {
-        when (action) {
-            is MagnetAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
-        }
+        return snapshot.machineType()?.entry(BDMachineSettings.PICKUP_TARGET.get())?.valueIn(snapshot.settings())
+            ?: PickupTarget.NETWORK_ONLY
     }
 
     @Composable
-    override fun Content(state: MagnetState, slots: ComposeMenuSlots<NetMagnetMenu>) {
+    override fun Content(slots: ComposeMenuSlots<NetMagnetMenu>) {
         val page = rememberPageSelection()
         val settingsOpen = page.settings
         BdScreenFrame {
@@ -65,30 +54,29 @@ class MagnetScreen(menu: NetMagnetMenu, inventory: Inventory, title: Component) 
                 },
             ) {
                 BdMainPage(page.main) {
+                    val target by gameState { readPickupTarget() }
                     BdSlotSection(text.filters, filterSlots, slots)
                     Spacer(Modifier.height(7.dp))
-                    BdSlotSection(state.exceptions, exceptionSlots, slots, hint = state.exceptionsHint)
+                    // 先送网络时例外的物品进背包，先送背包时进网络
+                    BdSlotSection(
+                        if (target.prefersNetwork()) text.toInventory else text.toNetwork,
+                        exceptionSlots,
+                        slots,
+                        hint = text.exceptionHints.getValue(target),
+                    )
                     Spacer(Modifier.height(7.dp))
                     BdInventorySection(text.inventory, playerSlots, slots)
                 }
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
-                    BdMachineSettings(state.settings, settingsOpen) { send(MagnetAction.Setting(it)) }
+                    val settings by gameState { machineSettingRows(container.machineSettings().snapshot()) }
+                    BdMachineSettings(settings, settingsOpen) { pick ->
+                        gameThread.post { container.requestSetting(pick.setting, pick.value) }
+                    }
                 }
             }
         }
     }
-}
-
-data class MagnetState(
-    val settings: List<MachineSettingRow>,
-    /** 例外槽的标题与说明，随物品去向变化 */
-    val exceptions: String,
-    val exceptionsHint: String,
-)
-
-sealed interface MagnetAction {
-    data class Setting(val pick: MachineSettingPick) : MagnetAction
 }
 
 private class MagnetText(val title: String) {

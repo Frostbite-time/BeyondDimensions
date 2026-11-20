@@ -21,6 +21,7 @@ group = mod_group_id
 
 repositories {
     mavenCentral()
+    google()
     // CompixelUI is published only here; other repositories are never asked for it, so their outages cannot fail
     // the build.
     exclusiveContent {
@@ -191,11 +192,10 @@ dependencies {
 
     compileOnly "org.jetbrains:annotations:26.0.2"
 
-    // CompixelUI 单独安装：编译用带 Kotlin 的坐标，运行用标准版并由 Kotlin for Forge 提供 Kotlin，与玩家装 KFF 时相同。
-    // 标准版写进发布的 POM，引用 BD 的项目会自动带上它。1.20.1 的构件是 SRG 名，要同时经重映射配置声明；
-    // 重映射配置不带传递依赖，Compose 运行库由普通配置带入，其中的 CompixelUI 仍按重映射解析
+    // CompixelUI 单独安装：开发运行由 Kotlin for Forge 提供 Kotlin；标准版写进发布的 POM，引用 BD 的项目会自动带上它。
+    // 1.20.1 的构件是 SRG 名，要同时经重映射配置声明；重映射配置不带传递依赖，Compose 运行库由普通配置带入，其中的 CompixelUI 仍按重映射解析
     modCompileOnly "dev.compixel:compixel-forge-1.20.1:${compixel_version}"
-    compileOnly "dev.compixel:compixel-forge-1.20.1-with-kotlin:${compixel_version}"
+    compileOnly "dev.compixel:compixel-forge-1.20.1:${compixel_version}"
     modRuntimeOnly "dev.compixel:compixel-forge-1.20.1:${compixel_version}"
     runtimeOnly "dev.compixel:compixel-forge-1.20.1:${compixel_version}"
     localRuntime "maven.modrinth:kotlin-for-forge:${kff_version}"

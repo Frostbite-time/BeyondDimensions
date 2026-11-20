@@ -6,7 +6,7 @@ import com.wintercogs.beyonddimensions.api.ui.page.*
 import com.wintercogs.beyonddimensions.client.ui.kit.BdRailTab
 import com.wintercogs.beyonddimensions.client.ui.kit.BdTabPage
 import dev.compixel.forge.slots.ComposeMenuSlots
-import dev.compixel.host.UiBinding
+import dev.compixel.host.GameThread
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.inventory.AbstractContainerMenu
 
@@ -31,45 +31,32 @@ class BdPageSelection {
 fun rememberPageSelection() = remember { BdPageSelection() }
 
 /**
- * 一个界面上由附属模组注入的页：在游戏线程取快照、处理动作，
- * 用 [InjectedTabs] 画页签、[InjectedPages] 画页面
+ * 一个界面上由附属模组注入的页：用 [InjectedTabs] 画页签、[InjectedPages] 画页面。
+ * 注入页直接共享宿主界面的 `gameState` 与 [gameThread]，无需单独维护状态绑定
  */
 class BdPageHost<M : AbstractContainerMenu>(
     menu: M,
     screen: Screen,
     private val slots: ComposeMenuSlots<*>?,
+    private val gameThread: GameThread,
     private val requestClose: () -> Unit,
-) : AutoCloseable {
+) {
     private val context = BdPageContext(menu, screen, requestClose)
-    private val mounted: List<Mounted<*, *>> = BdPages.pagesFor(menu).mapNotNull { mount(it) }
-    private var closed = false
+    private val mounted: List<Mounted> = BdPages.pagesFor(menu).mapNotNull { mount(it) }
 
     val isEmpty
         get() = mounted.isEmpty()
 
     @Suppress("UNCHECKED_CAST")
-    private fun mount(entry: BdPages.Entry): Mounted<*, *>? {
-        val page = entry.page as BdPage<M, Any?, Any?>
+    private fun mount(entry: BdPages.Entry): Mounted? {
+        val page = entry.page as BdPage<M>
         if (!page.appliesTo(context)) return null
         return Mounted(
             entry.id.toString(),
             page,
             page.title(context).string,
             page.size(context),
-            UiBinding(page.snapshot(context))
         )
-    }
-
-    /** 游戏线程：每刻与每个输入事件之后调用，先处理各页送来的动作，再取新快照 */
-    fun update() {
-        if (closed) return
-        for (page in mounted) page.update()
-    }
-
-    override fun close() {
-        if (closed) return
-        closed = true
-        for (page in mounted) page.binding.close()
     }
 
     @Composable
@@ -84,35 +71,29 @@ class BdPageHost<M : AbstractContainerMenu>(
         for (page in mounted) page.Show(this, selection)
     }
 
-    private inner class Mounted<S, A>(
+    private inner class Mounted(
         val id: String,
-        val page: BdPage<M, S, A>,
+        val page: BdPage<M>,
         val title: String,
         val size: BdPageSize,
-        val binding: UiBinding<S, A>,
     ) {
-        fun update() {
-            binding.drainActions { page.handle(context, it) }
-            binding.update(page.snapshot(context))
-        }
-
         @Composable
         fun Show(box: BoxScope, selection: BdPageSelection) {
             val shown = selection.current == id
             with(box) {
                 BdTabPage(shown, size = size) {
-                    val scope = remember(shown) { Scope(shown, selection) }
-                    with(page) { Content(binding.value, scope) }
+                    val scope = remember(shown, selection) { Scope(shown, selection) }
+                    with(page) { Content(context, scope) }
                 }
             }
         }
 
-        private inner class Scope(override val shown: Boolean, private val selection: BdPageSelection) :
-            BdPageScope<A> {
+        private inner class Scope(override val shown: Boolean, private val selection: BdPageSelection) : BdPageScope {
             override val slots
                 get() = this@BdPageHost.slots
 
-            override fun send(action: A) = binding.send(action)
+            override val gameThread
+                get() = this@BdPageHost.gameThread
 
             override fun open(page: String) = selection.open(page)
 

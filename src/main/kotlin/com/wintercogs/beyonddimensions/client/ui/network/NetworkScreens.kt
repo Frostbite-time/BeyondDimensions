@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetControlAction
 import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel
+import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetOption
 import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetSwitchAction
 import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType
@@ -36,6 +37,7 @@ import com.wintercogs.beyonddimensions.network.packet.c2s.PrimaryNetSwitchAction
 import com.wintercogs.beyonddimensions.network.packet.c2s.RenameNetPacket
 import com.wintercogs.beyonddimensions.util.UIDataHelper
 import dev.compixel.forge.item.ItemIcon
+import dev.compixel.host.gameState
 import dev.compixel.ui.ore.display.OreText
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
@@ -83,24 +85,16 @@ data class MemberView(
     val self: Boolean
 )
 
-data class NetControlState(val networkId: Int, val networkName: String, val members: List<MemberView>)
-
-sealed interface NetControlRequest {
-    data class Apply(val member: UUID, val action: NetControlAction, val role: NetPermissionlevel) : NetControlRequest
-
-    data object Refresh : NetControlRequest
-}
-
 /** 网络控制器：列出网络成员，按各自的权限提供提升、降级与移除 */
 class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Component) :
-    BdMenuScreen<NetControlMenu, NetControlState, NetControlRequest>(menu, title) {
+    BdMenuScreen<NetControlMenu>(menu, title) {
     private val text = NetControlText(title.string)
 
     // 成员列表没有变化时沿用上次排好序的视图
     private var members = emptyList<NetControlMenu.Member>()
     private var views = emptyList<MemberView>()
 
-    override fun snapshot(): NetControlState {
+    private fun readMembers(): List<MemberView> {
         val current = container.members()
         if (current !== members) {
             members = current
@@ -113,47 +107,32 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                     }
                     .sortedWith(compareByDescending<MemberView> { it.role.ordinal }.thenBy { it.name.lowercase() })
         }
-        return NetControlState(
-            container.networkId(),
-            DimensionsNet.getNetworkName(container.networkId(), container.networkName()).string,
-            views,
-        )
-    }
-
-    override fun handle(action: NetControlRequest) {
-        when (action) {
-            is NetControlRequest.Apply -> container.request(
-                NetControlMenu.Request(
-                    action.member,
-                    action.action,
-                    action.role
-                )
-            )
-
-            NetControlRequest.Refresh -> container.refresh()
-        }
+        return views
     }
 
     @Composable
-    override fun Content(state: NetControlState) {
+    override fun Content() {
+        val networkId by gameState { container.networkId() }
+        val networkName by gameState { DimensionsNet.getNetworkName(container.networkId(), container.networkName()).string }
+        val members by gameState { readMembers() }
         val colors = Bd.colors
         var chosen by remember { mutableStateOf<UUID?>(null) }
         val page = rememberPageSelection()
         BdScreenFrame {
             // 成员为空说明数据还没到：这时只有背景淡入，窗口等数据到了再进场
-            if (state.members.isNotEmpty()) {
+            if (members.isNotEmpty()) {
                 // 默认选中自己；选中的成员离开网络后也回到自己
                 val selected =
-                    state.members.find { it.id == chosen } ?: state.members.find { it.self } ?: state.members.first()
+                    members.find { it.id == chosen } ?: members.find { it.self } ?: members.first()
                 BdTabbedWindow(
                     Modifier,
                     width = (SIDE_RAIL_WIDTH + 250).dp,
                     header = {
                         BdHeader(
                             text.icon,
-                            state.networkName,
+                            networkName,
                             ::requestClose,
-                            tag = "#%04d".format(state.networkId)
+                            tag = "#%04d".format(networkId)
                         )
                     },
                     tabs = {
@@ -166,7 +145,7 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                             Column(Modifier.weight(1f)) {
                                 BdSectionLabel(text.members) {
                                     OreText(
-                                        state.members.size.toString(),
+                                        members.size.toString(),
                                         color = colors[BdColors.faint],
                                         style = Bd.caption
                                     )
@@ -174,7 +153,7 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                                     BdGlyphButton(
                                         BdIcons.Refresh,
                                         text.refresh,
-                                        { send(NetControlRequest.Refresh) },
+                                        { gameThread.post { container.refresh() } },
                                         size = 11.dp,
                                     )
                                 }
@@ -184,11 +163,11 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                                         Modifier.heightIn(min = LIST_MIN_HEIGHT.dp, max = 200.dp),
                                         Arrangement.spacedBy(2.dp)
                                     ) {
-                                        for (member in state.members) {
+                                        for (member in members) {
                                             MemberRow(member, member == selected, text) { chosen = member.id }
                                         }
                                         // 只有自己时说明怎样让别人加入，免得只看到一行自己的名字
-                                        if (state.members.size == 1) {
+                                        if (members.size == 1) {
                                             OreText(
                                                 text.alone,
                                                 Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 8.dp),
@@ -200,7 +179,11 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
                                 }
                             }
                             Spacer(Modifier.width(8.dp))
-                            MemberPanel(selected, text, Modifier.width(PANEL_WIDTH.dp)) { send(it) }
+                            MemberPanel(selected, text, Modifier.width(PANEL_WIDTH.dp)) { action ->
+                                gameThread.post {
+                                    container.request(NetControlMenu.Request(selected.id, action, selected.role))
+                                }
+                            }
                         }
                     }
                     InjectedPages(pages, page)
@@ -266,7 +249,7 @@ private fun MemberPanel(
     member: MemberView,
     text: NetControlText,
     modifier: Modifier,
-    send: (NetControlRequest) -> Unit,
+    onAction: (NetControlAction) -> Unit,
 ) {
     val colors = Bd.colors
     Column(modifier) {
@@ -295,7 +278,7 @@ private fun MemberPanel(
                     danger = action == NetControlAction.RemovePlayer,
                     enabled = action in member.actions,
                 ) {
-                    send(NetControlRequest.Apply(member.id, action, member.role))
+                    onAction(action)
                 }
             }
         }
@@ -335,79 +318,40 @@ private fun ActionButton(label: String, hint: String, danger: Boolean, enabled: 
 
 // ---- 主网络切换 ----
 
-data class NetOptionView(val id: Int, val name: String, val role: NetPermissionlevel, val renamable: Boolean)
-
-data class PrimaryNetState(val primary: Int, val options: List<NetOptionView>)
-
-sealed interface PrimaryNetRequest {
-    data class Select(val id: Int) : PrimaryNetRequest
-
-    data class Rename(val id: Int, val name: String) : PrimaryNetRequest
-
-    data object Clear : PrimaryNetRequest
-
-    data object OpenTerminal : PrimaryNetRequest
-}
+private fun PrimaryNetOption.displayName(): String = DimensionsNet.getNetworkName(netId(), customName()).string
 
 /** 主网络切换：搜索、选择与重命名可用的网络，并打开主网络的终端 */
 class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title: Component) :
-    BdMenuScreen<PrimaryNetSwitcherMenu, PrimaryNetState, PrimaryNetRequest>(menu, title) {
+    BdMenuScreen<PrimaryNetSwitcherMenu>(menu, title) {
     private val text = PrimaryNetText(title.string)
 
-    override fun snapshot() =
-        PrimaryNetState(
-            container.currentPrimaryNetId,
-            container.options.map {
-                NetOptionView(
-                    it.netId(),
-                    DimensionsNet.getNetworkName(it.netId(), it.customName()).string,
-                    it.permission(),
-                    it.permission() != NetPermissionlevel.Member,
-                )
-            },
+    private fun selectNet(id: Int) =
+        // 成员资格、管理权限与名称长度都由服务器检查
+        BDPackets.INSTANCE.sendToServer(PrimaryNetSwitchActionPacket(PrimaryNetSwitchAction.SET_EXPLICIT, id))
+
+    private fun renameNet(id: Int, name: String) = BDPackets.INSTANCE.sendToServer(RenameNetPacket(id, name))
+
+    private fun clearPrimary() =
+        BDPackets.INSTANCE.sendToServer(
+            PrimaryNetSwitchActionPacket(PrimaryNetSwitchAction.CLEAR_PRIMARY, DimensionsNet.NO_PRIMARY_NET_ID)
         )
 
-    override fun handle(action: PrimaryNetRequest) {
-        when (action) {
-            // 成员资格、管理权限与名称长度都由服务器检查
-            is PrimaryNetRequest.Select ->
-                BDPackets.INSTANCE.sendToServer(
-                    PrimaryNetSwitchActionPacket(
-                        PrimaryNetSwitchAction.SET_EXPLICIT,
-                        action.id
-                    )
-                )
-
-            is PrimaryNetRequest.Rename -> BDPackets.INSTANCE.sendToServer(RenameNetPacket(action.id, action.name))
-            PrimaryNetRequest.Clear ->
-                BDPackets.INSTANCE.sendToServer(
-                    PrimaryNetSwitchActionPacket(
-                        PrimaryNetSwitchAction.CLEAR_PRIMARY,
-                        DimensionsNet.NO_PRIMARY_NET_ID
-                    )
-                )
-
-            PrimaryNetRequest.OpenTerminal -> {
-                // 终端打开时回到上次的滚动位置
-                UIDataHelper.isTransfer = true
-                BDPackets.INSTANCE.sendToServer(
-                    OpenNetGuiPacket(
-                        container.player.stringUUID,
-                        NetMenuType.NET_MENU
-                    )
-                )
-            }
-        }
+    private fun openTerminal() {
+        // 终端打开时回到上次的滚动位置
+        UIDataHelper.isTransfer = true
+        BDPackets.INSTANCE.sendToServer(OpenNetGuiPacket(container.player.stringUUID, NetMenuType.NET_MENU))
     }
 
     @Composable
-    override fun Content(state: PrimaryNetState) {
+    override fun Content() {
+        val primary by gameState { container.currentPrimaryNetId }
+        val options by gameState { container.options }
         val colors = Bd.colors
         var query by remember { mutableStateOf("") }
         var renaming by remember { mutableStateOf<Int?>(null) }
         val page = rememberPageSelection()
         BdScreenFrame {
-            val current = state.options.find { it.id == state.primary }
+            val current = options.find { it.netId() == primary }
             BdTabbedWindow(
                 Modifier,
                 width = (SIDE_RAIL_WIDTH + 230).dp,
@@ -416,7 +360,7 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                         text.icon,
                         text.title,
                         ::requestClose,
-                        tag = current?.let { "#%04d".format(it.id) },
+                        tag = current?.let { "#%04d".format(it.netId()) },
                     )
                 },
                 tabs = {
@@ -429,16 +373,16 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                     Spacer(Modifier.height(6.dp))
                     BdSectionLabel(text.networks) {
                         OreText(
-                            state.options.size.toString(),
+                            options.size.toString(),
                             color = colors[BdColors.faint],
                             style = Bd.caption
                         )
                     }
                     Spacer(Modifier.height(4.dp))
                     val shown =
-                        state.options.filter {
-                            query.isBlank() || it.name.contains(query, ignoreCase = true) || it.id.toString()
-                                .contains(query.trim().removePrefix("#"))
+                        options.filter {
+                            query.isBlank() || it.displayName().contains(query, ignoreCase = true) ||
+                                it.netId().toString().contains(query.trim().removePrefix("#"))
                         }
                     ListWell {
                         if (shown.isEmpty()) {
@@ -456,14 +400,14 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                                 for (option in shown) {
                                     NetworkRow(
                                         option,
-                                        option.id == state.primary,
-                                        renaming == option.id,
+                                        option.netId() == primary,
+                                        renaming == option.netId(),
                                         text,
-                                        onSelect = { send(PrimaryNetRequest.Select(option.id)) },
-                                        onRename = { renaming = option.id },
+                                        onSelect = { gameThread.post { selectNet(option.netId()) } },
+                                        onRename = { renaming = option.netId() },
                                         onCommit = { name ->
                                             renaming = null
-                                            if (name != null) send(PrimaryNetRequest.Rename(option.id, name))
+                                            if (name != null) gameThread.post { renameNet(option.netId(), name) }
                                         },
                                     )
                                 }
@@ -475,18 +419,18 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                         OreText(text.primary, color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
                         Spacer(Modifier.width(3.dp))
                         OreText(
-                            current?.name ?: text.none,
+                            current?.displayName() ?: text.none,
                             Modifier.weight(1f),
                             color = colors[BdColors.text],
                             style = Bd.caption,
                             maxLines = 1
                         )
-                        BdChip({ send(PrimaryNetRequest.Clear) }, enabled = current != null) {
+                        BdChip({ gameThread.post { clearPrimary() } }, enabled = current != null) {
                             OreText(text.clear, color = colors[BdColors.muted], style = Bd.caption, maxLines = 1)
                         }
                         Spacer(Modifier.width(4.dp))
                         BdChip(
-                            { send(PrimaryNetRequest.OpenTerminal) },
+                            { gameThread.post { openTerminal() } },
                             enabled = current != null,
                             active = current != null
                         ) {
@@ -515,7 +459,7 @@ private class PrimaryNetText(val title: String) {
 
 @Composable
 private fun NetworkRow(
-    option: NetOptionView,
+    option: PrimaryNetOption,
     selected: Boolean,
     renaming: Boolean,
     text: PrimaryNetText,
@@ -524,6 +468,7 @@ private fun NetworkRow(
     onCommit: (String?) -> Unit,
 ) {
     val colors = Bd.colors
+    val name = option.displayName()
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     Row(
@@ -539,13 +484,13 @@ private fun NetworkRow(
         Box(Modifier.size(4.dp).background(if (selected) colors[BdColors.accent] else colors[BdColors.line]))
         Spacer(Modifier.width(5.dp))
         if (renaming) {
-            RenameField(option.name, onCommit)
+            RenameField(name, onCommit)
         } else {
-            OreText(option.name, Modifier.weight(1f), color = colors[BdColors.text], maxLines = 1)
-            OreText("#%04d".format(option.id), color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
+            OreText(name, Modifier.weight(1f), color = colors[BdColors.text], maxLines = 1)
+            OreText("#%04d".format(option.netId()), color = colors[BdColors.faint], style = Bd.caption, maxLines = 1)
             Spacer(Modifier.width(4.dp))
-            RoleChip(option.role, text.roles.getValue(option.role))
-            if (option.renamable) {
+            RoleChip(option.permission(), text.roles.getValue(option.permission()))
+            if (option.permission() != NetPermissionlevel.Member) {
                 Spacer(Modifier.width(2.dp))
                 BdGlyphButton(BdIcons.Pencil, text.rename, onRename, size = 13.dp)
             }

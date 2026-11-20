@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,7 @@ import com.wintercogs.beyonddimensions.common.menu.NetStockEmitterMenu
 import com.wintercogs.beyonddimensions.common.menu.widget.slot.AbstractStackTypedSlot
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.host.gameState
 import dev.compixel.ui.ore.display.OreText
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
@@ -27,7 +29,7 @@ import net.minecraft.world.item.ItemStack
 
 /** 存量发信器：标记要监测的资源，设定发信条件与数量，下面是玩家背包；设置页是模糊匹配 */
 class StockEmitterScreen(menu: NetStockEmitterMenu, inventory: Inventory, title: Component) :
-    BdInventoryScreen<NetStockEmitterMenu, StockEmitterState, StockEmitterAction>(menu, title) {
+    BdInventoryScreen<NetStockEmitterMenu>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(BDBlocks.NET_STOCK_EMITTER.get()))
     private val markSlot = menu.flagSlotIds().single()
     private val playerSlots = menu.playerSlotIds()
@@ -35,37 +37,17 @@ class StockEmitterScreen(menu: NetStockEmitterMenu, inventory: Inventory, title:
     private val emitSetting = BDRegistries.MACHINE_SETTINGS.get().getKey(BDMachineSettings.EMIT.get())
     private val editable = !inventory.player.isSpectator
 
-    override fun snapshot(): StockEmitterState {
-        // 发信条件放在主页面，设置页只留其余的设置
-        val (condition, settings) = machineSettingRows(
-            container.machineSettings().snapshot()
-        ).partition { it.setting == emitSetting }
+    private fun readMark(): String? {
         val key = (container.getSlot(markSlot) as AbstractStackTypedSlot).stack.key()
-        val mark =
-            when {
-                key.isEmpty -> null
-                key is ItemStackKey -> key.readOnlyStack.hoverName.string
-                else -> key.render.getDisplayName(key).string
-            }
-        return StockEmitterState(
-            mark = mark,
-            amount = tr("ui.beyonddimensions.emitter.amount", formatExact(container.amount())),
-            threshold = container.threshold(),
-            emitting = container.emitting(),
-            condition = condition.firstOrNull(),
-            settings = settings,
-        )
-    }
-
-    override fun handle(action: StockEmitterAction) {
-        when (action) {
-            is StockEmitterAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
-            is StockEmitterAction.Threshold -> container.requestThreshold(action.value)
+        return when {
+            key.isEmpty -> null
+            key is ItemStackKey -> key.readOnlyStack.hoverName.string
+            else -> key.render.getDisplayName(key).string
         }
     }
 
     @Composable
-    override fun Content(state: StockEmitterState, slots: ComposeMenuSlots<NetStockEmitterMenu>) {
+    override fun Content(slots: ComposeMenuSlots<NetStockEmitterMenu>) {
         val colors = Bd.colors
         val page = rememberPageSelection()
         val settingsOpen = page.settings
@@ -83,6 +65,14 @@ class StockEmitterScreen(menu: NetStockEmitterMenu, inventory: Inventory, title:
                 },
             ) {
                 BdMainPage(page.main) {
+                    val mark by gameState { readMark() }
+                    val amount by gameState { container.amount() }
+                    val threshold by gameState { container.threshold() }
+                    val emitting by gameState { container.emitting() }
+                    val condition by gameState {
+                        // 发信条件放在主页面
+                        machineSettingRows(container.machineSettings().snapshot()).firstOrNull { it.setting == emitSetting }
+                    }
                     BdSectionLabel(text.watched)
                     Spacer(Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -90,30 +80,34 @@ class StockEmitterScreen(menu: NetStockEmitterMenu, inventory: Inventory, title:
                         Spacer(Modifier.width(6.dp))
                         Column(Modifier.weight(1f)) {
                             OreText(
-                                state.mark ?: text.unmarked,
-                                color = colors[if (state.mark != null) BdColors.text else BdColors.faint],
+                                mark ?: text.unmarked,
+                                color = colors[if (mark != null) BdColors.text else BdColors.faint],
                                 maxLines = 1,
                             )
-                            OreText(state.amount, color = colors[BdColors.muted], style = Bd.caption, maxLines = 1)
-                            Signal(state.emitting, text)
+                            OreText(
+                                tr("ui.beyonddimensions.emitter.amount", formatExact(amount)),
+                                color = colors[BdColors.muted],
+                                style = Bd.caption,
+                                maxLines = 1,
+                            )
+                            Signal(emitting, text)
                         }
                     }
                     Spacer(Modifier.height(7.dp))
                     BdSectionLabel(text.condition)
                     Spacer(Modifier.height(4.dp))
-                    state.condition?.let {
-                        BdMachineSettings(
-                            listOf(it),
-                            page.main
-                        ) { pick -> send(StockEmitterAction.Setting(pick)) }
+                    condition?.let {
+                        BdMachineSettings(listOf(it), page.main) { pick ->
+                            gameThread.post { container.requestSetting(pick.setting, pick.value) }
+                        }
                     }
                     Spacer(Modifier.height(5.dp))
                     BdSettingRow(text.threshold) {
                         BdNumberEditor(
-                            state.threshold,
-                            { send(StockEmitterAction.Threshold(it)) },
+                            threshold,
+                            { value -> gameThread.post { container.requestThreshold(value) } },
                             0L..Long.MAX_VALUE,
-                            editable
+                            editable,
                         )
                     }
                     Spacer(Modifier.height(7.dp))
@@ -121,8 +115,13 @@ class StockEmitterScreen(menu: NetStockEmitterMenu, inventory: Inventory, title:
                 }
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
+                    val settings by gameState {
+                        machineSettingRows(container.machineSettings().snapshot()).filter { it.setting != emitSetting }
+                    }
                     BdSectionLabel(text.settings)
-                    BdMachineSettings(state.settings, settingsOpen) { send(StockEmitterAction.Setting(it)) }
+                    BdMachineSettings(settings, settingsOpen) { pick ->
+                        gameThread.post { container.requestSetting(pick.setting, pick.value) }
+                    }
                 }
             }
         }
@@ -143,22 +142,6 @@ private fun Signal(emitting: Boolean, text: StockEmitterText) {
         Spacer(Modifier.width(3.dp))
         OreText(if (emitting) text.on else text.off, color = tint, style = Bd.caption, maxLines = 1)
     }
-}
-
-/** [mark] 为标记资源的名称，没有标记时为 null；[condition] 是主页面上的发信条件 */
-data class StockEmitterState(
-    val mark: String?,
-    val amount: String,
-    val threshold: Long,
-    val emitting: Boolean,
-    val condition: MachineSettingRow?,
-    val settings: List<MachineSettingRow>,
-)
-
-sealed interface StockEmitterAction {
-    data class Setting(val pick: MachineSettingPick) : StockEmitterAction
-
-    data class Threshold(val value: Long) : StockEmitterAction
 }
 
 private class StockEmitterText(val title: String) {

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.wintercogs.beyonddimensions.api.ui.page.BdPages
@@ -16,13 +17,14 @@ import com.wintercogs.beyonddimensions.common.init.BDBlocks
 import com.wintercogs.beyonddimensions.common.menu.NetInterfaceBaseMenu
 import dev.compixel.forge.item.ItemIcon
 import dev.compixel.forge.slots.ComposeMenuSlots
+import dev.compixel.host.gameState
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 
 /** 网络接口：每行标记槽下方是对应的缓存槽，标记决定从网络中保持哪些资源 */
 class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: Component) :
-    BdInventoryScreen<NetInterfaceBaseMenu, InterfaceState, InterfaceAction>(menu, title) {
+    BdInventoryScreen<NetInterfaceBaseMenu>(menu, title) {
     private val icon = ItemIcon.snapshot(ItemStack(BDBlocks.NET_INTERFACE.get()))
     private val flagRows = menu.flagSlotIds().chunked(9)
     private val storedRows = menu.resourceSlotIds().chunked(9)
@@ -32,16 +34,8 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
     // 动态结构里的接口没有固定的相邻方块，设置页上没有面配置
     private val sides = machineSidesView(menu.access as? NetInterfaceBlockEntity)
 
-    override fun snapshot() = InterfaceState(machineSettingRows(container.machineSettings().snapshot(), sides))
-
-    override fun handle(action: InterfaceAction) {
-        when (action) {
-            is InterfaceAction.Setting -> container.requestSetting(action.pick.setting, action.pick.value)
-        }
-    }
-
     @Composable
-    override fun Content(state: InterfaceState, slots: ComposeMenuSlots<NetInterfaceBaseMenu>) {
+    override fun Content(slots: ComposeMenuSlots<NetInterfaceBaseMenu>) {
         val colors = Bd.colors
         val page = rememberPageSelection()
         val settingsOpen = page.settings
@@ -76,18 +70,15 @@ class InterfaceScreen(menu: NetInterfaceBaseMenu, inventory: Inventory, title: C
                 }
                 InjectedPages(pages, page)
                 BdTabPage(settingsOpen) {
+                    val settings by gameState { machineSettingRows(container.machineSettings().snapshot(), sides) }
                     BdSectionLabel(text.settings)
-                    BdMachineSettings(state.settings, settingsOpen) { send(InterfaceAction.Setting(it)) }
+                    BdMachineSettings(settings, settingsOpen) { pick ->
+                        gameThread.post { container.requestSetting(pick.setting, pick.value) }
+                    }
                 }
             }
         }
     }
-}
-
-data class InterfaceState(val settings: List<MachineSettingRow>)
-
-sealed interface InterfaceAction {
-    data class Setting(val pick: MachineSettingPick) : InterfaceAction
 }
 
 private class InterfaceText(val title: String) {

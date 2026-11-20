@@ -43,7 +43,7 @@ object BdPages {
     /** 紧挨着排在 [id] 之后 */
     fun after(id: ResourceLocation): Placement = After(id)
 
-    internal class Entry(val id: ResourceLocation, val menuClass: Class<*>, val page: BdPage<*, *, *>)
+    internal class Entry(val id: ResourceLocation, val menuClass: Class<*>, val page: BdPage<*>)
 
     @Volatile
     private var entries = emptyList<Entry>()
@@ -54,7 +54,7 @@ object BdPages {
     fun <M : AbstractContainerMenu> register(
         id: ResourceLocation,
         menuClass: Class<M>,
-        page: BdPage<M, *, *>,
+        page: BdPage<M>,
         placement: Placement = last(),
     ) {
         check(entries.none { it.id == id }) { "BD page $id is already registered. Registered, in order: ${ids()}" }
@@ -71,7 +71,7 @@ object BdPages {
 
     inline fun <reified M : AbstractContainerMenu> register(
         id: ResourceLocation,
-        page: BdPage<M, *, *>,
+        page: BdPage<M>,
         placement: Placement = last(),
     ) = register(id, M::class.java, page, placement)
 

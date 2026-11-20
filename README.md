@@ -115,8 +115,8 @@ Download the file for your Minecraft version from [CurseForge](https://www.curse
 page lists the dependencies it needs. Versions with the CompixelUI interface also need:
 
 - [CompixelUI](https://www.curseforge.com/projects/1715758), the library its screens are built with;
-- Kotlin: install [Kotlin for Forge](https://www.curseforge.com/minecraft/mc-mods/kotlin-for-forge), or use the
-  CompixelUI file whose name ends in `-with-kotlin`, which includes it.
+- Kotlin: install [Kotlin for Forge](https://www.curseforge.com/minecraft/mc-mods/kotlin-for-forge) (or another
+  compatible Kotlin runtime mod).
 
 ### Supported versions
 

@@ -11,6 +11,7 @@ import com.wintercogs.beyonddimensions.client.ui.kit.BdIcons
 import com.wintercogs.beyonddimensions.common.menu.DimensionsNetMenu
 import dev.compixel.forge.slots.ComposeMenuSlots
 import dev.compixel.forge.sync.MenuAction
+import dev.compixel.host.GameThread
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.player.LocalPlayer
@@ -28,40 +29,31 @@ data class StorageWorkbenchSize(val width: Int, val height: Int)
  * 玩家在工作区左上角的下拉框里选择；工作区比工作台大时，工作台在其中居中。
  * 下拉框只列出这次打开时玩家能用的工作台，由菜单一侧的
  * [com.wintercogs.beyonddimensions.api.menu.workbench.StorageWorkbenchType] 在服务端判断。
- * [snapshot] 与 [handle] 在游戏线程运行，可以读写菜单、玩家与世界；
- * [Actions] 与 [Content] 在 Compose 线程运行，只用 [snapshot] 给出的状态，通过 [StorageWorkbenchScope.send]
- * 把动作交回游戏线程。快照应当是不可变的值。
+ *
+ * 工作台与存储界面一起运行在游戏线程。会变化的游戏数据在 [Actions] 与 [Content] 中通过 `gameState { ... }` 读取
+ * （返回不可变值，不要放菜单、物品堆等游戏对象）；修改游戏状态或向服务端发请求的操作通过
+ * [StorageWorkbenchScope.gameThread] 提交。
  * 工作台的槽位来自菜单一侧的部件，界面用 `BdSlot` 画出它们。部件放着玩家的物品
  * （[com.wintercogs.beyonddimensions.api.menu.widget.ClearableWidget]）时，下拉框一行的末端还有一个退回方向按钮，
  * 所有工作台共用这个设置
- *
- * @param S 工作台状态
- * @param A 工作台动作
  */
-interface StorageWorkbench<S, A> {
-    /** 下拉框里的名称；打开界面时在游戏线程取一次 */
+interface StorageWorkbench {
+    /** 下拉框里的名称；打开界面时取一次 */
     fun title(context: StorageWorkbenchContext): Component
 
-    /** 内容的大小；打开界面时在游戏线程取一次。工作区取所有工作台里最大的宽高，切换时不变大小 */
+    /** 内容的大小；打开界面时取一次。工作区取所有工作台里最大的宽高，切换时不变大小 */
     fun size(context: StorageWorkbenchContext): StorageWorkbenchSize
-
-    /** 在游戏线程读取工作台状态；可能一刻多次调用，只读不改 */
-    fun snapshot(context: StorageWorkbenchContext): S
-
-    /** 在游戏线程处理工作台送来的动作，处理完会再取快照 */
-    fun handle(context: StorageWorkbenchContext, action: A) {}
 
     /** 下拉框所在一行右端的按钮，高 11 dp，例如 [WorkbenchClearButtons]；退回方向按钮在它们右边 */
     @Composable
-    fun Actions(state: S, scope: StorageWorkbenchScope<A>) {
-    }
+    fun Actions(context: StorageWorkbenchContext, scope: StorageWorkbenchScope) {}
 
     /** 工作台的内容，按 [size] 的大小组合；可以直接使用 BD 的界面组件 */
     @Composable
-    fun Content(state: S, scope: StorageWorkbenchScope<A>)
+    fun Content(context: StorageWorkbenchContext, scope: StorageWorkbenchScope)
 }
 
-/** 工作台在游戏线程上的上下文，每个工作台一份，不要带进 Compose */
+/** 工作台访问存储界面与菜单的上下文，每个工作台一份 */
 class StorageWorkbenchContext internal constructor(
     /** 工作台的 ID */
     val id: ResourceLocation,
@@ -99,19 +91,19 @@ class StorageWorkbenchContext internal constructor(
     fun clearItems(toStorage: Boolean) = menu.commands().clearWorkbench(id, toStorage)
 }
 
-/** 工作台在 Compose 线程上能做的事 */
-interface StorageWorkbenchScope<A> {
-    /** 界面的槽位。用 `BdSlot(slots, id)` 画出菜单的槽位，id 在游戏线程取出后放进状态 */
+/** 工作台在 [StorageWorkbench.Actions] 与 [StorageWorkbench.Content] 中可以使用的宿主能力 */
+interface StorageWorkbenchScope {
+    /** 界面的槽位。用 `BdSlot(slots, id)` 画出菜单的槽位 */
     val slots: ComposeMenuSlots<*>
 
-    /** 把动作交给 [StorageWorkbench.handle]；返回 false 表示没有送出 */
-    fun send(action: A): Boolean
+    /** 宿主界面的游戏线程任务入口，用于在 UI 回调中提交修改游戏状态或服务端请求的操作 */
+    val gameThread: GameThread
 
     /** 关闭界面 */
     fun requestClose()
 }
 
-/** [WorkbenchClearButtons] 的提示文字，在游戏线程构造 */
+/** [WorkbenchClearButtons] 的提示文字 */
 class WorkbenchClearText {
     val toStorage = tr("ui.beyonddimensions.storage.workbench.clear_to_storage")
     val toInventory = tr("ui.beyonddimensions.storage.workbench.clear_to_inventory")
@@ -119,7 +111,7 @@ class WorkbenchClearText {
 
 /**
  * 放在 [StorageWorkbench.Actions] 里的两个按钮：把工作台里的物品清回存储或背包。
- * [onClear] 收到 true 时清回存储，通常转成工作台的动作，在 [StorageWorkbench.handle] 里调用
+ * [onClear] 收到 true 时清回存储，通常通过 [StorageWorkbenchScope.gameThread] 调用
  * [StorageWorkbenchContext.clearItems]
  */
 @Composable
