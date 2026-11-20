@@ -136,7 +136,7 @@
 - [网络与存储](docs/zh-CN/networks.md)：查找网络、存取资源、监听事件，以及在网络上保存自定义数据
 - [资源类型](docs/zh-CN/resource-types.md)：让网络存储新的资源类型
 - [机器设置](docs/zh-CN/machines.md)：可自动保存、同步，并支持用机器配置符复制的设置
-- [界面](docs/zh-CN/screens.md)：为超越维度的界面添加页面、向服务器发送动作、修改槽位点击行为
+- [界面](docs/zh-CN/screens.md)：为超越维度的界面添加页面与存储侧边面板、向服务器发送动作、修改槽位点击行为
 
 ## 开发者
 
@@ -146,6 +146,7 @@
 
 ```groovy
 repositories {
+    google()
     maven { url = 'https://maven.wintercogs.com/releases' }
 }
 
