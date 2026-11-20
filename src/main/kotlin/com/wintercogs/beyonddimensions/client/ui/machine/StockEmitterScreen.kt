@@ -71,7 +71,9 @@ class StockEmitterScreen(menu: NetStockEmitterMenu, inventory: Inventory, title:
                     val emitting by gameState { container.emitting() }
                     val condition by gameState {
                         // 发信条件放在主页面
-                        machineSettingRows(container.machineSettings().snapshot()).firstOrNull { it.setting == emitSetting }
+                        machineSettingRows(
+                            container.machineSettings().snapshot()
+                        ).firstOrNull { it.setting == emitSetting }
                     }
                     BdSectionLabel(text.watched)
                     Spacer(Modifier.height(4.dp))

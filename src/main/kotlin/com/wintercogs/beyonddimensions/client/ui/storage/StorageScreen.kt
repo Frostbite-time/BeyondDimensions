@@ -342,7 +342,7 @@ private fun availableGridSize(
     // 内容区居中，竖条对面也留出一条竖条宽的空位；右侧展开侧边面板时窗口向右扩展
     val fitColumns =
         (screenWidth - SCREEN_MARGIN * 2 - CHROME_WIDTH - SIDE_RAIL_WIDTH - contentWidth(0) - sidePanelWidth) /
-            SLOT_PITCH
+                SLOT_PITCH
     val columns = fitColumns.coerceAtMost(preferredColumns).coerceAtLeast(9)
     val fitRows = (screenHeight - SCREEN_MARGIN * 2 - CHROME_HEIGHT - bottomHeight(contentWidth(columns))) / SLOT_PITCH
     return columns to fitRows
@@ -360,7 +360,13 @@ internal fun fittedGridSize(
     preferredRows: Int,
     bottomHeight: (contentWidth: Int) -> Int,
 ): Pair<Int, Int> {
-    val (columns, fitRows) = availableGridSize(screenWidth, screenHeight, sidePanelWidth, preferredColumns, bottomHeight)
+    val (columns, fitRows) = availableGridSize(
+        screenWidth,
+        screenHeight,
+        sidePanelWidth,
+        preferredColumns,
+        bottomHeight
+    )
     return columns to fitRows.coerceAtMost(preferredRows).coerceAtLeast(2)
 }
 

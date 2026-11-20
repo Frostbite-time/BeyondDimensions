@@ -16,11 +16,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.wintercogs.beyonddimensions.api.dimensionnet.DimensionsNet
-import com.wintercogs.beyonddimensions.api.dimensionnet.NetControlAction
-import com.wintercogs.beyonddimensions.api.dimensionnet.NetPermissionlevel
-import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetOption
-import com.wintercogs.beyonddimensions.api.dimensionnet.PrimaryNetSwitchAction
+import com.wintercogs.beyonddimensions.api.dimensionnet.*
 import com.wintercogs.beyonddimensions.api.ui.page.BdPages
 import com.wintercogs.beyonddimensions.client.gui.NetMenuType
 import com.wintercogs.beyonddimensions.client.ui.base.*
@@ -113,7 +109,12 @@ class NetControlScreen(menu: NetControlMenu, inventory: Inventory, title: Compon
     @Composable
     override fun Content() {
         val networkId by gameState { container.networkId() }
-        val networkName by gameState { DimensionsNet.getNetworkName(container.networkId(), container.networkName()).string }
+        val networkName by gameState {
+            DimensionsNet.getNetworkName(
+                container.networkId(),
+                container.networkName()
+            ).string
+        }
         val members by gameState { readMembers() }
         val colors = Bd.colors
         var chosen by remember { mutableStateOf<UUID?>(null) }
@@ -382,7 +383,7 @@ class PrimaryNetScreen(menu: PrimaryNetSwitcherMenu, inventory: Inventory, title
                     val shown =
                         options.filter {
                             query.isBlank() || it.displayName().contains(query, ignoreCase = true) ||
-                                it.netId().toString().contains(query.trim().removePrefix("#"))
+                                    it.netId().toString().contains(query.trim().removePrefix("#"))
                         }
                     ListWell {
                         if (shown.isEmpty()) {
