@@ -2,7 +2,7 @@
 
 [English](../en/screens.md) · [全部指南](../../README.zh-CN.md#指南)
 
-其他模组可以向超越维度的界面添加页面、从页面向服务器发送动作，以及修改点击槽位的行为。超越维度的界面基于 [CompixelUI](https://github.com/Frostbite-time/CompixelUI) 和 Compose 实现，页面中可以直接使用超越维度的控件。
+其他模组可以向超越维度的界面添加页面、向存储界面添加右侧可展开面板、从界面向服务器发送动作，以及修改点击槽位的行为。超越维度的界面基于 [CompixelUI](https://github.com/Frostbite-time/CompixelUI) 和 Compose 实现，页面与面板中可以直接使用超越维度的控件。
 
 ## 添加页面
 
@@ -57,6 +57,51 @@ BdPages.register<DimensionsNetMenu>(ResourceLocation("examplemod", "network_info
 | `Content(maxWidth, maxHeight)` | 随内容变化，可以设上限；内容的最外层需要有确定的大小，不能使用 `fillMaxSize` 或 `weight` |
 
 页面比左侧页签栏所需的高度矮时，窗口仍会留出放下所有页签的高度，但不会超过主页面的高度。
+
+## 存储界面侧边面板
+
+存储界面右侧的可展开区域（与内置分类编辑区共用同一区域）允许其他模组注册自己的侧边面板，用来在不切换整页的前提下展示大量附属内容。展开和收起的入口完全由附属自行决定，同一时间最多展开一个面板；面板展开时窗口自动向右扩展并收窄存储格列数，内容位于宿主提供的可滚动 `Column` 内：
+
+| `StorageSidePanel` 的成员 | 作用 |
+| --- | --- |
+| `appliesTo(context)` | 当前存储界面是否挂载该面板，默认 `true`，打开界面时判断一次 |
+| `width(context)` | 面板内容区宽度（单位 dp，不含分隔线与间距），默认 `127`，会被限制在 `80..220` |
+| `onOpen(context)` | 面板展开时在游戏线程调用 |
+| `onClose(context)` | 面板收起、切到其他面板或存储界面关闭时在游戏线程调用 |
+| `Content(context, scope)` | 在游戏线程绘制面板内容 |
+
+在 `Content` 中同样用 `gameState { ... }` 读取变化的游戏数据、用 `scope.gameThread.post { ... }` 提交修改或服务端请求；`scope.openPanel(id)` 切到另一个侧边面板，`scope.closePanel()` 收起当前面板，`scope.shown` 表示该面板是否正在主页面展开。`context.remember(key) { ... }` 可保存仅在当前界面生命周期内有效的状态，`context.request(action, value)` 向服务器发送菜单动作。
+
+```kotlin
+val DETAILS_PANEL = ResourceLocation("examplemod", "details")
+
+object DetailsSidePanel : StorageSidePanel {
+    override fun width(context: StorageSidePanelContext): Int = 150
+
+    @Composable
+    override fun ColumnScope.Content(context: StorageSidePanelContext, scope: StorageSidePanelScope) {
+        val name by gameState { context.menu.networkName().string }
+        BdSectionLabel("Details")
+        OreText(name, color = Bd.colors[BdColors.text])
+        BdChip({ scope.closePanel() }, enabled = scope.shown) {
+            OreText("Close", color = Bd.colors[BdColors.text])
+        }
+    }
+}
+```
+
+面板仅在客户端注册（例如在模组客户端构造或 `FMLClientSetupEvent` 中）：
+
+```kotlin
+StorageSidePanels.register(DETAILS_PANEL, DetailsSidePanel)
+```
+
+附属在自己的按钮或回调里控制展开与收起（需在客户端线程调用，例如通过 `scope.gameThread.post`）：
+
+- `StorageSidePanels.open(screen, id)`：展开指定面板；若当前处于设置页或其他注入页，会自动切回主页面。
+- `StorageSidePanels.close(screen)`：收起当前展开的面板。
+- `StorageSidePanels.toggle(screen, id)`：切换指定面板的展开状态，返回切换后是否处于展开状态。
+- `StorageSidePanels.current(screen)`：获取当前展开的面板 ID，未展开时为 `null`（内置分类编辑区为 `StorageSidePanels.CATEGORY_EDITOR`）。
 
 ## 向服务器发送动作
 

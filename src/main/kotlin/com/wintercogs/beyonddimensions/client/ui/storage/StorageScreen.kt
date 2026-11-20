@@ -34,6 +34,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.zIndex
 import com.wintercogs.beyonddimensions.api.ui.page.BdPages
+import com.wintercogs.beyonddimensions.api.ui.storage.StorageSidePanelOwner
+import com.wintercogs.beyonddimensions.api.ui.storage.StorageSidePanels
 import com.wintercogs.beyonddimensions.client.init.BDShortKeys
 import com.wintercogs.beyonddimensions.client.ui.base.*
 import com.wintercogs.beyonddimensions.client.ui.kit.*
@@ -51,6 +53,7 @@ import dev.compixel.ui.ore.display.OreText
 import dev.compixel.ui.ore.inventory.OreSlot
 import kotlinx.coroutines.launch
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 import org.lwjgl.glfw.GLFW
@@ -151,14 +154,35 @@ class StorageText {
 
 /** 存储终端与合成终端 */
 class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inventory, title: Component) :
-    BdInventoryScreen<DimensionsNetMenu>(storageMenu, title) {
+    BdInventoryScreen<DimensionsNetMenu>(storageMenu, title), StorageSidePanelOwner {
     private val workbenches = StorageWorkbenchHost(storageMenu, this, this.inventory, gameThread, ::requestClose)
-    private val controller = StorageController(storageMenu, workbenches)
-    private val layout = StorageLayout(storageMenu, workbenches)
+    private var fitViewportCallback: () -> Unit = {}
+    internal val sidePanels =
+        StorageSidePanelHost(storageMenu, this, this.inventory, gameThread, ::requestClose) { fitViewportCallback() }
+    internal val controller =
+        StorageController(
+            menu = storageMenu,
+            workbenches = workbenches,
+            sidePanelWidth = { sidePanels.activeTotalWidth },
+            onOpenCategoryEditor = { sidePanels.open(StorageSidePanels.CATEGORY_EDITOR) },
+            onCloseCategoryEditor = {
+                if (sidePanels.activeId == StorageSidePanels.CATEGORY_EDITOR) sidePanels.close()
+            },
+        )
+    internal val layout = StorageLayout(storageMenu, workbenches)
 
     init {
+        fitViewportCallback = controller::fitViewport
         adapter.resourceMenu = controller::openSlotMenu
     }
+
+    override fun openSidePanel(id: ResourceLocation): Boolean = sidePanels.open(id)
+
+    override fun closeSidePanel() = sidePanels.close()
+
+    override fun currentSidePanel(): ResourceLocation? = sidePanels.activeId
+
+    internal fun onCategoryEditorPanelClosed() = controller.clearEditorSelection()
 
     // 打开界面与窗口缩放时调用：先按屏幕定好格子行列，界面立即按最终尺寸布局
     override fun init() {
@@ -173,7 +197,7 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
 
     @Composable
     override fun Content(slots: ComposeMenuSlots<DimensionsNetMenu>) =
-        StorageView(controller, ::requestClose, slots, layout, pages, workbenches) { block ->
+        StorageView(controller, ::requestClose, slots, layout, pages, workbenches, sidePanels) { block ->
             gameThread.post { controller.block() }
         }
 
@@ -184,6 +208,7 @@ class StorageScreen(private val storageMenu: DimensionsNetMenu, inventory: Inven
 
     override fun menuClosed() {
         super.menuClosed()
+        sidePanels.closeOnScreenClosed()
         controller.saveSearch()
         controller.saveNow()
     }
@@ -241,11 +266,10 @@ private fun StorageSlotGrid(slots: ComposeMenuSlots<*>, ids: List<Int>, columns:
 /** 窗口中除格子区域外的宽度 */
 private const val CHROME_WIDTH = SIDE_RAIL_WIDTH + PAGE_PADDING_X * 2 + 2
 
-/** 分类编辑区：与主内容的间隔、分隔线、间隔与七列标记格 */
+/** 右侧可展开侧边面板：与主内容的间隔、分隔线、间隔；内置分类编辑区放七列标记格 */
 private const val EDITOR_COLUMNS = 7
-private const val EDITOR_CONTENT_WIDTH = EDITOR_COLUMNS * SLOT_PITCH + 1
-private const val EDITOR_WIDTH = GAP + 1 + GAP + EDITOR_CONTENT_WIDTH
-private const val EDITOR_MILLIS = 180
+internal const val SIDE_PANEL_CHROME_WIDTH = GAP + 1 + GAP
+private const val SIDE_PANEL_MILLIS = 180
 
 /** 除格子行与下方各区外的固定高度：标题栏、页面留白、搜索栏、分类标签栏与格子边框 */
 private const val CHROME_HEIGHT = HEADER_HEIGHT + PAGE_PADDING_TOP + FIELD_HEIGHT + 3 + 13 + 3 + 2 + PAGE_PADDING_BOTTOM
@@ -311,14 +335,14 @@ internal fun maxWindowScale(framebufferWidth: Int, framebufferHeight: Int): Int 
 private fun availableGridSize(
     screenWidth: Int,
     screenHeight: Int,
-    editorOpen: Boolean,
+    sidePanelWidth: Int,
     preferredColumns: Int,
     bottomHeight: (contentWidth: Int) -> Int,
 ): Pair<Int, Int> {
-    // 内容区居中，竖条对面也留出一条竖条宽的空位；分类编辑区打开时窗口向右扩展
+    // 内容区居中，竖条对面也留出一条竖条宽的空位；右侧展开侧边面板时窗口向右扩展
     val fitColumns =
-        (screenWidth - SCREEN_MARGIN * 2 - CHROME_WIDTH - SIDE_RAIL_WIDTH - contentWidth(0) -
-                if (editorOpen) EDITOR_WIDTH else 0) / SLOT_PITCH
+        (screenWidth - SCREEN_MARGIN * 2 - CHROME_WIDTH - SIDE_RAIL_WIDTH - contentWidth(0) - sidePanelWidth) /
+            SLOT_PITCH
     val columns = fitColumns.coerceAtMost(preferredColumns).coerceAtLeast(9)
     val fitRows = (screenHeight - SCREEN_MARGIN * 2 - CHROME_HEIGHT - bottomHeight(contentWidth(columns))) / SLOT_PITCH
     return columns to fitRows
@@ -331,12 +355,12 @@ private fun availableGridSize(
 internal fun fittedGridSize(
     screenWidth: Int,
     screenHeight: Int,
-    editorOpen: Boolean,
+    sidePanelWidth: Int,
     preferredColumns: Int,
     preferredRows: Int,
     bottomHeight: (contentWidth: Int) -> Int,
 ): Pair<Int, Int> {
-    val (columns, fitRows) = availableGridSize(screenWidth, screenHeight, editorOpen, preferredColumns, bottomHeight)
+    val (columns, fitRows) = availableGridSize(screenWidth, screenHeight, sidePanelWidth, preferredColumns, bottomHeight)
     return columns to fitRows.coerceAtMost(preferredRows).coerceAtLeast(2)
 }
 
@@ -353,7 +377,7 @@ internal fun storageUiScale(
     guiScale: Int,
     configuredScale: Int,
     autoMinRows: Int,
-    editorOpen: Boolean,
+    sidePanelWidth: Int,
     preferredColumns: Int,
     preferredRows: Int,
     bottomHeight: (contentWidth: Int) -> Int,
@@ -369,7 +393,7 @@ internal fun storageUiScale(
         val (_, fitRows) = availableGridSize(
             screenWidth = framebufferWidth / scale,
             screenHeight = framebufferHeight / scale,
-            editorOpen = editorOpen,
+            sidePanelWidth = sidePanelWidth,
             preferredColumns = preferredColumns,
             bottomHeight = bottomHeight,
         )
@@ -378,7 +402,7 @@ internal fun storageUiScale(
     return 1
 }
 
-private typealias StorageAct = (StorageController.() -> Unit) -> Unit
+internal typealias StorageAct = (StorageController.() -> Unit) -> Unit
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -389,6 +413,7 @@ private fun StorageView(
     layout: StorageLayout,
     pages: BdPageHost<DimensionsNetMenu>,
     workbenches: StorageWorkbenchHost,
+    sidePanels: StorageSidePanelHost,
     act: StorageAct,
 ) {
     val colors = Bd.colors
@@ -410,26 +435,31 @@ private fun StorageView(
     val firstRow by gameState { controller.firstRow }
     val totalRows by gameState { controller.totalRows }
     val currentEditor by gameState { controller.editorState() }
+    val activePanel by gameState { sidePanels.activeState() }
     val slotMenu by gameState { controller.slotMenuState() }
     val workbenchShown by gameState { controller.workbenchShown }
 
+    // 通过代码打开侧边面板时，若当前在设置页或其他页，自动切回主页面展示面板
+    LaunchedEffect(activePanel?.openSerial) {
+        if (activePanel != null && !page.main) page.open(BdPages.MAIN)
+    }
+
     CompositionLocalProvider(LocalBdPopovers provides popovers) {
         BdScreenFrame {
-            val editorOpen = currentEditor != null
             val width = contentWidth(gridColumns)
-            // 编辑区收起期间仍显示最后的内容，直到宽度收回
-            val lastEditor = remember { arrayOfNulls<CategoryEditor>(1) }
-            currentEditor?.let { lastEditor[0] = it }
-            val editorWidth by animateIntAsState(
-                if (editorOpen) EDITOR_WIDTH else 0,
-                tween(EDITOR_MILLIS, easing = FastOutSlowInEasing),
-                label = "category editor",
+            // 侧边面板收起期间仍显示最后的内容，直到宽度收回
+            val lastPanel = remember { arrayOfNulls<ActiveSidePanel>(1) }
+            activePanel?.let { lastPanel[0] = it }
+            val panelWidth by animateIntAsState(
+                activePanel?.totalWidth ?: 0,
+                tween(SIDE_PANEL_MILLIS, easing = FastOutSlowInEasing),
+                label = "side panel",
             )
-            val mainAlpha by animateFloatAsState(if (page.main) 1f else 0f, tween(150), label = "editor fade")
+            val mainAlpha by animateFloatAsState(if (page.main) 1f else 0f, tween(150), label = "side panel fade")
             BdTabbedWindow(
                 slots.areaModifier()
                     .onPointerEvent(PointerEventType.Scroll) { event ->
-                        // 分类标签与编辑区自己滚动时不翻动格子
+                        // 分类标签与侧边面板自己滚动时不翻动格子
                         if (event.changes.any { it.isConsumed }) return@onPointerEvent
                         val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
                         if (delta != 0f && page.main) act { scrollBy(if (delta > 0) 1 else -1) }
@@ -450,7 +480,7 @@ private fun StorageView(
                         }
                     }
                     .focusGroup(),
-                width = (CHROME_WIDTH + width + editorWidth).dp,
+                width = (CHROME_WIDTH + width + panelWidth).dp,
                 header = {
                     BdHeader(
                         layout.icon,
@@ -526,11 +556,11 @@ private fun StorageView(
                         )
                     }
                     WorkbenchAndInventory(controller, workbenchShown, act, slots, layout, workbenches, width)
-                    // 给编辑区留出位置
-                    Spacer(Modifier.width((width + editorWidth).dp))
+                    // 给右侧展开面板留出位置
+                    Spacer(Modifier.width((width + panelWidth).dp))
                 }
-                val editor = lastEditor[0]
-                if (editorWidth > 0 && editor != null) {
+                val panel = lastPanel[0]
+                if (panelWidth > 0 && panel != null) {
                     Box(
                         Modifier.matchParentSize()
                             .padding(
@@ -541,19 +571,21 @@ private fun StorageView(
                             .graphicsLayer { alpha = mainAlpha },
                         contentAlignment = Alignment.TopEnd,
                     ) {
-                        // 编辑区的内容按完整宽度排好，展开时从主内容后面露出来
-                        Box(Modifier.width(editorWidth.dp).fillMaxHeight().clipToBounds()) {
+                        // 侧边面板的内容按完整宽度排好，展开时从主内容后面露出来
+                        Box(Modifier.width(panelWidth.dp).fillMaxHeight().clipToBounds()) {
                             Row(
                                 Modifier.wrapContentWidth(Alignment.Start, unbounded = true)
-                                    .width(EDITOR_WIDTH.dp)
+                                    .width(panel.totalWidth.dp)
                                     .fillMaxHeight()
                             ) {
                                 Spacer(Modifier.width(GAP.dp))
                                 Box(Modifier.width(1.dp).fillMaxHeight().background(colors[BdColors.line]))
                                 Spacer(Modifier.width(GAP.dp))
-                                key(editor.index) {
-                                    BdScrollColumn(Modifier.width(EDITOR_CONTENT_WIDTH.dp).fillMaxHeight()) {
-                                        CategoryEditorPanel(editor, act, text, enabled = editorOpen && page.main)
+                                key(panel.id) {
+                                    BdScrollColumn(Modifier.width(panel.contentWidth.dp).fillMaxHeight()) {
+                                        with(sidePanels) {
+                                            Content(panel.id, shown = activePanel?.id == panel.id && page.main)
+                                        }
                                     }
                                 }
                             }
@@ -1239,7 +1271,7 @@ private fun CategoryOption(
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ColumnScope.CategoryEditorPanel(
+internal fun ColumnScope.CategoryEditorPanel(
     editor: CategoryEditor,
     act: StorageAct,
     text: StorageText,
